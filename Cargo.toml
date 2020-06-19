@@ -21,4 +21,4 @@ log = "0.4.8"
 
 [lib]
 name = "hcor"
-path = "lib.rs"
+
