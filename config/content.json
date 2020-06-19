@@ -1,0 +1,5427 @@
+{
+  "special_users": [],
+  "profile_archetype": {
+    "advancements": {
+      "base": {
+        "kind": {
+          "Land": {
+            "pieces": 0
+          }
+        },
+        "xp": 0,
+        "art": "",
+        "title": "Hackstead",
+        "description": "A freshly hacked together Hackstead is what you have here! I see exciting new adventures in the future of this - cuts off - Hackstead!",
+        "achiever_title": "Hackstead"
+      },
+      "rest": [
+        {
+          "kind": {
+            "Land": {
+              "pieces": 1
+            }
+          },
+          "xp": 1250,
+          "art": "",
+          "title": "Housewarming",
+          "description": "Your parents, ever thankful that you finally have moved out of their home, gift you with a new plot!",
+          "achiever_title": "Newstead"
+        },
+        {
+          "kind": {
+            "Land": {
+              "pieces": 1
+            }
+          },
+          "xp": 4900,
+          "art": "",
+          "title": "This'll Do for Now",
+          "description": "In a feat of unparalleled engineering prowess, you duct tape one more piece of land onto your Hackstead!",
+          "achiever_title": "Bodgestead"
+        },
+        {
+          "kind": {
+            "Land": {
+              "pieces": 1
+            }
+          },
+          "xp": 14400,
+          "art": "",
+          "title": "Sew What Now?",
+          "description": "Only true Hackers can sew yet another piece of land onto their Hackstead!",
+          "achiever_title": "Threadstead"
+        },
+        {
+          "kind": {
+            "Land": {
+              "pieces": 1
+            }
+          },
+          "xp": 56000,
+          "art": "",
+          "title": "North Korea",
+          "description": "Now that you can have one more piece of land, you're rapidly approaching the size of everyone's favorite democracy!",
+          "achiever_title": "Dictatorstead"
+        },
+        {
+          "kind": {
+            "Land": {
+              "pieces": 2
+            }
+          },
+          "xp": 210000,
+          "art": "",
+          "title": "Stay a While...",
+          "description": "Listen closely, and you'll hear two more pieces of land being summoned via demonic forces!",
+          "achiever_title": "Cainstead"
+        },
+        {
+          "kind": {
+            "Land": {
+              "pieces": 2
+            }
+          },
+          "xp": 810000,
+          "art": "",
+          "title": "Something Completely Different",
+          "description": "By the power of noisy knights and crossdressing lumberjacks, you get two more empty plots!",
+          "achiever_title": "Snakestead"
+        },
+        {
+          "kind": {
+            "Land": {
+              "pieces": 2
+            }
+          },
+          "xp": 3200000,
+          "art": "",
+          "title": "Barrel Welding",
+          "description": "The Muskonator himself espouses this crafty method of attaching more land to your hackstead! You are gifted with two more plots of land!",
+          "achiever_title": "Spacestead"
+        },
+        {
+          "kind": {
+            "Land": {
+              "pieces": 3
+            }
+          },
+          "xp": 12700000,
+          "art": "",
+          "title": "Space Lasers",
+          "description": "Who knew that stealing this complex arrangement of magnifying glasses from the Elven technocracy would prove so useful? You've been able to use it to make room for three new pieces of land for your Hackstead!",
+          "achiever_title": "Hackalfheim"
+        },
+        {
+          "kind": {
+            "Land": {
+              "pieces": 3
+            }
+          },
+          "xp": 50000000,
+          "art": "",
+          "title": "Astartes",
+          "description": "A group of heavily armored space police bumble around on your property. They don't seem to be doing anything too harmful, and they even end up rewarding you three more pieces of land for your cooperation.",
+          "achiever_title": "Hammerstead"
+        },
+        {
+          "kind": {
+            "Land": {
+              "pieces": 4
+            }
+          },
+          "xp": 188000000,
+          "art": "",
+          "title": "Plothole",
+          "description": "You tear a huge gash in the fabric of reality, giving yourself four pieces of land!",
+          "achiever_title": "Wormstead"
+        },
+        {
+          "kind": {
+            "Land": {
+              "pieces": 0
+            }
+          },
+          "xp": 666666661,
+          "art": "",
+          "title": "Full House",
+          "description": "Turns out winning poker games against gods is a pretty fruitful endeavor, as they make all your Land Grants have quadruple the power!",
+          "achiever_title": "Homestead"
+        }
+      ]
+    }
+  },
+  "plant_archetypes": [
+    {
+      "name": "Bractus",
+      "base_yield_duration": 4320.0,
+      "advancements": {
+        "base": {
+          "kind": {
+            "Xp": 1.0
+          },
+          "xp": 0,
+          "art": "bractus_loaf",
+          "title": "Baked Like a Bractus",
+          "description": "Right now this Bractus can only produce XP, but he's eager to do more!",
+          "achiever_title": "Bractus Seedling"
+        },
+        "rest": [
+          {
+            "kind": {
+              "Yield": [
+                [
+                  [
+                    1.0,
+                    [
+                      1.4,
+                      1.6
+                    ]
+                  ],
+                  "Bread Essence"
+                ]
+              ]
+            },
+            "xp": 240,
+            "art": "bractus_loaf",
+            "title": "Doughy Drought",
+            "description": "In the pounding desert heat, this young Bractus only has the strength to provide one Bread Essence every six hours on yields.",
+            "achiever_title": "Dry Loaf"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.05
+            },
+            "xp": 600,
+            "art": "bractus_loaf",
+            "title": "Bread Buddies",
+            "description": "This adorable Bractus is truly a man's best friend. It's soft and squishy and even comes with a 5% yield boost!",
+            "achiever_title": "Budding Bractus"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.1
+            },
+            "xp": 1080,
+            "art": "bractus_loaf",
+            "title": "Journey to the Yeast",
+            "description": "The Bread Heavens part and a crisp, golden light shines down on this Bractus, blessing it with 10% faster resource production.",
+            "achiever_title": "Half-Baked Bractus"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.1
+            },
+            "xp": 1680,
+            "art": "bractus_loaf",
+            "title": "Rockin' and Rollin'",
+            "description": "Tall and proud with the horizon extended ahead, this Bractus now produces resources at a 10% higher rate.",
+            "achiever_title": "Lone Star Sourguarodough"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      5,
+                      "Bread Essence"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "bressence"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 240.0
+                }
+              ]
+            },
+            "xp": 3200,
+            "art": "bractus_kid",
+            "title": "Playdough",
+            "description": "I'm sure you got yelled at as a kid for smushing your bread into tiny little balls ... No? Well that's what your Bractus has been up to, except these compressed bread things seem to be especially useful.",
+            "achiever_title": "Compactus"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.05
+            },
+            "xp": 3800,
+            "art": "bractus_kid",
+            "title": "Agglutination",
+            "description": "It seems like some powerful compounds are clumping together in your Bractus's photoreceptor units, as well as in its kneading organs! It can now produce 5% larger yields!",
+            "achiever_title": "Not Gluten-Free Bractus"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.1
+            },
+            "xp": 4800,
+            "art": "bractus_kid",
+            "title": "Just Desserts",
+            "description": "Desert, dessert, desert, deserted by your friends in this horrible desert with no dessert ... but what's the difference when the sun has baked your brain to a nice crispy golden brown? Your Bractus can now produce 10% larger yields!",
+            "achiever_title": "Pastry Bractus"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSpeed": 1.1
+              }
+            },
+            "xp": 6200,
+            "art": "bractus_kid",
+            "title": "Biscuits 'n Gravy",
+            "description": "Your Bractus has decided to start preparing Biscuits 'n Gravy for all of the other Bracti nearby. They find this delicious concoction to be quite invigorating, and as a result they can produce yields 10% more often!",
+            "achiever_title": "Breaktus"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSpeed": 1.2
+              }
+            },
+            "xp": 8000,
+            "art": "bractus_kid",
+            "title": "Gravy 'n Biscuits",
+            "description": "Your Bractus has decided to start sharing its illustrious Biscuits 'n Gravy recipe with all the other Bracti nearby, allowing them to produce yields 20% faster.",
+            "achiever_title": "Breakfastus"
+          },
+          {
+            "kind": {
+              "Yield": [
+                [
+                  [
+                    0.004,
+                    [
+                      1.0,
+                      1.11
+                    ]
+                  ],
+                  "Doughy Buzzwing Bagling"
+                ]
+              ]
+            },
+            "xp": 15400,
+            "art": "bractus_teen",
+            "title": "New Baginnings",
+            "description": "News has been spreading of a mysterious goblin who has been sneaking little bags filled with treats to your plants.",
+            "achiever_title": "Droning Bractus"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      1,
+                      "bressence"
+                    ],
+                    [
+                      3,
+                      "Doughy Buzzwing Bagling"
+                    ]
+                  ],
+                  "makes": {
+                    "OneOf": [
+                      [
+                        0.129,
+                        "Bagling Egg"
+                      ],
+                      [
+                        0.0452,
+                        "Spirited Buzzwing Boxling"
+                      ],
+                      [
+                        0.0452,
+                        "Crystalline Buzzwing Boxling"
+                      ],
+                      [
+                        0.3885,
+                        "Spirited Buzzwing Bagling"
+                      ],
+                      [
+                        0.3885,
+                        "Crystalline Buzzwing Bagling"
+                      ]
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 24.0
+                }
+              ]
+            },
+            "xp": 17600,
+            "art": "bractus_teen",
+            "title": "Breadbox",
+            "description": "Baglings can now be upgraded, transformed, or opened.",
+            "achiever_title": "Humming Bractus"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.2
+            },
+            "xp": 20000,
+            "art": "bractus_teen",
+            "title": "Son of a Biscuit Eater",
+            "description": "Your Bractus has developed spikes which are well over a meter long. These deter carnivorous desert unicorns, allowing your now-unhindered Bractus to produce yields at a 20% faster rate.",
+            "achiever_title": "Hardtacktus"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.15
+            },
+            "xp": 22600,
+            "art": "bractus_teen",
+            "title": "Butter My Biscuits",
+            "description": "Your Bractus now the ability to retract its spikes and has begun to secrete a delicious buttery substance which attracts nearby carnivorous unicorns. Once the unicorns begin licking the buttery substance, the Bractus extends its spikes, piercing the pale, bioluminescent flesh of the unicorns and draining their vital organs. This newfound source of nutrients allows your Bractus to produce 15% larger yields!",
+            "achiever_title": "Buttertus"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      3,
+                      "bressence"
+                    ],
+                    [
+                      2,
+                      "Doughy Buzzwing Boxling"
+                    ]
+                  ],
+                  "makes": {
+                    "OneOf": [
+                      [
+                        0.083,
+                        "Boxling Egg"
+                      ],
+                      [
+                        0.0305,
+                        "Spirited Buzzwing Boxlet"
+                      ],
+                      [
+                        0.0305,
+                        "Crystalline Buzzwing Boxlet"
+                      ],
+                      [
+                        0.428,
+                        "Spirited Buzzwing Boxling"
+                      ],
+                      [
+                        0.428,
+                        "Crystalline Buzzwing Boxling"
+                      ]
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 36.0
+                }
+              ]
+            },
+            "xp": 25400,
+            "art": "bractus_teen",
+            "title": "Bready Unboxing",
+            "description": "Boxlings can now be upgraded, transformed, or opened.",
+            "achiever_title": "Fizzing Bractus"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      5,
+                      "hacksprit"
+                    ],
+                    [
+                      5,
+                      "crystcyl"
+                    ],
+                    [
+                      2,
+                      "Bractus Seed"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Bread Egg"
+                    ]
+                  },
+                  "destroys_plant": true,
+                  "time": 720.0
+                }
+              ]
+            },
+            "xp": 48000,
+            "art": "bractus_grown",
+            "title": "Birds and the Bread",
+            "description": "This Bractus has lived long and now can spread life across the vast reaches of the desert.",
+            "achiever_title": "Flouring Sourguarodough"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.2
+            },
+            "xp": 52000,
+            "art": "bractus_grown",
+            "title": "Artificial Inflation",
+            "description": "You know how when you open a bag of chips only to find that it's already half empty? Your Bractus figured out how to accomplish something similar by putting more air bubbles in its bread! Expect 20% more bountiful yields from now on!",
+            "achiever_title": "Bubbly Bractus"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Volatile Vial"
+                    ],
+                    [
+                      6,
+                      "Warp Powder"
+                    ],
+                    [
+                      10,
+                      "bressence"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Bractification Brew"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 4320.0
+                }
+              ]
+            },
+            "xp": 57000,
+            "art": "bractus_grown",
+            "title": "Potent Potables",
+            "description": "Watering this Bractus with alcohol has provided some interesting results, as it has been processed into a golden fluid that can boost plant yields.",
+            "achiever_title": "Drunk Bractus"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      7,
+                      "bressence"
+                    ],
+                    [
+                      1,
+                      "Doughy Buzzwing Boxlet"
+                    ]
+                  ],
+                  "makes": {
+                    "OneOf": [
+                      [
+                        0.056,
+                        "Boxlet Egg"
+                      ],
+                      [
+                        0.02,
+                        "Spirited Buzzwing Megabox"
+                      ],
+                      [
+                        0.02,
+                        "Crystalline Buzzwing Megabox"
+                      ],
+                      [
+                        0.452,
+                        "Spirited Buzzwing Boxlet"
+                      ],
+                      [
+                        0.452,
+                        "Crystalline Buzzwing Boxlet"
+                      ]
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 72.0
+                }
+              ]
+            },
+            "xp": 63000,
+            "art": "bractus_grown",
+            "title": "Breadbox Bonzanza",
+            "description": "Boxlets can now be upgraded, transformed, or opened.",
+            "achiever_title": "Whirring Bractus"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSize": 1.1
+              }
+            },
+            "xp": 68000,
+            "art": "bractus_grown",
+            "title": "Bread Growers' Association",
+            "description": "Your Bractus forms an official unofficial regulatory body with the other Bracti nearby, allowing them to produce 10% larger yields!",
+            "achiever_title": "Connected Bractus"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSize": 1.1
+              }
+            },
+            "xp": 76000,
+            "art": "bractus_grown",
+            "title": "Bread Growers' Guild",
+            "description": "Your Bractus's Bread Growers' Association is now complete with hazing, violent riots, freemason connections and 10% larger yields for all neighboring Bracti!",
+            "achiever_title": "Deepstate Bractus"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSize": 1.15
+              }
+            },
+            "xp": 87000,
+            "art": "bractus_grown",
+            "title": "Bread Growers' Empire",
+            "description": "The Bread Growers' Association's influence has expanded unprecedentedly! All Bracti neighbors unite with a 1.15 times increase to yield size.",
+            "achiever_title": "Baron Bractus"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Bractification Brew"
+                    ],
+                    [
+                      15,
+                      "Warp Powder"
+                    ],
+                    [
+                      25,
+                      "bressence"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Bold Bractification Brew"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 8640.0
+                }
+              ]
+            },
+            "xp": 97000,
+            "art": "bractus_grown",
+            "title": "Bready Beverages",
+            "description": "While a young Bractus often grows in a dry area, powerful and mature Bracti often are the reason for the surroundings being so devoid of water, as they typically pull up more liquid than needed to secrete its buttery, golden sap. Using this natural tendency to drain and dry liquids on a certain powerful potion refines it to the point that it can transform other plants into Bracti.",
+            "achiever_title": "Soggy Bractus"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      15,
+                      "bressence"
+                    ],
+                    [
+                      1,
+                      "Doughy Buzzwing Megabox"
+                    ]
+                  ],
+                  "makes": {
+                    "OneOf": [
+                      [
+                        0.04,
+                        "Megabox Egg"
+                      ],
+                      [
+                        0.48,
+                        "Spirited Buzzwing Megabox"
+                      ],
+                      [
+                        0.48,
+                        "Crystalline Buzzwing Megabox"
+                      ]
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 216.0
+                }
+              ]
+            },
+            "xp": 108000,
+            "art": "bractus_grown",
+            "title": "Panera's Box",
+            "description": "Megaboxes can now be transformed or opened.",
+            "achiever_title": "Buzzing Bractus"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      120,
+                      "hacksprit"
+                    ],
+                    [
+                      120,
+                      "crystcyl"
+                    ],
+                    [
+                      1,
+                      "Rolling Pin"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Kingpin"
+                    ]
+                  },
+                  "destroys_plant": true,
+                  "time": 17280.0
+                }
+              ]
+            },
+            "xp": 999991,
+            "art": "bractus_grown",
+            "title": "Bread of Kings",
+            "description": "Bread has always been a staple fit for kings, and now bread returns the favor, giving you a recipe that will make any Rolling Pins into the pinnacle of majesty.",
+            "achiever_title": "Bractus Kingmaker"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Coffea Cyl",
+      "base_yield_duration": 4320.0,
+      "advancements": {
+        "base": {
+          "kind": {
+            "Xp": 1.0
+          },
+          "xp": 0,
+          "art": "coffea_cyl_baby",
+          "title": "Crystal-less Chrysalis",
+          "description": "Born without a single gem to its name, this plant will only be able to give you XP for now.",
+          "achiever_title": "Cyllica Sapling"
+        },
+        "rest": [
+          {
+            "kind": {
+              "Yield": [
+                [
+                  [
+                    1.0,
+                    [
+                      1.4,
+                      1.6
+                    ]
+                  ],
+                  "Cyl Crystal"
+                ]
+              ]
+            },
+            "xp": 240,
+            "art": "coffea_cyl_baby",
+            "title": "Intelligent Investment",
+            "description": "What it lacks in luster, it makes up for in its potential, but for now this Coffea Cyl can only give you an Energy Crystal every six hours.",
+            "achiever_title": "Dull Orange Coffea Cyl"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.05
+            },
+            "xp": 600,
+            "art": "coffea_cyl_baby",
+            "title": "Night Shift",
+            "description": "Uncovering some grime reveals that the Cyl Crystal was more orange than originally thought. The cheery hue comes with the ability to produce 5% larger yields.",
+            "achiever_title": "Not-Totally-Blue Orange Coffea Cyl"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.1
+            },
+            "xp": 1080,
+            "art": "coffea_cyl_baby",
+            "title": "Periodic Coffee Table",
+            "description": "This Coffea Cyl has been working on a formula that should allow it to get more work done in less time. After ingesting it, your plant has its production speed boosted by a factor of 1.1!",
+            "achiever_title": "Timely Coffea Cyl"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.1
+            },
+            "xp": 1680,
+            "art": "coffea_cyl_baby",
+            "title": "Caffeine Catastrophe",
+            "description": "Turns out that formula was just caffeine, and it's made your plant a bit too hyper... Well, at least you get another 10% speed boost.",
+            "achiever_title": "Speedy Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      5,
+                      "Cyl Crystal"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "crystcyl"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 240.0
+                }
+              ]
+            },
+            "xp": 3200,
+            "art": "coffea_cyl_kid",
+            "title": "Chromatic Concentration",
+            "description": "Your Coffea Cyl has found that if it focuses all of its electromagnetic intensity on just a handful of Cyl Crystals, it can concentrate all of them into a single extremely compressed crystcyl.",
+            "achiever_title": "Focused Coffea Cyl"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.05
+            },
+            "xp": 3800,
+            "art": "coffea_cyl_kid",
+            "title": "Warm Up",
+            "description": "If you thought this plant was useful before, it might surprise you to hear that it was just getting started. It's begun to absorb even more light from the sun, and now this Coffea Cyl can support a 5% yield boost!",
+            "achiever_title": "Glowing Coffea Cyl"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.1
+            },
+            "xp": 4800,
+            "art": "coffea_cyl_kid",
+            "title": "Roasted!",
+            "description": "The sun's glaring heat has roasted this Cyl's arcane chemical compounds to dark, aromatic perfection, allowing it to produce 10% more during yields.",
+            "achiever_title": "Toasted Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSpeed": 1.1
+              }
+            },
+            "xp": 6200,
+            "art": "coffea_cyl_kid",
+            "title": "Espresso Your Feelings",
+            "description": "This Coffea Cyl has grown to be quite empathic, and can commonly be found talking with others of its kind about their problems. As a result, its neighbors can produce yields 10% more often.",
+            "achiever_title": "Hearth-to-Heart Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSpeed": 1.2
+              }
+            },
+            "xp": 8000,
+            "art": "coffea_cyl_kid",
+            "title": "Cylli Me",
+            "description": "This plant's antics lighten the burden of neighboring plants hard work in the field all day. They even allow them to work 1.2 times faster.",
+            "achiever_title": " Campfire Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Yield": [
+                [
+                  [
+                    0.004,
+                    [
+                      1.0,
+                      1.11
+                    ]
+                  ],
+                  "Crystalline Buzzwing Bagling"
+                ]
+              ]
+            },
+            "xp": 15400,
+            "art": "coffea_cyl_teen",
+            "title": "New Baginnings",
+            "description": "An unknown person has been leaving behind bags by plants at night. No one knows why they are doing this, but apparently the bags are filled with all kinds of useful things.",
+            "achiever_title": "Droning Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      1,
+                      "crystcyl"
+                    ],
+                    [
+                      3,
+                      "Crystalline Buzzwing Bagling"
+                    ]
+                  ],
+                  "makes": {
+                    "OneOf": [
+                      [
+                        0.129,
+                        "Bagling Egg"
+                      ],
+                      [
+                        0.0452,
+                        "Doughy Buzzwing Boxling"
+                      ],
+                      [
+                        0.0452,
+                        "Spirited Buzzwing Boxling"
+                      ],
+                      [
+                        0.3885,
+                        "Doughy Buzzwing Bagling"
+                      ],
+                      [
+                        0.3885,
+                        "Spirited Buzzwing Bagling"
+                      ]
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 24.0
+                }
+              ]
+            },
+            "xp": 17600,
+            "art": "coffea_cyl_teen",
+            "title": "Ground Up",
+            "description": "Baglings can now be upgraded, transformed, or opened.",
+            "achiever_title": "Humming Coffea Cyl"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.2
+            },
+            "xp": 20000,
+            "art": "coffea_cyl_teen",
+            "title": "100% Organic",
+            "description": "The natural wildfires of great forests reinvigorate the growth of the forest; the 100% organic flames in the branches of this Cyl are similarly vital, and they seem to allow it to produce yields 20% faster!",
+            "achiever_title": "Wildfire Coffea Cyl"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.15
+            },
+            "xp": 22600,
+            "art": "coffea_cyl_teen",
+            "title": "Crystalline Bean",
+            "description": "The shine of the mystical crystals forming on this plant's limbs create ripples of warm energy in the air. Occasional sparks ignite around it, the warm energy giving your plant gains a 15% yield boost!",
+            "achiever_title": "Inferno Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      3,
+                      "crystcyl"
+                    ],
+                    [
+                      2,
+                      "Crystalline Buzzwing Boxling"
+                    ]
+                  ],
+                  "makes": {
+                    "OneOf": [
+                      [
+                        0.083,
+                        "Boxling Egg"
+                      ],
+                      [
+                        0.0305,
+                        "Doughy Buzzwing Boxlet"
+                      ],
+                      [
+                        0.0305,
+                        "Spirited Buzzwing Boxlet"
+                      ],
+                      [
+                        0.428,
+                        "Doughy Buzzwing Boxling"
+                      ],
+                      [
+                        0.428,
+                        "Spirited Buzzwing Boxling"
+                      ]
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 36.0
+                }
+              ]
+            },
+            "xp": 25400,
+            "art": "coffea_cyl_teen",
+            "title": "Coffee Coffer",
+            "description": "Boxlings can now be upgraded, transformed, or opened.",
+            "achiever_title": "Fizzing Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      5,
+                      "bressence"
+                    ],
+                    [
+                      5,
+                      "hacksprit"
+                    ],
+                    [
+                      2,
+                      "Coffea Cyl Seed"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Cyl Egg"
+                    ]
+                  },
+                  "destroys_plant": true,
+                  "time": 720.0
+                }
+              ]
+            },
+            "xp": 48000,
+            "art": "coffea_cyl_grown",
+            "title": "Sparks of Brilliance",
+            "description": "The rays passing through the glistening boughs of polished Cyl can now ignite life when certain materials are present, allowing for the flame of life to carry on.",
+            "achiever_title": "Blazing Coffea Cyl"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.2
+            },
+            "xp": 52000,
+            "art": "coffea_cyl_grown",
+            "title": "Clear As Crystal",
+            "description": "Searing heat on a hot summer's day makes the horizon shimmer and shift; your Coffea Cyl seems to be enveloped with a similar shimmer, and its yields are now 20% more bountiful as a result.",
+            "achiever_title": "Shimmering Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Volatile Vial"
+                    ],
+                    [
+                      6,
+                      "Warp Powder"
+                    ],
+                    [
+                      10,
+                      "crystcyl"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Cyllicizing Coffee Concoction"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 4320.0
+                }
+              ]
+            },
+            "xp": 57000,
+            "art": "coffea_cyl_grown",
+            "title": "Swell Swill",
+            "description": "While favoring coffee cannibalism, this Cyl is quite the mixologist. Doing its best work in fits of drunkenness, it can make a drink that could make any Cyl feel empowered.",
+            "achiever_title": "Intoxicated Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      7,
+                      "crystcyl"
+                    ],
+                    [
+                      1,
+                      "Crystalline Buzzwing Boxlet"
+                    ]
+                  ],
+                  "makes": {
+                    "OneOf": [
+                      [
+                        0.056,
+                        "Boxlet Egg"
+                      ],
+                      [
+                        0.02,
+                        "Doughy Buzzwing Megabox"
+                      ],
+                      [
+                        0.02,
+                        "Spirited Buzzwing Megabox"
+                      ],
+                      [
+                        0.452,
+                        "Doughy Buzzwing Boxlet"
+                      ],
+                      [
+                        0.452,
+                        "Spirited Buzzwing Boxlet"
+                      ]
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 72.0
+                }
+              ]
+            },
+            "xp": 63000,
+            "art": "coffea_cyl_grown",
+            "title": "Crystalline Coffer",
+            "description": "Boxlets can now be upgraded, transformed, or opened.",
+            "achiever_title": "Whirring Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSize": 1.1
+              }
+            },
+            "xp": 68000,
+            "art": "coffea_cyl_grown",
+            "title": "Something Brewing",
+            "description": "All the plants in the neighborhood know that something is up...Clouds gather around your plant. Of course, these are the effect of its famous coffee, the Zach Latte, made from the remains of distant cousins! Your plant shares these stewed entrails to its neighbors, giving them a 1.1 times boost to all yields!",
+            "achiever_title": "Brewmaster Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSize": 1.1
+              }
+            },
+            "xp": 76000,
+            "art": "coffea_cyl_grown",
+            "title": "Towards the Horizon",
+            "description": "Shining like a fiery afternoon sky, the beams of light fragmenting from this Coffea Cyl empowers others of its kind nearby with a 10% boost to yields for its neighbors.",
+            "achiever_title": "Sunset Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSize": 1.15
+              }
+            },
+            "xp": 87000,
+            "art": "coffea_cyl_grown",
+            "title": "Caesar's Pride",
+            "description": "Named after a season known for landscapes of brightly-colored leaves, the august shine of this plant's crystalline structure multiplies the yield of this plant by 1.15.",
+            "achiever_title": "Autumn Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Cyllicizing Coffee Concoction"
+                    ],
+                    [
+                      15,
+                      "Warp Powder"
+                    ],
+                    [
+                      25,
+                      "crystcyl"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Scintillating Cyllicizing Coffee Concoction"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 8640.0
+                }
+              ]
+            },
+            "xp": 97000,
+            "art": "coffea_cyl_grown",
+            "title": "Foam Fountain",
+            "description": "Your Cyl has shown the characteristic of making any fluids it has contact with more caffeinated with prolonged contact. While this has destroyed many ecosystems, it has also allowed for a new drink that transforms others into Cyls to become a possibility.",
+            "achiever_title": "Frothy Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      15,
+                      "crystcyl"
+                    ],
+                    [
+                      1,
+                      "Crystalline Buzzwing Megabox"
+                    ]
+                  ],
+                  "makes": {
+                    "OneOf": [
+                      [
+                        0.04,
+                        "Megabox Egg"
+                      ],
+                      [
+                        0.48,
+                        "Doughy Buzzwing Megabox"
+                      ],
+                      [
+                        0.48,
+                        "Spirited Buzzwing Megabox"
+                      ]
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 216.0
+                }
+              ]
+            },
+            "xp": 108000,
+            "art": "coffea_cyl_grown",
+            "title": "Midas's Masterpiece",
+            "description": "Megaboxes can now be transformed or opened.",
+            "achiever_title": "Buzzing Coffea Cyl"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      120,
+                      "bressence"
+                    ],
+                    [
+                      120,
+                      "hacksprit"
+                    ],
+                    [
+                      1,
+                      "Cyl Wand"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Cytrus Staff"
+                    ]
+                  },
+                  "destroys_plant": true,
+                  "time": 17280.0
+                }
+              ]
+            },
+            "xp": 999991,
+            "art": "coffea_cyl_grown",
+            "title": "Orange You Glad?",
+            "description": "Imbued with the power of the stars themselves, this Coffea Cyl has ascended to a whole new level of power. It's aura can be imbued into a Cyl Wand over time, giving it the power and properties of a Cytrus Staff.",
+            "achiever_title": "Sol Cyl"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Hacker Vibes Vine",
+      "base_yield_duration": 4320.0,
+      "advancements": {
+        "base": {
+          "kind": {
+            "Xp": 1.0
+          },
+          "xp": 0,
+          "art": "hacker_vibes_vine_baby",
+          "title": "Ivy Initiation",
+          "description": "This Vine is at the bottom of the ladder for now, but it will soon climb to the top, giving you XP along the way.",
+          "achiever_title": "Hacker Vibes Seedling"
+        },
+        "rest": [
+          {
+            "kind": {
+              "Yield": [
+                [
+                  [
+                    1.0,
+                    [
+                      1.4,
+                      1.6
+                    ]
+                  ],
+                  "Hacker Spirit"
+                ]
+              ]
+            },
+            "xp": 240,
+            "art": "hacker_vibes_vine_baby",
+            "title": "Really Got a Hold On Me",
+            "description": "You're so fond of this little vine you just wanna love it forever and not let go. After all, it can already produce Hacker Spirit for you every six hours!",
+            "achiever_title": "Clingy Vibes Vine"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.05
+            },
+            "xp": 600,
+            "art": "hacker_vibes_vine_baby",
+            "title": "Duct Duct Goose",
+            "description": "This Vine has constructed a vocal cord for itself out of duct tape, which allows it to communicate effectively with other nearby Hacker Vibes Vines using an assortment of goose sounds. This somehow increases the yield size of this Vine by 5%.",
+            "achiever_title": "Quacking Vine"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.1
+            },
+            "xp": 1080,
+            "art": "hacker_vibes_vine_baby",
+            "title": "Hacker Culture Horticulture",
+            "description": "This Vine has had some nights learning on forums, and has learned to optimize its production to be 1.1 times as fast.",
+            "achiever_title": "Clacking Vine"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.1
+            },
+            "xp": 1680,
+            "art": "hacker_vibes_vine_baby",
+            "title": "Fey Fines",
+            "description": "The elves made a mistake when they leased this land to you! As compensation, they weave arcane runes into the air, making this plant produce Hacker Spirit 10% faster!",
+            "achiever_title": "Ley Vibes Vine"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      5,
+                      "Hacker Spirit"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "hacksprit"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 240.0
+                }
+              ]
+            },
+            "xp": 3200,
+            "art": "hacker_vibes_vine_kid",
+            "title": "Vine Combined",
+            "description": "By slapping some duct tape on old Hacker Spirits, this Vine can make hacksprits with the power of five Spirits in one!",
+            "achiever_title": "Twined Vine"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.05
+            },
+            "xp": 3800,
+            "art": "hacker_vibes_vine_kid",
+            "title": "Perennial Programming",
+            "description": "Making amazing things is the gift that keeps on coming back, and in the case of your vine, it'll keep coming back bigger than ever! Your vine can now produce 5% larger yields.",
+            "achiever_title": "Reliable Vibes Vine"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.1
+            },
+            "xp": 4800,
+            "art": "hacker_vibes_vine_kid",
+            "title": "Stem Education",
+            "description": "After taking a class on the optimal stem width to rigidness ratio, your vine is now able to hold more Hacker Spirit aloft on its branches. Expect 10% greater yields!",
+            "achiever_title": "Educated Vibes Vine"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSpeed": 1.1
+              }
+            },
+            "xp": 6200,
+            "art": "hacker_vibes_vine_kid",
+            "title": "Morning Glory",
+            "description": "Most people think that programmers are night owls, but this Hacker Vibes Vine prefers it when the bright rays of early morning sunlight make their leaves glisten with dew. Quiet reflection during these early mornings has made this vine realize how to help its neighbors produce 10% larger yields!",
+            "achiever_title": "Blossoming Vibes Vine"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSpeed": 1.2
+              }
+            },
+            "xp": 8000,
+            "art": "hacker_vibes_vine_kid",
+            "title": "Social Climber",
+            "description": "Having a pretty amicable personality allows this Vine to make friends with peers in its field. Its helpful responses and support makes him a platform for giving others a 20% boost to yield speed.",
+            "achiever_title": "Medium Vine"
+          },
+          {
+            "kind": {
+              "Yield": [
+                [
+                  [
+                    0.004,
+                    [
+                      1.0,
+                      1.11
+                    ]
+                  ],
+                  "Spirited Buzzwing Bagling"
+                ]
+              ]
+            },
+            "xp": 15400,
+            "art": "hacker_vibes_vine_teen",
+            "title": "New Baginnings",
+            "description": "There's apparently been some bags randomly appearing next to plants in the night. Reports suggest that a mysterious stout figure has been leaving these goodie bags.",
+            "achiever_title": "Dronging Vibes Vine"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      1,
+                      "hacksprit"
+                    ],
+                    [
+                      3,
+                      "Spirited Buzzwing Bagling"
+                    ]
+                  ],
+                  "makes": {
+                    "OneOf": [
+                      [
+                        0.129,
+                        "Bagling Egg"
+                      ],
+                      [
+                        0.0452,
+                        "Doughy Buzzwing Boxling"
+                      ],
+                      [
+                        0.0452,
+                        "Crystalline Buzzwing Boxling"
+                      ],
+                      [
+                        0.3885,
+                        "Doughy Buzzwing Bagling"
+                      ],
+                      [
+                        0.3885,
+                        "Crystalline Buzzwing Bagling"
+                      ]
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 24.0
+                }
+              ]
+            },
+            "xp": 17600,
+            "art": "hacker_vibes_vine_teen",
+            "title": "Hack in the Box",
+            "description": "Baglings can now be upgraded, transformed, or opened.",
+            "achiever_title": "Humming Vibes Vine"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.2
+            },
+            "xp": 20000,
+            "art": "hacker_vibes_vine_teen",
+            "title": "Honeysuckle, I'm Home",
+            "description": "Due to its size, this Vine has become home to a few small creatures, especially birds. Of course, these creatures take care of their home sweet home, and help make yields 20% faster.",
+            "achiever_title": "Homely Vibes Vine"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.15
+            },
+            "xp": 22600,
+            "art": "hacker_vibes_vine_teen",
+            "title": "Scandent Sourcerer",
+            "description": "This code wizard uses some spooky black magic shortcuts to make yields have 15% more resources.",
+            "achiever_title": "Mystical Vibes Vine"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      3,
+                      "hacksprit"
+                    ],
+                    [
+                      2,
+                      "Spirited Buzzwing Boxling"
+                    ]
+                  ],
+                  "makes": {
+                    "OneOf": [
+                      [
+                        0.083,
+                        "Boxling Egg"
+                      ],
+                      [
+                        0.0305,
+                        "Doughy Buzzwing Boxlet"
+                      ],
+                      [
+                        0.0305,
+                        "Crystalline Buzzwing Boxlet"
+                      ],
+                      [
+                        0.428,
+                        "Doughy Buzzwing Boxling"
+                      ],
+                      [
+                        0.428,
+                        "Crystalline Buzzwing Boxling"
+                      ]
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 36.0
+                }
+              ]
+            },
+            "xp": 25400,
+            "art": "hacker_vibes_vine_teen",
+            "title": "Hacking Outside of the Box",
+            "description": "Boxlings can now be upgraded, transformed, or opened.",
+            "achiever_title": "Fizzing Vibes Vine"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      5,
+                      "bressence"
+                    ],
+                    [
+                      5,
+                      "crystcyl"
+                    ],
+                    [
+                      2,
+                      "Hacker Vibes Vine Seed"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Hacker Egg"
+                    ]
+                  },
+                  "destroys_plant": true,
+                  "time": 720.0
+                }
+              ]
+            },
+            "xp": 48000,
+            "art": "hacker_vibes_vine_grown",
+            "title": "Ivy League",
+            "description": "Getting into the Ivy League is no small feat, but this plant makes it look easy. After many all-nighters, it even learned how to engineer life on its own!",
+            "achiever_title": "Insomnia Vibes Vine"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.2
+            },
+            "xp": 52000,
+            "art": "hacker_vibes_vine_grown",
+            "title": "Back to Our Roots",
+            "description": "Remembering its passion-filled projects from its youth, this Vine redoubles its efforts into making, which boosts the magnitude of its production by 1.2.",
+            "achiever_title": "Nostalgia Vibes Vine"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Volatile Vial"
+                    ],
+                    [
+                      6,
+                      "Warp Powder"
+                    ],
+                    [
+                      10,
+                      "hacksprit"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Vibefying Vinefying Elixir"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 4320.0
+                }
+              ]
+            },
+            "xp": 57000,
+            "art": "hacker_vibes_vine_grown",
+            "title": "Alcoholic Attraction",
+            "description": "This Vine will cling to a bottle of hard liquor like it's a tree trunk. Refining the vomit that results from its inebriated state will make a beverage which can make any other Vines work more efficiently.",
+            "achiever_title": "Imbibed Vibes Vine"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      7,
+                      "hacksprit"
+                    ],
+                    [
+                      1,
+                      "Spirited Buzzwing Boxlet"
+                    ]
+                  ],
+                  "makes": {
+                    "OneOf": [
+                      [
+                        0.056,
+                        "Boxlet Egg"
+                      ],
+                      [
+                        0.02,
+                        "Doughy Buzzwing Megabox"
+                      ],
+                      [
+                        0.02,
+                        "Crystalline Buzzwing Megabox"
+                      ],
+                      [
+                        0.452,
+                        "Doughy Buzzwing Boxlet"
+                      ],
+                      [
+                        0.452,
+                        "Crystalline Buzzwing Boxlet"
+                      ]
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 72.0
+                }
+              ]
+            },
+            "xp": 63000,
+            "art": "hacker_vibes_vine_grown",
+            "title": "Box of Bark",
+            "description": "Boxlets can now be upgraded, transformed, or opened.",
+            "achiever_title": "Whirring Vibes Vine"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSize": 1.1
+              }
+            },
+            "xp": 68000,
+            "art": "hacker_vibes_vine_grown",
+            "title": "Ivy Induction",
+            "description": "When your coding prowess is well-known, it isn't unheard of for secret organizations to reach out. This Vine joined its local cult, sharing its skills as well as improving yields for neighbors by 10%.",
+            "achiever_title": "Deepstate Vibes Vine"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSize": 1.1
+              }
+            },
+            "xp": 76000,
+            "art": "hacker_vibes_vine_grown",
+            "title": "Cult Conduction",
+            "description": "With your Vine's contributions to the cult, it has become a high-ranking member. Your Vine uses its new status to support nearby members a further 10%.",
+            "achiever_title": "Authoritative Vibes Vine"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSize": 1.15
+              }
+            },
+            "xp": 87000,
+            "art": "hacker_vibes_vine_grown",
+            "title": "Cloud Vine",
+            "description": "Your Hacker Vibes Vine can now upload all of its extra Hacker Spirit onto the cloud, so it can simply focus on producing new Hacker Spirit (and other goods as the case may be, of course). Expect 15% larger yields!",
+            "achiever_title": "Head in the Clouds Vine"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Vibefying Vinefying Elixir"
+                    ],
+                    [
+                      15,
+                      "Warp Powder"
+                    ],
+                    [
+                      25,
+                      "hacksprit"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Vivifying Vibefying Vinefying Elixir"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 8640.0
+                }
+              ]
+            },
+            "xp": 97000,
+            "art": "hacker_vibes_vine_grown",
+            "title": "Fine Vines",
+            "description": "Never let it be said that Vines don't age well. In fact, the healthy glitter of dew on its leaves remain forever fresh. Adding a specific potion to rest upon its grand foliage will eventually return a potent potion that will turn other plants into Vines themselves.",
+            "achiever_title": "Mature Vibes Vine"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      15,
+                      "hacksprit"
+                    ],
+                    [
+                      1,
+                      "Spirited Buzzwing Megabox"
+                    ]
+                  ],
+                  "makes": {
+                    "OneOf": [
+                      [
+                        0.04,
+                        "Megabox Egg"
+                      ],
+                      [
+                        0.48,
+                        "Doughy Buzzwing Megabox"
+                      ],
+                      [
+                        0.48,
+                        "Crystalline Buzzwing Megabox"
+                      ]
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 216.0
+                }
+              ]
+            },
+            "xp": 108000,
+            "art": "hacker_vibes_vine_grown",
+            "title": "Vim Cubed",
+            "description": "Megaboxes can now be transformed or opened.",
+            "achiever_title": "Buzzing Vibes Vine"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      120,
+                      "bressence"
+                    ],
+                    [
+                      120,
+                      "crystcyl"
+                    ],
+                    [
+                      1,
+                      "Vine Keyboard"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Jungleboard"
+                    ]
+                  },
+                  "destroys_plant": true,
+                  "time": 17280.0
+                }
+              ]
+            },
+            "xp": 999991,
+            "art": "hacker_vibes_vine_grown",
+            "title": "Botany Oddity",
+            "description": "After many protein pills and excessive amounts of coffee, this Vine has grown into space! Its many leaves float in a peculiar way, and it says the planet looks pretty blue. While watching the stars swirl around, it had an epiphany, and can now upgrade your Vine Keyboards into Jungleboards.",
+            "achiever_title": "Otherworldly Vibes Vine"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Aloe Avanta",
+      "base_yield_duration": 11520.0,
+      "advancements": {
+        "base": {
+          "kind": {
+            "Xp": 1.0
+          },
+          "xp": 0,
+          "art": "aloe_avanta_baby",
+          "title": "In the Dust",
+          "description": "Out of the dust, a wonderful little plant has materialized. It's not much right now, but your baby Aloe will soon grow, gathering XP from the blue ashes it continues to produce.",
+          "achiever_title": "Aloe Seedling"
+        },
+        "rest": [
+          {
+            "kind": {
+              "Yield": [
+                [
+                  [
+                    0.03,
+                    [
+                      1.2,
+                      1.5
+                    ]
+                  ],
+                  "Warp Powder"
+                ]
+              ]
+            },
+            "xp": 600,
+            "art": "aloe_avanta_baby",
+            "title": "Wading In",
+            "description": "Your young Aloe is already trying to summon Warp Powder - how determined! Your plant has a 3% chance of obtaining Warp Powder.",
+            "achiever_title": "Shallow Aloe"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.05
+            },
+            "xp": 1500,
+            "art": "aloe_avanta_baby",
+            "title": "Aloe Alone",
+            "description": "Introverted and quiet, your mysterious plant has started working more efficiently. Their yield size has experienced a 1.05 size boost.",
+            "achiever_title": "Lonely Aloe"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.07
+            },
+            "xp": 2700,
+            "art": "aloe_avanta_baby",
+            "title": "Why So Blue?",
+            "description": "The plant seems to have become existential, being extremely intelligent. We might need to introduce them to some friends. Yield size has increased by 0.7%.",
+            "achiever_title": "Blue Aloe"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.05
+            },
+            "xp": 4200,
+            "art": "aloe_avanta_baby",
+            "title": "Smooth Tunes",
+            "description": "A little music while you work can really get things moving. This holds especially true for this plant, who gets a 5% bonus to yield speed.",
+            "achiever_title": "LoFi Aloe"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSpeed": 1.3
+              }
+            },
+            "xp": 7800,
+            "art": "aloe_avanta_kid",
+            "title": "Dust Smites",
+            "description": "This plant can't stand any dust that isn't its own. It periodically shoots out waves of powder that clear up those nasty Dust Bunnies of Caerbannog, giving its neighbors a 1.3 times speed boost.",
+            "achiever_title": "Friendly Aloe"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.1
+            },
+            "xp": 9800,
+            "art": "aloe_avanta_kid",
+            "title": "Vera Nice to See You",
+            "description": "Conversing with their neighbors has improved the Aloe's spirits! Their happy mood has increased their yield size by 10%.",
+            "achiever_title": "Energized Aloe"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.1
+            },
+            "xp": 12600,
+            "art": "aloe_avanta_kid",
+            "title": "Aloewance",
+            "description": "Your plant pal has prayed to their astronomical aloe ancestors for greater yields - and they provided! Your plant gets a 1.1 yield size boost!",
+            "achiever_title": "Spiritual Aloe"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.1
+            },
+            "xp": 16000,
+            "art": "aloe_avanta_kid",
+            "title": "Purple Haze",
+            "description": "The groovy succulent has sped up productivity after listening to some Jimi Hendrix. Far out, your speed has seen a 10% swell!",
+            "achiever_title": "Groovy Aloe"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      11,
+                      "Warp Powder"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Rift Powder"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 17280.0
+                },
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Rift Powder"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      9,
+                      "Warp Powder"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 17280.0
+                },
+                {
+                  "needs": [
+                    [
+                      4,
+                      "Rift Powder"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Wormhole Powder"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 17280.0
+                },
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Wormhole Powder"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      3,
+                      "Rift Powder"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 17280.0
+                }
+              ]
+            },
+            "xp": 30000,
+            "art": "aloe_avanta_teen",
+            "title": "Avanta Garde",
+            "description": "Novelty strikes very rarely, but when an inspired Aloe has an idea, it usually lets them compress and dissect Powders into another ... which is what this idea does.",
+            "achiever_title": "Inventive Aloe"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSize": 1.15
+              }
+            },
+            "xp": 33800,
+            "art": "aloe_avanta_teen",
+            "title": "Aloe Advantage",
+            "description": "Ingesting Warp Powder has enlightened your plant, and they will now support their friends to help their species grow. Neighbor yield size has seen a 1.15 increase! ",
+            "achiever_title": "Advanced Avanta"
+          },
+          {
+            "kind": {
+              "Neighbor": {
+                "YieldSize": 1.2
+              }
+            },
+            "xp": 38000,
+            "art": "aloe_avanta_teen",
+            "title": "Soothing Soot",
+            "description": "Working hard usually makes one hot and stufy, but the natural coolant that this Aloe emits in the form of dust helps its neighbors manage their temperatures, boosting their overall production by 20%.",
+            "achiever_title": "Chill Avanta"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Volatile Vial"
+                    ],
+                    [
+                      12,
+                      "Warp Powder"
+                    ],
+                    [
+                      15,
+                      "crystcyl"
+                    ],
+                    [
+                      15,
+                      "hacksprit"
+                    ],
+                    [
+                      15,
+                      "bressence"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Powder Keg"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 8640.0
+                }
+              ]
+            },
+            "xp": 42600,
+            "art": "aloe_avanta_teen",
+            "title": "Nitroglycerin Nursery",
+            "description": "After some extensive testing - and a few fires - your Aloe Avanta has found itself able to make a gelatinous liquid substance that can improve the effectiveness of Powders. Just try not to let it catch fire; there's some liquor in there.",
+            "achiever_title": "Plastic Avanta"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.15
+            },
+            "xp": 47600,
+            "art": "aloe_avanta_teen",
+            "title": "Warp Speed",
+            "description": "Having taken the plant equivalent of hard cocaine, this plant now can turn out yields 1.15 times faster.",
+            "achiever_title": "Hyper Avanta"
+          },
+          {
+            "kind": {
+              "Yield": [
+                [
+                  [
+                    0.001,
+                    [
+                      1.1,
+                      1.25
+                    ]
+                  ],
+                  "Rift Powder"
+                ]
+              ]
+            },
+            "xp": 93000,
+            "art": "aloe_avanta_grown",
+            "title": "Powder Power",
+            "description": "With the power of this plant's powder, we've started generating very potent material. There is now a 0.1% chance of getting Rift Powder on yields.",
+            "achiever_title": "Mighty Avanta"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.15
+            },
+            "xp": 101000,
+            "art": "aloe_avanta_grown",
+            "title": "Gel Guru",
+            "description": "Using the starry blue gel from one of it's bountiful leaves, the Aloe has increased it's yield size with a 15% enhancement. ",
+            "achiever_title": "Enlightened Avanta"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.15
+            },
+            "xp": 112000,
+            "art": "aloe_avanta_grown",
+            "title": "Successful Succulent",
+            "description": "Your Aloe Avanta has become famous for their brilliant, galactic style. Along with newfound confidence comes the perk of having their yield size increased by 15%!",
+            "achiever_title": "Celebritous Avanta"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Powder Keg"
+                    ],
+                    [
+                      24,
+                      "Warp Powder"
+                    ],
+                    [
+                      2,
+                      "Rift Powder"
+                    ],
+                    [
+                      24,
+                      "crystcyl"
+                    ],
+                    [
+                      24,
+                      "hacksprit"
+                    ],
+                    [
+                      24,
+                      "bressence"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Portent Powder Keg"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 5760.0
+                }
+              ]
+            },
+            "xp": 126000,
+            "art": "aloe_avanta_grown",
+            "title": "Expedited Explosions",
+            "description": "Your Aloe has learned how to use quantum injectors to carefully place nanoparticles in Powder Kegs which greatly increase its explosive properties, but more importantly, its capability to boost Powder usage.",
+            "achiever_title": "Bombastic Avanta"
+          },
+          {
+            "kind": {
+              "YieldSize": 1.2
+            },
+            "xp": 145000,
+            "art": "aloe_avanta_grown",
+            "title": "Fate of the Stars",
+            "description": "The shine of your Aloe's twinkling lights has dwarfed some of the galaxy's greatest wonders. The intense sparkles are actually the effect of a process that boosts yield size by 1.2.",
+            "achiever_title": "Galactic Avanta"
+          },
+          {
+            "kind": {
+              "Yield": [
+                [
+                  [
+                    0.0025,
+                    [
+                      1.0,
+                      1.05
+                    ]
+                  ],
+                  "Wormhole Powder"
+                ]
+              ]
+            },
+            "xp": 888000,
+            "art": "aloe_avanta_grown",
+            "title": "Aloe Savanta",
+            "description": "This Aloe has been designated a certified genius! They've started producing a mysterious, powerful powder with the uncanny ability to twist the fabric of space-time. There is now a slim 0.25% chance of getting Wormhole Powder.",
+            "achiever_title": "Genius Avanta"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Tinkerstool",
+      "base_yield_duration": null,
+      "advancements": {
+        "base": {
+          "kind": {
+            "Craft": [
+              {
+                "needs": [
+                  [
+                    5,
+                    "Bread Essence"
+                  ]
+                ],
+                "makes": {
+                  "Just": [
+                    1,
+                    "bressence"
+                  ]
+                },
+                "destroys_plant": false,
+                "time": 12.0
+              },
+              {
+                "needs": [
+                  [
+                    5,
+                    "Hacker Spirit"
+                  ]
+                ],
+                "makes": {
+                  "Just": [
+                    1,
+                    "hacksprit"
+                  ]
+                },
+                "destroys_plant": false,
+                "time": 12.0
+              },
+              {
+                "needs": [
+                  [
+                    5,
+                    "Cyl Crystal"
+                  ]
+                ],
+                "makes": {
+                  "Just": [
+                    1,
+                    "crystcyl"
+                  ]
+                },
+                "destroys_plant": false,
+                "time": 12.0
+              }
+            ]
+          },
+          "xp": 0,
+          "art": "tinkerstool_baby",
+          "title": "Tinkerer's Tools",
+          "description": "The Tinkerstool is a strange plant gifted with the knowledge of crafting from birth; they are particularly able to take certain materials and compress them at amazing speed. They also seem to be able to gain XP from crafting rather than from conventional means.",
+          "achiever_title": "Tinkerstool 1.0"
+        },
+        "rest": [
+          {
+            "kind": {
+              "YieldSpeed": 1.05
+            },
+            "xp": 400,
+            "art": "tinkerstool_baby",
+            "title": "Speedy Spores",
+            "description": "The occasional spores that this Tinkerstool expels in small clouds boost the crafting speed of items it makes by 5%.",
+            "achiever_title": "Puffy Tinkerstool"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.05
+            },
+            "xp": 880,
+            "art": "tinkerstool_baby",
+            "title": "Pressing Buttons",
+            "description": "Pressing issues are rarely fixed by just pressing buttons, but this cute as a button mushroom is too pressed for time! This work rush pushes him to craft 5% faster.",
+            "achiever_title": "Cute Tinkerstool"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.07
+            },
+            "xp": 1840,
+            "art": "tinkerstool_baby",
+            "title": "Fast Like a Fungus",
+            "description": "Fungal colonies naturally grow at impressive speeds. This Tinkerstool has found a way to channel this effect into crafting, allowing crafting to go 7% quicker.",
+            "achiever_title": "Fun Guy"
+          },
+          {
+            "kind": {
+              "CraftReturn": [
+                0.015,
+                [
+                  0.01,
+                  0.04
+                ]
+              ]
+            },
+            "xp": 3200,
+            "art": "tinkerstool_kid",
+            "title": "Toadstool Technology",
+            "description": "Your Tinkerstool has designed a utility belt for itself. This belt allows it to have tools and mechanical appendages that offer control over micromovements that cost others precious items and give a 1.5% chance for crafting to return used materials!",
+            "achiever_title": "Tinkerstool 2.0"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.08
+            },
+            "xp": 3800,
+            "art": "tinkerstool_kid",
+            "title": "Gillded Girdle",
+            "description": "The utility belt has been upgraded to have even more arms and tools, boosting crafting speed by 8%.",
+            "achiever_title": "Handy Tinkerstool"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.1
+            },
+            "xp": 5000,
+            "art": "tinkerstool_kid",
+            "title": "Mycelium Mechanics",
+            "description": "A talented Tinkerstool as this one has built a drone to assist in the workshop. Affixed to the Tinkerstool's belt when not used, this machine helps with the heavy lifting, making things run 10% faster.",
+            "achiever_title": "Mushroom Machinist"
+          },
+          {
+            "kind": {
+              "DoubleCraftYield": 0.005
+            },
+            "xp": 6600,
+            "art": "tinkerstool_kid",
+            "title": "Scrapyard Shenanigans",
+            "description": "This frugal fungus is able to salvage excess materials from his projects, reworking them into more crafts! This allows for a 0.5% chance to have double the yield!",
+            "achiever_title": "Resourceful Tinkertool"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      100,
+                      "Bread Essence"
+                    ],
+                    [
+                      2,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      25,
+                      "bressence"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 240.0
+                },
+                {
+                  "needs": [
+                    [
+                      100,
+                      "Hacker Spirit"
+                    ],
+                    [
+                      2,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      25,
+                      "hacksprit"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 240.0
+                },
+                {
+                  "needs": [
+                    [
+                      100,
+                      "Cyl Crystal"
+                    ],
+                    [
+                      2,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      25,
+                      "crystcyl"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 240.0
+                },
+                {
+                  "needs": [
+                    [
+                      500,
+                      "Bread Essence"
+                    ],
+                    [
+                      10,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      150,
+                      "bressence"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 3000.0
+                },
+                {
+                  "needs": [
+                    [
+                      500,
+                      "Hacker Spirit"
+                    ],
+                    [
+                      10,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      150,
+                      "hacksprit"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 3000.0
+                },
+                {
+                  "needs": [
+                    [
+                      500,
+                      "Cyl Crystal"
+                    ],
+                    [
+                      10,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      150,
+                      "crystcyl"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 3000.0
+                }
+              ]
+            },
+            "xp": 12000,
+            "art": "tinkerstool_teen",
+            "title": "Basidia in Bulk",
+            "description": "Are you tired of crafting items one at a time? Well so is this Tinkerstool! With the cost of a few Tinkerparts, items can now be produced in bulk with the efficiency and efficacy of a fungus factory!",
+            "achiever_title": "Hefty Tinkerstool"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      12,
+                      "Warp Powder"
+                    ],
+                    [
+                      2,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Rift Powder"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 540.0
+                },
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Rift Powder"
+                    ],
+                    [
+                      2,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      8,
+                      "Warp Powder"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 540.0
+                },
+                {
+                  "needs": [
+                    [
+                      4,
+                      "Rift Powder"
+                    ],
+                    [
+                      2,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Wormhole Powder"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 540.0
+                },
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Wormhole Powder"
+                    ],
+                    [
+                      2,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "AllOf": [
+                      [
+                        2,
+                        "Rift Powder"
+                      ],
+                      [
+                        7,
+                        "Warp Powder"
+                      ]
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 540.0
+                }
+              ]
+            },
+            "xp": 14400,
+            "art": "tinkerstool_teen",
+            "title": "Flux Capacitor",
+            "description": "Great Scott! Put on your thinking caps and get ready to go 88 miles an hour, because this plant has found a way to stabilize, separate, and contain the dimensional overflow from Powders! While not totally efficient, this allows the ability to deconstruct and reconstruct Powders.",
+            "achiever_title": "Contemporary Tinkerstool"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.1
+            },
+            "xp": 17600,
+            "art": "tinkerstool_teen",
+            "title": "Chanterelle Enchantments",
+            "description": "Turns out this modish mushroom has mastered a modicum of magical measures, allowing crafting speed to be increased by another 10%.",
+            "achiever_title": "Thaumaturgic Tinkerstool"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.1
+            },
+            "xp": 21600,
+            "art": "tinkerstool_teen",
+            "title": "Underground Upgrades",
+            "description": "Every now and then, some parts and tools can't be easily found. When that happens you have to go underground. The black market is shady, but fast, with a 1.1 times speed boost to offer.",
+            "achiever_title": "Incognito Tinkerstool"
+          },
+          {
+            "kind": {
+              "CraftReturn": [
+                0.01,
+                [
+                  0.03,
+                  0.06
+                ]
+              ]
+            },
+            "xp": 26400,
+            "art": "tinkerstool_teen",
+            "title": "Largely Licensed",
+            "description": "Apparently, some interesting permits are needed to do interesting things ... Now that you have them, your Tinkerstool gets the benefit of sometimes being reimbursed for his work, with a craft return of 2.5%.",
+            "achiever_title": "Official Tinkerstool"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      10,
+                      "crystcyl"
+                    ],
+                    [
+                      10,
+                      "hacksprit"
+                    ],
+                    [
+                      20,
+                      "bressence"
+                    ],
+                    [
+                      80,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Tinkersledge"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 4320.0
+                },
+                {
+                  "needs": [
+                    [
+                      10,
+                      "crystcyl"
+                    ],
+                    [
+                      20,
+                      "hacksprit"
+                    ],
+                    [
+                      10,
+                      "bressence"
+                    ],
+                    [
+                      80,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Tinkerdriver"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 4320.0
+                },
+                {
+                  "needs": [
+                    [
+                      20,
+                      "crystcyl"
+                    ],
+                    [
+                      10,
+                      "hacksprit"
+                    ],
+                    [
+                      10,
+                      "bressence"
+                    ],
+                    [
+                      80,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Tinkerlight"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 4320.0
+                }
+              ]
+            },
+            "xp": 48000,
+            "art": "tinkerstool_grown",
+            "title": "Sporadic Spectacles",
+            "description": "The specs on this Tinkerstools spectacles have been specially upgraded to allow it to see the internal workings of most machines, opening up crafting to include the tools of the trade: the Tinkersledge, Tinkerdriver, and Tinkerlight.",
+            "achiever_title": "Tinkerstool 3.0"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Volatile Vial"
+                    ],
+                    [
+                      4,
+                      "Warp Powder"
+                    ],
+                    [
+                      8,
+                      "crystcyl"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Cyllicizing Coffee Concoction"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 2880.0
+                },
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Volatile Vial"
+                    ],
+                    [
+                      4,
+                      "Warp Powder"
+                    ],
+                    [
+                      8,
+                      "hacksprit"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Vibefying Vinefying Elixir"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 2880.0
+                },
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Volatile Vial"
+                    ],
+                    [
+                      4,
+                      "Warp Powder"
+                    ],
+                    [
+                      8,
+                      "bressence"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Bractification Brew"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 2880.0
+                }
+              ]
+            },
+            "xp": 54000,
+            "art": "tinkerstool_grown",
+            "title": "Amanita Alchemist",
+            "description": "With the power of drunk science, this Tinkerstool has done drink science. That is to say, that it has developed new formulas to create drinks which can boost plant yields.",
+            "achiever_title": "Toxin Tinkerstool"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.15
+            },
+            "xp": 70000,
+            "art": "tinkerstool_grown",
+            "title": "Compost Composition",
+            "description": "Having a hobby for one's spare time is nice, and this composed composer's compositions fill rooms with tunes - tunes that help him work 15% faster when on the job.",
+            "achiever_title": "Collected Tinkerstool"
+          },
+          {
+            "kind": {
+              "YieldSpeed": 1.15
+            },
+            "xp": 84000,
+            "art": "tinkerstool_grown",
+            "title": "Spore Downpour",
+            "description": "The spores that were keeping things moving before are now more frequent, and in greater amount, making small clouds and giving an extra 15% boost to crafting speed.",
+            "achiever_title": "Precipitating Tinkerstool"
+          },
+          {
+            "kind": {
+              "DoubleCraftYield": 0.003
+            },
+            "xp": 102000,
+            "art": "tinkerstool_grown",
+            "title": "King of the Craft",
+            "description": "Keeping an orderly workspace can be pretty taxing, but this Tinkerstool has class and control... until you call him a plant. He's a fungus. And as a fungus, the chance of craft bonuses is increased to 0.8%.",
+            "achiever_title": "Evolved Tinkerstool"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Volatile Vial"
+                    ],
+                    [
+                      8,
+                      "Warp Powder"
+                    ],
+                    [
+                      9,
+                      "crystcyl"
+                    ],
+                    [
+                      9,
+                      "hacksprit"
+                    ],
+                    [
+                      9,
+                      "bressence"
+                    ],
+                    [
+                      30,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Tinker Tincture"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 5760.0
+                },
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Tinker Tincture"
+                    ],
+                    [
+                      12,
+                      "Warp Powder"
+                    ],
+                    [
+                      20,
+                      "crystcyl"
+                    ],
+                    [
+                      20,
+                      "hacksprit"
+                    ],
+                    [
+                      20,
+                      "bressence"
+                    ],
+                    [
+                      75,
+                      "Tinkerpart"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Terrific Tinker Tincture"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 8640.0
+                },
+                {
+                  "needs": [
+                    [
+                      1,
+                      "Volatile Vial"
+                    ],
+                    [
+                      15,
+                      "Warp Powder"
+                    ],
+                    [
+                      12,
+                      "crystcyl"
+                    ],
+                    [
+                      12,
+                      "hacksprit"
+                    ],
+                    [
+                      12,
+                      "bressence"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Powder Keg"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 5760.0
+                }
+              ]
+            },
+            "xp": 124000,
+            "art": "tinkerstool_grown",
+            "title": "Superb Solutions",
+            "description": "While in a stupendous Siberian stupor, this Tinkerstool was inspired to research an assortment of alcohols with unique abilities.",
+            "achiever_title": "Pissed Tinkerstool"
+          },
+          {
+            "kind": {
+              "Craft": [
+                {
+                  "needs": [
+                    [
+                      50,
+                      "bressence"
+                    ],
+                    [
+                      50,
+                      "hacksprit"
+                    ],
+                    [
+                      50,
+                      "crystcyl"
+                    ],
+                    [
+                      200,
+                      "Tinkerpart"
+                    ],
+                    [
+                      1,
+                      "Tinkersledge"
+                    ],
+                    [
+                      1,
+                      "Tinkerdriver"
+                    ],
+                    [
+                      1,
+                      "Tinkerlight"
+                    ]
+                  ],
+                  "makes": {
+                    "Just": [
+                      1,
+                      "Tinkermultitool"
+                    ]
+                  },
+                  "destroys_plant": false,
+                  "time": 18000.0
+                }
+              ]
+            },
+            "xp": 1250000,
+            "art": "tinkerstool_grown",
+            "title": "In the Hall of the Mushroom King",
+            "description": "As adept a crafter as the ancient dwarves of old, this Tinkerstool has developed a forging technique that combines the tools of its trade into one Tinkermultitool of miraculous power.",
+            "achiever_title": "Tinkerstool 4.0"
+          }
+        ]
+      }
+    }
+  ],
+  "possession_archetypes": [
+    {
+      "name": "Gempheus",
+      "description": "The boundless buzzing, crackling energy found in Cyl Crystals manifests itself in Gempheus's personality! That is to say, Gempheus early in the morning is a little more than most people can handle.",
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 3,
+          "plant_effects": [
+            [
+              "Coffea Cyl",
+              {
+                "kind": {
+                  "YieldSize": 1.5
+                },
+                "xp": 0,
+                "art": "bractus_loaf",
+                "title": "Hackagotchi Help!",
+                "description": "Having a Gempheus increases the yield size of this Coffea Cyl 50%!",
+                "achiever_title": "Hackagotchi Haver"
+              }
+            ]
+          ],
+          "hatch_table": null,
+          "welcome_gift": false
+        }
+      }
+    },
+    {
+      "name": "Hackpheus",
+      "description": "Enjoys long hacks on the beach, and thinks that posting her dating profile bio here is somehow not appropriate. You can hear less profanity from this one.",
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 3,
+          "plant_effects": [
+            [
+              "Hacker Vibes Vine",
+              {
+                "kind": {
+                  "YieldSize": 1.5
+                },
+                "xp": 0,
+                "art": "bractus_loaf",
+                "title": "Hackagotchi Help!",
+                "description": "Having a Hackpheus increases the yield size of this Hacker Vibes Vine 50%!",
+                "achiever_title": "Hackagotchi Haver"
+              }
+            ]
+          ],
+          "hatch_table": null,
+          "welcome_gift": false
+        }
+      }
+    },
+    {
+      "name": "Chefpheus",
+      "description": "A cute Hackagotchi who is into baking! She can actually only make bread, as we all know from the Great Cake Fire of '19.",
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 3,
+          "plant_effects": [
+            [
+              "Bractus",
+              {
+                "kind": {
+                  "YieldSize": 1.5
+                },
+                "xp": 0,
+                "art": "bractus_loaf",
+                "title": "Hackagotchi Help!",
+                "description": "Having a Chefpheus increases the yield size of this Bractus 50%!",
+                "achiever_title": "Hackagotchi Haver"
+              }
+            ]
+          ],
+          "hatch_table": null,
+          "welcome_gift": false
+        }
+      }
+    },
+    {
+      "name": "Warp Powder",
+      "description": "Sparkling, glittery, glowing blue powder that emits high-pitched squeaking noises, especially when excited. Has been known to accelerate time when suspended in the air.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": {
+            "TimeIncrease": {
+              "extra_cycles": 1500,
+              "duration_cycles": 72
+            }
+          },
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Rift Powder",
+      "description": "A volatile mixture of two volatile substances! Its powerful time acceleration properties were last recorded in the ancient books of the Brognarks; no one has been able to acquire any of this substance since then.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": {
+            "TimeIncrease": {
+              "extra_cycles": 15000,
+              "duration_cycles": 60
+            }
+          },
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Wormhole Powder",
+      "description": "The rarest, most pure time acceleration substance in the universe ... so rare, even the ancients only alluded to its existence ... said to be able to call forth the ancient worm of time herself ...",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": {
+            "TimeIncrease": {
+              "extra_cycles": 50000,
+              "duration_cycles": 24
+            }
+          },
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Land Deed",
+      "description": "Entitles the holder to a new plot of land, if they have the experience to handle it, of course.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": {
+            "requires_xp": true
+          },
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Land Grant",
+      "description": "A much rarer, much more valuable land deed that can grant you land even if you don't have enough experience.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": {
+            "requires_xp": false
+          },
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Cytrus Staff",
+      "description": "Energy overflows from this staff, with orange lightning arcing from Cyl to Cyl, sending them into overdrive. Overdrive Cyl can craft and produce yields 50% faster!",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": [
+            [
+              "Coffea Cyl",
+              {
+                "kind": {
+                  "YieldSpeed": 1.5
+                },
+                "xp": 0,
+                "art": "coffea_cyl_baby",
+                "title": "Cytrus Staff Bonus",
+                "description": "Having a Cytrus Staff in your inventory increases the yield speed of this Coffea Cyl 35%!",
+                "achiever_title": "Cyl Sorceror"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "Jungleboard",
+      "description": "Click clack. Clickity clack click. That is the sound that Hacker Vibes Vines are lost in. Lost to a trance, they let out more VIbes than ever with a 50% boost to yield speed.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": [
+            [
+              "Hacker Vibes Vine",
+              {
+                "kind": {
+                  "YieldSpeed": 1.5
+                },
+                "xp": 0,
+                "art": "hacker_vibes_vine_baby",
+                "title": "Jungleboard Bonus",
+                "description": "Having a Jungleboard in your inventory increases the yield speed of this Hacker Vibes Vine by 35%!",
+                "achiever_title": "Keyboard Crusader"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "Kingpin",
+      "description": "The majesty and might of this Rolling Pin has grown after being bathed in bressence, and the terror it causes within Bracti now keep them at a 50% boost to yield speed.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": [
+            [
+              "Bractus",
+              {
+                "kind": {
+                  "YieldSpeed": 1.5
+                },
+                "xp": 0,
+                "art": "bractus_loaf",
+                "title": "Rolling Pin Bonus",
+                "description": "Having a Kingpin in your inventory increases the yield speed of this Bractus 35%!",
+                "achiever_title": "Bractus Baron"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "Cyl Wand",
+      "description": "Once a regular stick, this wand is lined with gems, giving it the ability to boost the crafting and growth speed of Coffea Cyl plants by 20%.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": [
+            [
+              "Coffea Cyl",
+              {
+                "kind": {
+                  "YieldSpeed": 1.2
+                },
+                "xp": 0,
+                "art": "coffea_cyl_baby",
+                "title": "Cyl Wand Bonus",
+                "description": "Having a Cyl Wand in your inventory increases the yield speed of this Coffea Cyl 35%!",
+                "achiever_title": "Cyl Mage"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "Vine Keyboard",
+      "description": "The loud clacking of this keyboard's keys enchant Hacker Vibes Vines, sending those who hear it into a trancelike state wherein they grow and craft 20% faster.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": [
+            [
+              "Hacker Vibes Vine",
+              {
+                "kind": {
+                  "YieldSpeed": 1.2
+                },
+                "xp": 0,
+                "art": "hacker_vibes_vine_baby",
+                "title": "Vine Keyboard Bonus",
+                "description": "Having a Vine Keyboard in your inventory increases the yield speed of this Hacker Vibes Vine by 35%!",
+                "achiever_title": "Keyboard Warrior"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "Rolling Pin",
+      "description": "Bracti fear the Rolling Pin more than almost any other tool, and in the hands of the right wielder, it will inspire them to work harder with a 20% boost to growth and crafting speed.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": [
+            [
+              "Bractus",
+              {
+                "kind": {
+                  "YieldSpeed": 1.2
+                },
+                "xp": 0,
+                "art": "bractus_loaf",
+                "title": "Rolling Pin Bonus",
+                "description": "Having a Rolling Pin in your inventory increases the yield speed of this Bractus 35%!",
+                "achiever_title": "Bractus Baker"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "Cyl Egg",
+      "description": "Veins of pure arcane energy course throughout the egg, and holding it quickly makes your hands shaky and numb.",
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
+          "hatch_table": [
+            [
+              [
+                0.011,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Hackpheus"
+            ],
+            [
+              [
+                0.011,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Chefpheus"
+            ],
+            [
+              [
+                0.7,
+                [
+                  2.1,
+                  3.32
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                0.18,
+                [
+                  2.3,
+                  4.44
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                1.0,
+                [
+                  4.25,
+                  6.65
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.44,
+                [
+                  5.75,
+                  7.7
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.03,
+                [
+                  1.25,
+                  2.66
+                ]
+              ],
+              "Wormhole Powder"
+            ],
+            [
+              [
+                0.017,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Vine Keyboard"
+            ],
+            [
+              [
+                0.017,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Rolling Pin"
+            ],
+            [
+              [
+                0.022,
+                [
+                  1.21,
+                  2.02
+                ]
+              ],
+              "Land Deed"
+            ],
+            [
+              [
+                0.007,
+                [
+                  1.0,
+                  1.07
+                ]
+              ],
+              "Land Grant"
+            ],
+            [
+              [
+                0.168,
+                [
+                  1.05,
+                  2.01
+                ]
+              ],
+              "Tinkerpart"
+            ],
+            [
+              [
+                0.145,
+                [
+                  1.03,
+                  1.6
+                ]
+              ],
+              "Volatile Vial"
+            ],
+            [
+              [
+                1.0,
+                [
+                  3.45,
+                  6.18
+                ]
+              ],
+              "Coffea Cyl Seed"
+            ],
+            [
+              [
+                0.35,
+                [
+                  4.8,
+                  7.45
+                ]
+              ],
+              "Coffea Cyl Seed"
+            ],
+            [
+              [
+                0.012,
+                [
+                  1.0,
+                  1.1
+                ]
+              ],
+              "Tinkerspore"
+            ],
+            [
+              [
+                0.015,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Aloe Avanta Seed"
+            ],
+            [
+              [
+                0.3,
+                [
+                  1.25,
+                  2.25
+                ]
+              ],
+              "Spirited Buzzwing Bagling"
+            ],
+            [
+              [
+                0.11,
+                [
+                  1.65,
+                  3.35
+                ]
+              ],
+              "Spirited Buzzwing Bagling"
+            ],
+            [
+              [
+                0.3,
+                [
+                  1.25,
+                  2.25
+                ]
+              ],
+              "Doughy Buzzwing Bagling"
+            ],
+            [
+              [
+                0.11,
+                [
+                  1.65,
+                  3.35
+                ]
+              ],
+              "Doughy Buzzwing Bagling"
+            ],
+            [
+              [
+                0.01,
+                [
+                  1.0,
+                  1.3
+                ]
+              ],
+              "Cyl Egg"
+            ],
+            [
+              [
+                0.008,
+                [
+                  1.0,
+                  1.45
+                ]
+              ],
+              "Cyl Egg"
+            ]
+          ],
+          "welcome_gift": false
+        }
+      }
+    },
+    {
+      "name": "Hacker Egg",
+      "description": "If you put your ear up to this egg, you can hear the sounds of a keyboard clacking. And profanity. Lots and lots of profanity...",
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
+          "hatch_table": [
+            [
+              [
+                0.011,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Chefpheus"
+            ],
+            [
+              [
+                0.011,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Gempheus"
+            ],
+            [
+              [
+                0.7,
+                [
+                  2.1,
+                  3.32
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                0.18,
+                [
+                  2.3,
+                  4.44
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                1.0,
+                [
+                  4.25,
+                  6.65
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.44,
+                [
+                  5.75,
+                  7.7
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.03,
+                [
+                  1.25,
+                  2.66
+                ]
+              ],
+              "Wormhole Powder"
+            ],
+            [
+              [
+                0.017,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Rolling Pin"
+            ],
+            [
+              [
+                0.017,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Cyl Wand"
+            ],
+            [
+              [
+                0.168,
+                [
+                  1.05,
+                  2.01
+                ]
+              ],
+              "Tinkerpart"
+            ],
+            [
+              [
+                0.145,
+                [
+                  1.03,
+                  1.6
+                ]
+              ],
+              "Volatile Vial"
+            ],
+            [
+              [
+                0.022,
+                [
+                  1.21,
+                  2.02
+                ]
+              ],
+              "Land Deed"
+            ],
+            [
+              [
+                0.007,
+                [
+                  1.0,
+                  1.07
+                ]
+              ],
+              "Land Grant"
+            ],
+            [
+              [
+                1.0,
+                [
+                  3.45,
+                  6.18
+                ]
+              ],
+              "Hacker Vibes Vine Seed"
+            ],
+            [
+              [
+                0.35,
+                [
+                  4.8,
+                  7.45
+                ]
+              ],
+              "Hacker Vibes Vine Seed"
+            ],
+            [
+              [
+                0.012,
+                [
+                  1.0,
+                  1.1
+                ]
+              ],
+              "Tinkerspore"
+            ],
+            [
+              [
+                0.015,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Aloe Avanta Seed"
+            ],
+            [
+              [
+                0.3,
+                [
+                  1.25,
+                  2.25
+                ]
+              ],
+              "Doughy Buzzwing Bagling"
+            ],
+            [
+              [
+                0.11,
+                [
+                  1.65,
+                  3.35
+                ]
+              ],
+              "Doughy Buzzwing Bagling"
+            ],
+            [
+              [
+                0.3,
+                [
+                  1.25,
+                  2.25
+                ]
+              ],
+              "Crystalline Buzzwing Bagling"
+            ],
+            [
+              [
+                0.11,
+                [
+                  1.65,
+                  3.35
+                ]
+              ],
+              "Crystalline Buzzwing Bagling"
+            ],
+            [
+              [
+                0.01,
+                [
+                  1.0,
+                  1.3
+                ]
+              ],
+              "Hacker Egg"
+            ],
+            [
+              [
+                0.008,
+                [
+                  1.0,
+                  1.45
+                ]
+              ],
+              "Hacker Egg"
+            ]
+          ],
+          "welcome_gift": false
+        }
+      }
+    },
+    {
+      "name": "Bread Egg",
+      "description": "If you knock gently on this egg, it sounds like the crisp outer shell of hardtack. Petition to change its name to 'Breagg.' No? ... okay fine.",
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
+          "hatch_table": [
+            [
+              [
+                0.011,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Hackpheus"
+            ],
+            [
+              [
+                0.011,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Gempheus"
+            ],
+            [
+              [
+                0.7,
+                [
+                  2.1,
+                  3.32
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                0.18,
+                [
+                  2.3,
+                  4.44
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                1.0,
+                [
+                  4.25,
+                  6.65
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.44,
+                [
+                  5.75,
+                  7.7
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.03,
+                [
+                  1.25,
+                  2.66
+                ]
+              ],
+              "Wormhole Powder"
+            ],
+            [
+              [
+                0.017,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Vine Keyboard"
+            ],
+            [
+              [
+                0.017,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Cyl Wand"
+            ],
+            [
+              [
+                0.168,
+                [
+                  1.05,
+                  2.01
+                ]
+              ],
+              "Tinkerpart"
+            ],
+            [
+              [
+                0.145,
+                [
+                  1.03,
+                  1.6
+                ]
+              ],
+              "Volatile Vial"
+            ],
+            [
+              [
+                0.022,
+                [
+                  1.21,
+                  2.02
+                ]
+              ],
+              "Land Deed"
+            ],
+            [
+              [
+                0.007,
+                [
+                  1.0,
+                  1.07
+                ]
+              ],
+              "Land Grant"
+            ],
+            [
+              [
+                1.0,
+                [
+                  3.45,
+                  6.18
+                ]
+              ],
+              "Bractus Seed"
+            ],
+            [
+              [
+                0.35,
+                [
+                  4.8,
+                  7.45
+                ]
+              ],
+              "Bractus Seed"
+            ],
+            [
+              [
+                0.012,
+                [
+                  1.0,
+                  1.1
+                ]
+              ],
+              "Tinkerspore"
+            ],
+            [
+              [
+                0.015,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Aloe Avanta Seed"
+            ],
+            [
+              [
+                0.3,
+                [
+                  1.25,
+                  2.25
+                ]
+              ],
+              "Spirited Buzzwing Bagling"
+            ],
+            [
+              [
+                0.11,
+                [
+                  1.65,
+                  3.35
+                ]
+              ],
+              "Spirited Buzzwing Bagling"
+            ],
+            [
+              [
+                0.3,
+                [
+                  1.25,
+                  2.25
+                ]
+              ],
+              "Crystalline Buzzwing Bagling"
+            ],
+            [
+              [
+                0.11,
+                [
+                  1.65,
+                  3.35
+                ]
+              ],
+              "Crystalline Buzzwing Bagling"
+            ],
+            [
+              [
+                0.01,
+                [
+                  1.0,
+                  1.3
+                ]
+              ],
+              "Bread Egg"
+            ],
+            [
+              [
+                0.008,
+                [
+                  1.0,
+                  1.45
+                ]
+              ],
+              "Bread Egg"
+            ]
+          ],
+          "welcome_gift": false
+        }
+      }
+    },
+    {
+      "name": "crystcyl",
+      "description": "The humming noise coming from this compressed crystal is powerful enough to roast marshmallows. I'm not kidding! The marshmallows glow orange slightly and discharge static on your tongue, but have a delicious coffee flavor!",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "hacksprit",
+      "description": "Dude, I'm seriously kind of amazed at the power of duct tape. There's no way that these five Hacker Spirits should be able to stick together like this. It's mind blowing.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "bressence",
+      "description": "Seriously, don't eat bressence. It might sound like a quick way to get five meals in the time it takes to get one. It's not. Just don't. The last guy to try it was on the toilet for ... well, I'll spare you the gory details.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Cyl Crystal",
+      "description": "This crystal pops, buzzes, and warps the space around it. Soft, warm lights dance within the crystal's facets.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Hacker Spirit",
+      "description": "It does not, as a matter of fact, smell like Teen Spirit. Except for when it does. The air is ripe with it whenever new things are being created.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Bread Essence",
+      "description": "It may be whole wheat, but don't hold that against it. Its rich, freshly-baked aroma triggers overwhelming nostalgia and a gentle, thoughtful sense of calm.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Coffea Cyl Seed",
+      "description": "A special species of coffee, descended from Coffea arabica and a host of other species. Instead of beans, this plant is grown for the clusters of crystals which grow on its limbs, inside of which mystical forces of the universe coalesce.",
+      "kind": {
+        "Seed": {
+          "grows_into": "Coffea Cyl"
+        }
+      }
+    },
+    {
+      "name": "Hacker Vibes Vine Seed",
+      "description": "Just holding the sprout in your hands fills you with the desire to make something! Surely, this seed is in for some amazing things.",
+      "kind": {
+        "Seed": {
+          "grows_into": "Hacker Vibes Vine"
+        }
+      }
+    },
+    {
+      "name": "Bractus Seed",
+      "description": "Doughy, yet still somehow prickly. It smells slightly of yeast, and promises to grow into something in between a fresh loaf of sourdough and a certain Sonoran cactus.",
+      "kind": {
+        "Seed": {
+          "grows_into": "Bractus"
+        }
+      }
+    },
+    {
+      "name": "Brognark Pendant",
+      "description": "Etched on this Ancient Amulet are the crude visages of four major Brognarkian deities: Gorbgar the Slaughterer, Bognard the Stomper, Varink the Nabber, and Fardink the Chanter. The exact purpose of this unholy object is unknown, but it is said to be able to slightly boost the speed of any plant.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": [
+            [
+              "Coffea Cyl",
+              {
+                "kind": {
+                  "YieldSpeed": 1.0016518
+                },
+                "xp": 0,
+                "art": "coffea_cyl_baby",
+                "title": "Brognark Blessings",
+                "description": "The haunting glow of the Brognark Pendant increases the yield speed of any plant by 0.165171300764919700743822803694%.",
+                "achiever_title": "Unholy Herald"
+              }
+            ],
+            [
+              "Hacker Vibes Vine",
+              {
+                "kind": {
+                  "YieldSpeed": 1.0016518
+                },
+                "xp": 0,
+                "art": "hacker_vibes_vine_baby",
+                "title": "Brognark Blessings",
+                "description": "The haunting glow of the Brognark Pendant increases the yield speed of any plant by 0.165171300764919700743822803694%.",
+                "achiever_title": "Unholy Herald"
+              }
+            ],
+            [
+              "Bractus",
+              {
+                "kind": {
+                  "YieldSpeed": 1.0016518
+                },
+                "xp": 0,
+                "art": "bractus_loaf",
+                "title": "Brognark Blessings",
+                "description": "The haunting glow of the Brognark Pendant increases the yield speed of any plant by 0.165171300764919700743822803694%.",
+                "achiever_title": "Unholy Herald"
+              }
+            ],
+            [
+              "Tinkerstool",
+              {
+                "kind": {
+                  "YieldSpeed": 1.0016518
+                },
+                "xp": 0,
+                "art": "tinkerstool_baby",
+                "title": "Brognark Blessings",
+                "description": "The haunting glow of the Brognark Pendant increases the yield speed of any plant by 0.165171300764919700743822803694%.",
+                "achiever_title": "Unholy Herald"
+              }
+            ],
+            [
+              "Aloe Avanta",
+              {
+                "kind": {
+                  "YieldSpeed": 1.0016518
+                },
+                "xp": 0,
+                "art": "aloe_avanta_baby",
+                "title": "Brognark Blessings",
+                "description": "The haunting glow of the Brognark Pendant increases the yield speed of any plant by 0.165171300764919700743822803694%.",
+                "achiever_title": "Unholy Herald"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "Tinkerspore",
+      "description": "This small spore is quite colorful. It often sticks itself to machinery, showing an innate attraction to strange contraptions.",
+      "kind": {
+        "Seed": {
+          "grows_into": "Tinkerstool"
+        }
+      }
+    },
+    {
+      "name": "Aloe Avanta Seed",
+      "description": "A strange seed that kind of smells of hand sanitizer. It emits a faint blue light that makes the earth around it glow.",
+      "kind": {
+        "Seed": {
+          "grows_into": "Aloe Avanta"
+        }
+      }
+    },
+    {
+      "name": "Tinkerpart",
+      "description": "A mysterious, mechanical scrap that can only be handled by masterful craftsmen. It smells and feels a bit damp.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Tinkermultitool",
+      "description": "A wieldly tool for only the finest craftsmen, this is the trade tool of a Tinkerstool. With the power of all three tools combined, this tool takes on the abilities of all its predecessors doubled.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Tinkersledge",
+      "description": "No one expects a mushroom to have a heavy-duty hammer, but here it is. Being just a bit springy, crafting with this hammer takes precision, and using it will allow a 1.5% chance at double the crafting yield!",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Tinkerdriver",
+      "description": "A carefully crafted tool that allows careful crafting. Having this tool available allows for a 4% chance to get 10% to 20% of your crafting resources returned.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Tinkerlight",
+      "description": "While this flashlight seems to be quite regular at a glance, it can filter light through artificial gills to refract light into an array of shapes and shades. It also has the unique ability of boosting crafting speed by 15%.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Crystalline Buzzwing Bagling",
+      "description": "A curious flying bag which is sometimes tied to a goblin folk legend. Upon opening you can usually find quite a few treats.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Spirited Buzzwing Bagling",
+      "description": "Magical bags such as this are rumored to have been commonplace in a time long past. It is bound to have some magical items inside.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Doughy Buzzwing Bagling",
+      "description": "The secret to the creation of rare winged bags known was supposedly lost, making it curious that they are turning up around plants. Figuring out how to open it may turn out some fruitful results",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Crystalline Buzzwing Boxling",
+      "description": "A flightful box of amber with a nice shine to it. Other than being a good mirror, it is sure to contain something of worth.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Spirited Buzzwing Boxling",
+      "description": "Infused with the might of duct tape, this box flies strong, wings flapping rhythmically. The box itself is worth trying to open for the hope of good loot.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Doughy Buzzwing Boxling",
+      "description": "For a box made of dough, this box holds itself together well, while still being a bit malleable. Treasure is to be found inside.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Crystalline Buzzwing Boxlet",
+      "description": "At the correct angle, this box reflects brilliant lights that mesmerize those who see it. Though it's telling that there is treasure to be discovered, the box's design itself makes it seem like a replica of an old goblin blueprint.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Spirited Buzzwing Boxlet",
+      "description": "The soft humming of this boxes wing is almost musical in nature, sounding like an ancient hymn of an old goblin tribe. Maybe inside you'll find some of their legendary treasure.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Doughy Buzzwing Boxlet",
+      "description": "From the corner of one's eye, it seems that the dough on this box occasionally shifts and slides, like it has been granted life by powerful magicks, known only to the ancients. One knows they can find valuable trinkets within this enchanted box.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Crystalline Buzzwing Megabox",
+      "description": "This box laden with crystals often lights up with strange magicks, similarly to a rumored piece of magitech made by the Brognarks. Bounty and wealth are promised by this box.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Spirited Buzzwing Megabox",
+      "description": "The melodious buzzings of this box remind of a song of the fabled and revered Brognark tribe. The song hints at a glorious treasure, which you may be holding now.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Doughy Buzzwing Megabox",
+      "description": "The way in which this box's outsides are animated emulate those the great Brognark civilization. Whoever made this box probably inserted items of much value.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Volatile Vial",
+      "description": "A glass bottle which occasionally lights up with sparks. Some of this energy escapes into whatever it holds, limiting its number of uses.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Cyllicizing Coffee Concoction",
+      "description": "This chemical craze commits quite the catastrophic capabilities to Coffea Cyl plants, contributing a capacity for increasing the size of their neighbors' yields by 5%.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Vibefying Vinefying Elixir",
+      "description": "Having a Hacker Vibes Vine quaff this potion has quite the effect on them, allowing them to boost the size of their neighbors' yields by 5%.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Bractification Brew",
+      "description": "This beaut of a butt can be boozed in a bout on a boat or a butte ... or just about anywhere. Bracti that drink it increase the size of neighboring Bracti's yields by 5%.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Scintillating Cyllicizing Coffee Concoction",
+      "description": "An aromatic potion which, as well as being able to wake up a dead elephant, can magically change a plant into a Coffea Cyl.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Vivifying Vibefying Vinefying Elixir",
+      "description": "This curious tincture smells like a fresh rainstorm, and makes the air around it feel humid. It also has the power to make any plant into a Hacker Vibes Vine.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Bold Bractification Brew",
+      "description": "As this golden liquid seems to be silky and smooth, it's quite strange that the potion is actually quite dry. Pouring it on a plant transforms it into a Bractus.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Tinker Tincture",
+      "description": "A nanobot mixture filled to the brim with bubbling beer. The nanobots inside can enhance any plant's dexterity, allowing them to craft 10% faster.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Terrific Tinker Tincture",
+      "description": "After some software updates, as well as some additives for flavor, this mechanical mixture can improve crafting speed by 30%.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Powder Keg",
+      "description": "A bottle of brew that is only a tad bit explosive. It has enough latent energy to boost the power of Powders on plants by 15%.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Portent Powder Keg",
+      "description": "Handle with caution. Upgrading this potion has has caused it to become more than just a bit explosive. Though keeping the fabric of reality safe is a concern, the risk is worth it when making powders 40% as effective.",
+      "kind": {
+        "Keepsake": {
+          "item_application_effect": null,
+          "unlocks_land": null,
+          "plant_effects": []
+        }
+      }
+    },
+    {
+      "name": "Nest Egg",
+      "description": "A special egg made to help new Hacksteaders get started. Hatching it guarantees some Powders to speed up plant growth, and a small chance at some crafting materials. Happy Hacksteading!",
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
+          "hatch_table": [
+            [
+              [
+                0.08,
+                [
+                  1.1,
+                  1.5
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                1.0,
+                [
+                  2.4,
+                  3.6
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.016,
+                [
+                  1.24,
+                  2.15
+                ]
+              ],
+              "Tinkerpart"
+            ],
+            [
+              [
+                0.011,
+                [
+                  1.1,
+                  1.64
+                ]
+              ],
+              "Volatile Vial"
+            ],
+            [
+              [
+                0.05,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Nest Egg"
+            ]
+          ],
+          "welcome_gift": true
+        }
+      }
+    },
+    {
+      "name": "Bagling Egg",
+      "description": "This Egg is the manifestation of loot contained in a Bagling!",
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
+          "hatch_table": [
+            [
+              [
+                0.03,
+                [
+                  1.12,
+                  1.34
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                0.8,
+                [
+                  1.2,
+                  2.08
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.15,
+                [
+                  1.32,
+                  2.25
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.605,
+                [
+                  1.2,
+                  2.17
+                ]
+              ],
+              "Tinkerpart"
+            ],
+            [
+              [
+                0.54,
+                [
+                  1.11,
+                  1.4
+                ]
+              ],
+              "Volatile Vial"
+            ],
+            [
+              [
+                0.001,
+                [
+                  1.0,
+                  1.01
+                ]
+              ],
+              "Crystalline Buzzwing Bagling"
+            ],
+            [
+              [
+                0.001,
+                [
+                  1.0,
+                  1.01
+                ]
+              ],
+              "Spirited Buzzwing Bagling"
+            ],
+            [
+              [
+                0.001,
+                [
+                  1.0,
+                  1.01
+                ]
+              ],
+              "Doughy Buzzwing Bagling"
+            ]
+          ],
+          "welcome_gift": false
+        }
+      }
+    },
+    {
+      "name": "Boxling Egg",
+      "description": "Bagling loot is somehow stored inside this Egg with the power of mysterious arcana.",
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
+          "hatch_table": [
+            [
+              [
+                0.375,
+                [
+                  1.24,
+                  1.58
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                0.045,
+                [
+                  1.58,
+                  2.15
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                1.0,
+                [
+                  2.21,
+                  3.72
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.512,
+                [
+                  2.47,
+                  4.24
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.022,
+                [
+                  1.1,
+                  1.28
+                ]
+              ],
+              "Wormhole Powder"
+            ],
+            [
+              [
+                0.85,
+                [
+                  2.05,
+                  3.2
+                ]
+              ],
+              "Tinkerpart"
+            ],
+            [
+              [
+                0.055,
+                [
+                  1.68,
+                  3.1
+                ]
+              ],
+              "Tinkerpart"
+            ],
+            [
+              [
+                0.787,
+                [
+                  1.29,
+                  1.85
+                ]
+              ],
+              "Volatile Vial"
+            ],
+            [
+              [
+                0.048,
+                [
+                  1.43,
+                  2.12
+                ]
+              ],
+              "Volatile Vial"
+            ],
+            [
+              [
+                0.01,
+                [
+                  1.0,
+                  3.03
+                ]
+              ],
+              "Crystalline Buzzwing Bagling"
+            ],
+            [
+              [
+                0.01,
+                [
+                  1.0,
+                  3.03
+                ]
+              ],
+              "Spirited Buzzwing Bagling"
+            ],
+            [
+              [
+                0.01,
+                [
+                  1.0,
+                  3.03
+                ]
+              ],
+              "Doughy Buzzwing Bagling"
+            ],
+            [
+              [
+                0.001,
+                [
+                  1.0,
+                  1.01
+                ]
+              ],
+              "Crystalline Buzzwing Boxling"
+            ],
+            [
+              [
+                0.001,
+                [
+                  1.0,
+                  1.01
+                ]
+              ],
+              "Spirited Buzzwing Boxling"
+            ],
+            [
+              [
+                0.001,
+                [
+                  1.0,
+                  1.01
+                ]
+              ],
+              "Doughy Buzzwing Boxling"
+            ]
+          ],
+          "welcome_gift": false
+        }
+      }
+    },
+    {
+      "name": "Boxlet Egg",
+      "description": "With an occasional hum and flutter, this Egg will hatch into all the loot from Boxlets.",
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
+          "hatch_table": [
+            [
+              [
+                1.0,
+                [
+                  2.72,
+                  3.75
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                0.5,
+                [
+                  2.65,
+                  3.56
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                1.0,
+                [
+                  7.8,
+                  11.68
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.72,
+                [
+                  6.34,
+                  9.32
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.072,
+                [
+                  1.36,
+                  1.77
+                ]
+              ],
+              "Wormhole Powder"
+            ],
+            [
+              [
+                0.021,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Cyl Wand"
+            ],
+            [
+              [
+                0.021,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Vine Keyboard"
+            ],
+            [
+              [
+                0.021,
+                [
+                  1.0,
+                  1.05
+                ]
+              ],
+              "Rolling Pin"
+            ],
+            [
+              [
+                1.0,
+                [
+                  6.55,
+                  9.44
+                ]
+              ],
+              "Tinkerpart"
+            ],
+            [
+              [
+                0.187,
+                [
+                  4.82,
+                  7.66
+                ]
+              ],
+              "Tinkerpart"
+            ],
+            [
+              [
+                1.0,
+                [
+                  2.33,
+                  4.42
+                ]
+              ],
+              "Volatile Vial"
+            ],
+            [
+              [
+                0.152,
+                [
+                  2.75,
+                  4.7
+                ]
+              ],
+              "Volatile Vial"
+            ],
+            [
+              [
+                0.035,
+                [
+                  1.05,
+                  1.4
+                ]
+              ],
+              "Cyllicizing Coffee Concoction"
+            ],
+            [
+              [
+                0.035,
+                [
+                  1.05,
+                  1.4
+                ]
+              ],
+              "Vibefying Vinefying Elixir"
+            ],
+            [
+              [
+                0.035,
+                [
+                  1.05,
+                  1.4
+                ]
+              ],
+              "Bractification Brew"
+            ],
+            [
+              [
+                0.1,
+                [
+                  1.0,
+                  6.06
+                ]
+              ],
+              "Crystalline Buzzwing Bagling"
+            ],
+            [
+              [
+                0.1,
+                [
+                  1.0,
+                  6.06
+                ]
+              ],
+              "Spirited Buzzwing Bagling"
+            ],
+            [
+              [
+                0.1,
+                [
+                  1.0,
+                  6.06
+                ]
+              ],
+              "Doughy Buzzwing Bagling"
+            ],
+            [
+              [
+                0.01,
+                [
+                  1.0,
+                  2.02
+                ]
+              ],
+              "Crystalline Buzzwing Boxling"
+            ],
+            [
+              [
+                0.01,
+                [
+                  1.0,
+                  2.02
+                ]
+              ],
+              "Spirited Buzzwing Boxling"
+            ],
+            [
+              [
+                0.01,
+                [
+                  1.0,
+                  2.02
+                ]
+              ],
+              "Doughy Buzzwing Boxling"
+            ],
+            [
+              [
+                0.001,
+                [
+                  1.0,
+                  1.01
+                ]
+              ],
+              "Crystalline Buzzwing Boxlet"
+            ],
+            [
+              [
+                0.001,
+                [
+                  1.0,
+                  1.01
+                ]
+              ],
+              "Spirited Buzzwing Boxlet"
+            ],
+            [
+              [
+                0.001,
+                [
+                  1.0,
+                  1.01
+                ]
+              ],
+              "Doughy Buzzwing Boxlet"
+            ]
+          ],
+          "welcome_gift": false
+        }
+      }
+    },
+    {
+      "name": "Megabox Egg",
+      "description": "Megabox loot is magically transferred into this bright and cheery Egg!",
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
+          "hatch_table": [
+            [
+              [
+                1.0,
+                [
+                  6.2,
+                  9.15
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                0.6,
+                [
+                  5.17,
+                  7.63
+                ]
+              ],
+              "Rift Powder"
+            ],
+            [
+              [
+                1.0,
+                [
+                  20.48,
+                  41.15
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.85,
+                [
+                  17.27,
+                  33.32
+                ]
+              ],
+              "Warp Powder"
+            ],
+            [
+              [
+                0.12,
+                [
+                  2.24,
+                  3.44
+                ]
+              ],
+              "Wormhole Powder"
+            ],
+            [
+              [
+                0.166,
+                [
+                  1.11,
+                  1.44
+                ]
+              ],
+              "Cyl Wand"
+            ],
+            [
+              [
+                0.166,
+                [
+                  1.11,
+                  1.44
+                ]
+              ],
+              "Vine Keyboard"
+            ],
+            [
+              [
+                0.166,
+                [
+                  1.11,
+                  1.44
+                ]
+              ],
+              "Rolling Pin"
+            ],
+            [
+              [
+                1.0,
+                [
+                  16.43,
+                  36.22
+                ]
+              ],
+              "Tinkerpart"
+            ],
+            [
+              [
+                0.758,
+                [
+                  13.12,
+                  31.84
+                ]
+              ],
+              "Tinkerpart"
+            ],
+            [
+              [
+                1.0,
+                [
+                  7.56,
+                  11.33
+                ]
+              ],
+              "Volatile Vial"
+            ],
+            [
+              [
+                0.69,
+                [
+                  5.46,
+                  9.72
+                ]
+              ],
+              "Volatile Vial"
+            ],
+            [
+              [
+                0.227,
+                [
+                  1.24,
+                  2.07
+                ]
+              ],
+              "Cyllicizing Coffee Concoction"
+            ],
+            [
+              [
+                0.227,
+                [
+                  1.24,
+                  2.07
+                ]
+              ],
+              "Vibefying Vinefying Elixir"
+            ],
+            [
+              [
+                0.227,
+                [
+                  1.24,
+                  2.07
+                ]
+              ],
+              "Bractification Brew"
+            ],
+            [
+              [
+                1.0,
+                [
+                  1.0,
+                  6.06
+                ]
+              ],
+              "Crystalline Buzzwing Bagling"
+            ],
+            [
+              [
+                1.0,
+                [
+                  1.0,
+                  6.06
+                ]
+              ],
+              "Spirited Buzzwing Bagling"
+            ],
+            [
+              [
+                1.0,
+                [
+                  1.0,
+                  6.06
+                ]
+              ],
+              "Doughy Buzzwing Bagling"
+            ],
+            [
+              [
+                0.1,
+                [
+                  1.0,
+                  2.02
+                ]
+              ],
+              "Crystalline Buzzwing Boxling"
+            ],
+            [
+              [
+                0.1,
+                [
+                  1.0,
+                  2.02
+                ]
+              ],
+              "Spirited Buzzwing Boxling"
+            ],
+            [
+              [
+                0.1,
+                [
+                  1.0,
+                  2.02
+                ]
+              ],
+              "Doughy Buzzwing Boxling"
+            ],
+            [
+              [
+                0.01,
+                [
+                  1.0,
+                  1.0
+                ]
+              ],
+              "Crystalline Buzzwing Boxlet"
+            ],
+            [
+              [
+                0.01,
+                [
+                  1.0,
+                  1.0
+                ]
+              ],
+              "Spirited Buzzwing Boxlet"
+            ],
+            [
+              [
+                0.01,
+                [
+                  1.0,
+                  1.0
+                ]
+              ],
+              "Doughy Buzzwing Boxlet"
+            ],
+            [
+              [
+                0.001,
+                [
+                  1.0,
+                  1.0
+                ]
+              ],
+              "Crystalline Buzzwing Megabox"
+            ],
+            [
+              [
+                0.001,
+                [
+                  1.0,
+                  1.0
+                ]
+              ],
+              "Spirited Buzzwing Megabox"
+            ],
+            [
+              [
+                0.001,
+                [
+                  1.0,
+                  1.0
+                ]
+              ],
+              "Doughy Buzzwing Megabox"
+            ],
+            [
+              [
+                0.025,
+                [
+                  1.0,
+                  1.06
+                ]
+              ],
+              "Hacker Egg"
+            ],
+            [
+              [
+                0.012,
+                [
+                  1.01,
+                  1.15
+                ]
+              ],
+              "Hacker Egg"
+            ],
+            [
+              [
+                0.025,
+                [
+                  1.0,
+                  1.06
+                ]
+              ],
+              "Cyl Egg"
+            ],
+            [
+              [
+                0.012,
+                [
+                  1.01,
+                  1.15
+                ]
+              ],
+              "Cyl Egg"
+            ],
+            [
+              [
+                0.025,
+                [
+                  1.0,
+                  1.06
+                ]
+              ],
+              "Bread Egg"
+            ],
+            [
+              [
+                0.012,
+                [
+                  1.01,
+                  1.15
+                ]
+              ],
+              "Bread Egg"
+            ]
+          ],
+          "welcome_gift": false
+        }
+      }
+    }
+  ]
+}
