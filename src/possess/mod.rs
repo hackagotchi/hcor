@@ -212,8 +212,6 @@ impl Into<AttributeValue> for Owner {
 }
 #[test]
 fn owner_serialize() {
-    dotenv::dotenv().ok();
-
     let og = Owner {
         id: "bob".to_string(),
         acquisition: Acquisition::spawned(),
@@ -324,8 +322,6 @@ impl Into<AttributeValue> for Acquisition {
 }
 #[test]
 fn acquisition_serialize() {
-    dotenv::dotenv().ok();
-
     let og = Acquisition::spawned();
 
     let og_av: AttributeValue = og.clone().into();
@@ -556,8 +552,6 @@ impl Possession {
 }
 #[test]
 fn possessed_gotchi_serialize() {
-    dotenv::dotenv().ok();
-
     let og = Possession::new(
         CONFIG
             .possession_archetypes
