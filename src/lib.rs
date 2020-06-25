@@ -1,5 +1,5 @@
 #![feature(try_trait)]
-#![deny(missing_docs)]
+#![warn(missing_docs)]
 
 use humantime::{format_rfc3339, parse_rfc3339};
 use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient};
