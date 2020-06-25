@@ -579,7 +579,7 @@ impl Recipe<&Archetype> {
                     .makes
                     .any()
                     .map(|e| e.description.clone())
-                    .unwrap_or_default()
+                    .unwrap_or("Nothing".to_string())
             })
     }
 }
