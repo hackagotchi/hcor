@@ -1,0 +1,21 @@
+image: archlinux
+packages:
+- rustup
+repositories: {}
+shell: false
+sources:
+  - https://git.sr.ht/~muirrum/hackagotchi-core
+tasks:
+- setup: |
+    rustup toolchain install stable
+    cd hackagotchi-core/
+    rustup run stable cargo fetch
+- fmt: |
+    cd hackagotchi-core/
+    cargo fmt -- --check
+- stable: |
+    rustup default stable
+    cd hackagotchi-core/
+    cargo build
+    cargo test
+
