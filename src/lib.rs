@@ -9,8 +9,8 @@ use std::time::SystemTime;
 pub mod category;
 pub mod config;
 pub mod market;
-pub mod possess;
 pub mod models;
+pub mod possess;
 pub mod frontend {
     pub fn emojify<S: ToString>(txt: S) -> String {
         format!(":{}:", txt.to_string().replace(" ", "_"))

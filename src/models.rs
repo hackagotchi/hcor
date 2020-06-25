@@ -1,6 +1,6 @@
-use std::time::SystemTime;
-use crate::*;
 use crate::config::{ArchetypeHandle, PlantArchetype};
+use crate::*;
+use std::time::SystemTime;
 
 #[derive(Clone, Debug)]
 pub struct Hacksteader {

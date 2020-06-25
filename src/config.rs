@@ -28,22 +28,18 @@ pub struct Config {
 
 pub fn spawn<'rng, Handle: Clone>(
     table: &'rng Vec<(SpawnRate, Handle)>,
-    rng: &'rng mut impl rand::RngCore
-) -> impl Iterator<Item=Handle> + 'rng {
+    rng: &'rng mut impl rand::RngCore,
+) -> impl Iterator<Item = Handle> + 'rng {
     table
         .iter()
-        .flat_map(move |(spawn_rate, h)| {
-            (0..spawn_rate.gen_count(rng)).map(move |_| {
-                h.clone()
-            })
-        })
+        .flat_map(move |(spawn_rate, h)| (0..spawn_rate.gen_count(rng)).map(move |_| h.clone()))
 }
 
 /// Quite similar to spawn(), but it also returns a list of the
 /// leading spawn rates for the rows in the table the spawn qualified for.
 pub fn spawn_with_percentile<Handle: Clone>(
     table: &Vec<(SpawnRate, Handle)>,
-    rng: &mut impl rand::RngCore
+    rng: &mut impl rand::RngCore,
 ) -> (Vec<Handle>, f32) {
     let (handles, rows): (Vec<Vec<Handle>>, Vec<f32>) = table
         .iter()
@@ -54,25 +50,21 @@ pub fn spawn_with_percentile<Handle: Clone>(
                 None
             } else {
                 Some((
-                    (0..count)
-                        .map(move |_| h.clone())
-                        .collect::<Vec<_>>(),
-                    spawn_rate.0
+                    (0..count).map(move |_| h.clone()).collect::<Vec<_>>(),
+                    spawn_rate.0,
                 ))
             }
         })
         .unzip();
 
-    (
-        handles
-            .into_iter()
-            .flat_map(|h| h.into_iter())
-            .collect(),
-        {
-            let best_roll: f32 = table.iter().map(|(SpawnRate(c, _), _)| c).copied().product();
-            1.0 - ((rows.into_iter().product::<f32>() - best_roll) / (1.0 - best_roll))
-        }
-    )
+    (handles.into_iter().flat_map(|h| h.into_iter()).collect(), {
+        let best_roll: f32 = table
+            .iter()
+            .map(|(SpawnRate(c, _), _)| c)
+            .copied()
+            .product();
+        1.0 - ((rows.into_iter().product::<f32>() - best_roll) / (1.0 - best_roll))
+    })
 }
 
 impl Config {
@@ -81,18 +73,16 @@ impl Config {
         item_archetype_handle: ArchetypeHandle,
         effect_archetype_handle: ArchetypeHandle,
     ) -> Option<(&ItemApplicationEffect, &PlantAdvancement)> {
-        self
-            .get_item_application_effect(
-                item_archetype_handle,
-                effect_archetype_handle
-            )
-            .and_then(|e| Some((
-                e,
-                match &e.kind {
-                    ItemApplicationEffectKind::PlantAdvancement(pa) => Some(pa),
-                    _ => None,
-                }?
-            )))
+        self.get_item_application_effect(item_archetype_handle, effect_archetype_handle)
+            .and_then(|e| {
+                Some((
+                    e,
+                    match &e.kind {
+                        ItemApplicationEffectKind::PlantAdvancement(pa) => Some(pa),
+                        _ => None,
+                    }?,
+                ))
+            })
     }
 
     pub fn get_item_application_effect(
@@ -100,8 +90,7 @@ impl Config {
         item_archetype_handle: ArchetypeHandle,
         effect_archetype_handle: ArchetypeHandle,
     ) -> Option<&ItemApplicationEffect> {
-        self
-            .possession_archetypes
+        self.possession_archetypes
             .get(item_archetype_handle)?
             .kind
             .keepsake()?
@@ -223,14 +212,12 @@ impl KeepPlants<String> {
                 these
                     .iter()
                     .map(|h| CONFIG.find_plant_handle(h))
-                    .collect::<Result<_, _>>()?
+                    .collect::<Result<_, _>>()?,
             ),
-            Not(these) => Not(
-                these
-                    .iter()
-                    .map(|h| CONFIG.find_plant_handle(h))
-                    .collect::<Result<_, _>>()?
-            ),
+            Not(these) => Not(these
+                .iter()
+                .map(|h| CONFIG.find_plant_handle(h))
+                .collect::<Result<_, _>>()?),
             All => All,
         })
     }
@@ -279,13 +266,13 @@ pub struct ItemApplication {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ItemApplicationEffectKind {
     PlantAdvancement(PlantAdvancement),
-    TurnsPlantInto(String)
+    TurnsPlantInto(String),
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ItemApplicationEffect {
     pub duration: Option<f32>,
     pub keep_plants: KeepPlants<String>,
-    pub kind: ItemApplicationEffectKind
+    pub kind: ItemApplicationEffectKind,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -361,8 +348,7 @@ impl<Handle: Clone> RecipeMakes<Handle> {
     fn pick_one_weighted_of<T: Clone>(from: &Vec<(f32, T)>) -> T {
         use rand::Rng;
         let mut x: f32 = rand::thread_rng().gen_range(0.0, 1.0);
-        from
-            .iter()
+        from.iter()
             .find_map(|(chance, h)| {
                 x -= chance;
                 if x < 0.0 {
@@ -389,7 +375,7 @@ impl<Handle: Clone> RecipeMakes<Handle> {
                     &these
                         .iter()
                         .map(|(count, h)| (*count as f32 / total, h.clone()))
-                        .collect()
+                        .collect(),
                 ))
             }
             Nothing => return None,
@@ -403,12 +389,7 @@ impl<Handle: Clone> RecipeMakes<Handle> {
         match self {
             OneOf(these) => Self::pick_one_weighted_of(these).all(),
             Just(_, h) => [(h.clone(), 1)].iter().cloned().collect(),
-            AllOf(these) => {
-                these
-                    .iter()
-                    .map(|(count, h)| (h.clone(), *count))
-                    .collect()
-            },
+            AllOf(these) => these.iter().map(|(count, h)| (h.clone(), *count)).collect(),
             Nothing => vec![],
         }
     }
@@ -421,13 +402,15 @@ impl<Handle: Clone> RecipeMakes<Handle> {
 
         match &self {
             OneOf(these) => Self::pick_one_weighted_of(these).output(),
-            Just(_, _) => vec![self.any().expect("RecipeMakes::Just.any() can't return None")],
+            Just(_, _) => vec![self
+                .any()
+                .expect("RecipeMakes::Just.any() can't return None")],
             AllOf(_) => self
                 .all()
                 .into_iter()
                 .flat_map(|(what, count)| (0..count).map(move |_| what.clone()))
                 .collect(),
-            Nothing => vec![]
+            Nothing => vec![],
         }
     }
 }
@@ -444,13 +427,7 @@ impl fmt::Display for RecipeMakes<&'static Archetype> {
                 "one of these:\n{}",
                 these
                     .iter()
-                    .map(|(chance, what)| {
-                        format!(
-                            "{} (*{:.2}%* chance)",
-                            what,
-                            chance * 100.0
-                        )
-                    })
+                    .map(|(chance, what)| { format!("{} (*{:.2}%* chance)", what, chance * 100.0) })
                     .collect::<Vec<_>>()
                     .join("\n")
             ),
@@ -542,7 +519,15 @@ impl Recipe<ArchetypeHandle> {
         })
     }
     pub fn lookup_handles(self) -> Option<Recipe<&'static Archetype>> {
-        let Recipe { time, destroys_plant, title, explanation, makes, needs, xp } = self;
+        let Recipe {
+            time,
+            destroys_plant,
+            title,
+            explanation,
+            makes,
+            needs,
+            xp,
+        } = self;
         Some(Recipe {
             makes: makes.lookup_handles()?,
             needs: needs
@@ -553,34 +538,26 @@ impl Recipe<ArchetypeHandle> {
             destroys_plant,
             title,
             explanation,
-            xp
+            xp,
         })
     }
 }
 impl Recipe<&Archetype> {
     pub fn title(&self) -> String {
-        self
-            .title
-            .clone()
-            .unwrap_or_else(|| {
-                self
-                    .makes
-                    .any()
-                    .map(|e| format!("{} {}", crate::frontend::emojify(&e.name), e.name))
-                    .unwrap_or("Nothing".to_string())
-            })
+        self.title.clone().unwrap_or_else(|| {
+            self.makes
+                .any()
+                .map(|e| format!("{} {}", crate::frontend::emojify(&e.name), e.name))
+                .unwrap_or("Nothing".to_string())
+        })
     }
     pub fn explanation(&self) -> String {
-        self
-            .explanation
-            .clone()
-            .unwrap_or_else(|| {
-                self
-                    .makes
-                    .any()
-                    .map(|e| e.description.clone())
-                    .unwrap_or("Nothing".to_string())
-            })
+        self.explanation.clone().unwrap_or_else(|| {
+            self.makes
+                .any()
+                .map(|e| e.description.clone())
+                .unwrap_or("Nothing".to_string())
+        })
     }
 }
 
@@ -672,7 +649,6 @@ impl AdvancementSum for PlantAdvancementSum {
             };
 
             match kind {
-
                 // misc
                 Neighbor(..) => {}
                 &TimeTicksMultiplier(multiplier) => time_ticks_multiplier *= multiplier,
@@ -701,7 +677,15 @@ impl AdvancementSum for PlantAdvancementSum {
                         .clone()
                         .into_iter()
                         .map(|r| {
-                            let Recipe { makes, needs, time, destroys_plant, title, explanation, xp } = r;
+                            let Recipe {
+                                makes,
+                                needs,
+                                time,
+                                destroys_plant,
+                                title,
+                                explanation,
+                                xp,
+                            } = r;
                             Ok(Recipe {
                                 makes: makes.clone().find_handles()?,
                                 needs: needs
@@ -712,7 +696,7 @@ impl AdvancementSum for PlantAdvancementSum {
                                 destroys_plant,
                                 title,
                                 explanation,
-                                xp
+                                xp,
                             })
                         })
                         .collect::<Result<Vec<_>, ConfigError>>()
@@ -735,7 +719,8 @@ impl AdvancementSum for PlantAdvancementSum {
             .collect();
 
         Self {
-            total_extra_time_ticks: ((extra_time_ticks as f32) * time_ticks_multiplier).ceil() as u128,
+            total_extra_time_ticks: ((extra_time_ticks as f32) * time_ticks_multiplier).ceil()
+                as u128,
             // xp
             xp,
             xp_multiplier,
@@ -833,7 +818,7 @@ impl<S: AdvancementSum> AdvancementSet<S> {
             &self
                 .unlocked(xp)
                 .chain(extra_advancements)
-                .collect::<Vec<_>>()
+                .collect::<Vec<_>>(),
         )
     }
 
@@ -892,13 +877,14 @@ fn upgrade_increase() {
 pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
     for a in config.possession_archetypes.iter() {
         match &a.kind {
-            ArchetypeKind::Seed(sa) => if config.find_plant(&sa.grows_into).is_err() {
-                return Err(format!(
-                    "seed archetype {:?} claims it grows into unknown plant archetype {:?}",
-                    a.name,
-                    sa.grows_into,
-                ))
-            },
+            ArchetypeKind::Seed(sa) => {
+                if config.find_plant(&sa.grows_into).is_err() {
+                    return Err(format!(
+                        "seed archetype {:?} claims it grows into unknown plant archetype {:?}",
+                        a.name, sa.grows_into,
+                    ));
+                }
+            }
             ArchetypeKind::Gotchi(ga) => {
                 if let Some(table) = &ga.hatch_table {
                     for (_, spawn) in table.iter() {
@@ -907,7 +893,7 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                                 "gotchi archetype {:?} claims it hatches into unknown possession archetype {:?}",
                                 a.name,
                                 spawn,
-                            ))
+                            ));
                         }
                     }
                 }
@@ -915,10 +901,8 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                     if let Err(e) = keep_plants.lookup_handles() {
                         return Err(format!(
                             "gotchi archetype {:?} keep plants error: {}\nkeep plants: {:?}",
-                            a.name,
-                            e,
-                            keep_plants,
-                        ))
+                            a.name, e, keep_plants,
+                        ));
                     }
                 }
             }
@@ -927,10 +911,8 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                     if let Err(e) = keep_plants.lookup_handles() {
                         return Err(format!(
                             "keepsake archetype {:?} keep plants error: {}\nkeep plants: {:?}",
-                            a.name,
-                            e,
-                            keep_plants,
-                        ))
+                            a.name, e, keep_plants,
+                        ));
                     }
                 }
                 if let Some(ia) = &ka.item_application {
@@ -943,11 +925,8 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                                     "keep plants error: {}\n",
                                     "keep plants: {:?}",
                                 ),
-                                a.name,
-                                ia.short_description,
-                                e,
-                                iaa.keep_plants,
-                            ))
+                                a.name, ia.short_description, e, iaa.keep_plants,
+                            ));
                         }
                     }
                 }
@@ -955,14 +934,10 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
         }
     }
 
-    for (arch, adv) in config.plant_archetypes
+    for (arch, adv) in config
+        .plant_archetypes
         .iter()
-        .flat_map(|arch| {
-            arch
-                .advancements
-                .all()
-                .map(move |adv| (arch.clone(), adv))
-        })
+        .flat_map(|arch| arch.advancements.all().map(move |adv| (arch.clone(), adv)))
     {
         use PlantAdvancementKind::*;
 
@@ -972,10 +947,8 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                     if config.find_possession(item_name).is_err() {
                         return Err(format!(
                             "Yield advancement {:?} for plant {:?} includes unknown resource {:?}",
-                            adv.title,
-                            arch.name,
-                            item_name,
-                        ))
+                            adv.title, arch.name, item_name,
+                        ));
                     }
                 }
             }
@@ -988,7 +961,7 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                                 adv.title,
                                 arch.name,
                                 resource,
-                            ))
+                            ));
                         }
                     }
 
@@ -1000,7 +973,7 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                                 arch.name,
                                 resource,
                                 makes
-                            ))
+                            ));
                         }
                     }
                 }
@@ -1014,6 +987,5 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
 
 #[test]
 fn archetype_name_matches() {
-    check_archetype_name_matches(&*CONFIG)
-        .unwrap_or_else(|e| panic!("{}", e));
+    check_archetype_name_matches(&*CONFIG).unwrap_or_else(|e| panic!("{}", e));
 }

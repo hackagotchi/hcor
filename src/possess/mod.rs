@@ -230,7 +230,7 @@ pub enum Acquisition {
     Purchase { price: u64 },
     Farmed,
     Crafted,
-    Hatched
+    Hatched,
 }
 impl Acquisition {
     fn from_item(item: &Item) -> Result<Self, AttributeParseError> {
@@ -282,7 +282,7 @@ impl Into<AttributeValue> for Acquisition {
 
         AttributeValue {
             m: match self {
-                Trade | Farmed | Crafted | Hatched  => Some(
+                Trade | Farmed | Crafted | Hatched => Some(
                     [(
                         "type".to_string(),
                         AttributeValue {
