@@ -12,6 +12,9 @@ pub enum ServiceError {
 
     #[display(fmt = "Unauthorized")]
     Unauthorized,
+
+    #[display(fmt = "No data found")]
+    NoData,
 }
 
 #[cfg(feature = "actix")]
@@ -23,6 +26,14 @@ impl ResponseError for ServiceError {
             }
             ServiceError::BadRequest(s) => HttpResponse::BadRequest().body(s),
             ServiceError::Unauthorized => HttpResponse::Unauthorized().body("Unauthorized"),
+            ServiceError::NoData => HttpReponse::NotFound().body("Data not found"),
         }
+    }
+}
+
+#[cfg(feature = "actix")]
+impl From<Box<dyn std::error::Error>> for ServiceError {
+    fn from(_: Box<dyn std::error::Error>) -> ServiceError {
+        ServiceError::InternalServerError
     }
 }
