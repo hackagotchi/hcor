@@ -1,6 +1,7 @@
 use actix_web::{error::ResponseError, HttpResponse};
 use derive_more::Display;
 use std::convert::From;
+use mongodb::error::Error as MongoError;
 
 #[derive(Debug, Display)]
 pub enum ServiceError {
@@ -34,6 +35,13 @@ impl ResponseError for ServiceError {
 #[cfg(feature = "actix")]
 impl From<Box<dyn std::error::Error>> for ServiceError {
     fn from(_: Box<dyn std::error::Error>) -> ServiceError {
+        ServiceError::InternalServerError
+    }
+}
+
+#[cfg(feature = "mongo")]
+impl From<MongoError> for ServiceError {
+    fn from(_: MongoError) -> ServiceError {
         ServiceError::InternalServerError
     }
 }

@@ -22,9 +22,12 @@ actix-web = "2.0"
 derive_more = "0.99"
 dotenv = "0.15"
 
+mongodb = {version = "1.0", optional = true}
+
 
 [lib]
 name = "hcor"
 
 [features]
 actix = []
+mongo = ["mongodb"]
