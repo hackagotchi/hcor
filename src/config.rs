@@ -29,8 +29,17 @@ pub struct Config {
 pub trait SpawnTableRow {
     type Output;
 
+    /// How likely is this row to occur?
+    /// NOTE: since this is currently only used for calculating
+    /// percentiles for eggs, perhaps we want to replace this with
+    /// some configurably-defined "desireability" factor?
+    /// Rarity does not strictly correlate with the value of something.
     fn rarity(&self) -> f32;
+
+    /// How many of this item should be outputted?
     fn count(&self, rng: &mut impl rand::RngCore) -> usize;
+    
+    /// What does this row actually produce?
     fn output(&self) -> Self::Output;
 }
 
@@ -48,6 +57,7 @@ impl<Handle: Clone> SpawnTableRow for (SpawnRate, Handle) {
     }
 }
 
+/// Spawns an iterator of output dictated by various rows in a table of things to spawn.
 pub fn spawn<'rng, Row: SpawnTableRow>(
     table: &'rng Vec<Row>,
     rng: &'rng mut impl rand::RngCore,
