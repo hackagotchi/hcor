@@ -627,15 +627,15 @@ impl CountProbability {
 pub struct Yield<Handle> {
     /// The chance this yield has of even occuring, in the domain [0.0, 1.0].
     /// Note that yields which do not occur yield neither xp nor items.
-    chance: f32,
+    pub chance: f32,
     /// The number of items to produce, see the documentation on AmountBounds for more information.
-    amount: AmountBounds,
+    pub amount: AmountBounds,
     /// An upper and lower bound for a random amount of xp to be awarded should this yield occur
     /// (as determined by the chance field)
-    xp: (usize, usize),
+    pub xp: (usize, usize),
     /// What item this yield outputs, should it occur as according to the chance field on this
     /// struct. Note that the amount of this item to be output is determined by the amount field.
-    yields: Handle,
+    pub yields: Handle,
 }
 impl Yield<String> {
     /// Takes ownership of an existing yield, producing an identical one which contains
