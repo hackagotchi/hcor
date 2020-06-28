@@ -16,7 +16,7 @@ impl fmt::Display for ConfigError {
 }
 
 pub type LootTableHandle = usize;
-pub type LootTable = Vec<(SpawnRate, String)>;
+pub type LootTable = Vec<(CountProbability, String)>;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
@@ -26,32 +26,64 @@ pub struct Config {
     pub possession_archetypes: Vec<Archetype>,
 }
 
-pub fn spawn<'rng, Handle: Clone>(
-    table: &'rng Vec<(SpawnRate, Handle)>,
+pub trait SpawnTableRow {
+    type Output;
+
+    /// How likely is this row to occur?
+    /// NOTE: since this is currently only used for calculating
+    /// percentiles for eggs, perhaps we want to replace this with
+    /// some configurably-defined "desireability" factor?
+    /// Rarity does not strictly correlate with the value of something.
+    fn rarity(&self) -> f32;
+
+    /// How many of this item should be outputted?
+    fn count(&self, rng: &mut impl rand::RngCore) -> usize;
+    
+    /// What does this row actually produce?
+    fn output(&self) -> Self::Output;
+}
+
+impl<Handle: Clone> SpawnTableRow for (CountProbability, Handle) {
+    type Output = Handle;
+
+    fn rarity(&self) -> f32 {
+        (self.0).0
+    }
+    fn count(&self, rng: &mut impl rand::RngCore) -> usize {
+        self.0.gen_count(rng)
+    }
+    fn output(&self) -> Self::Output {
+        self.1.clone()
+    }
+}
+
+/// Spawns an iterator of output dictated by various rows in a table of things to spawn.
+pub fn spawn<'rng, Row: SpawnTableRow>(
+    table: &'rng Vec<Row>,
     rng: &'rng mut impl rand::RngCore,
-) -> impl Iterator<Item = Handle> + 'rng {
+) -> impl Iterator<Item = Row::Output> + 'rng {
     table
         .iter()
-        .flat_map(move |(spawn_rate, h)| (0..spawn_rate.gen_count(rng)).map(move |_| h.clone()))
+        .flat_map(move |row| (0..row.count(rng)).map(move |_| row.output()))
 }
 
 /// Quite similar to spawn(), but it also returns a list of the
 /// leading spawn rates for the rows in the table the spawn qualified for.
-pub fn spawn_with_percentile<Handle: Clone>(
-    table: &Vec<(SpawnRate, Handle)>,
+pub fn spawn_with_percentile<Row: SpawnTableRow>(
+    table: &Vec<Row>,
     rng: &mut impl rand::RngCore,
-) -> (Vec<Handle>, f32) {
-    let (handles, rows): (Vec<Vec<Handle>>, Vec<f32>) = table
+) -> (Vec<Row::Output>, f32) {
+    let (handles, rows): (Vec<Vec<Row::Output>>, Vec<f32>) = table
         .iter()
-        .filter_map(|(spawn_rate, h)| {
-            let count = spawn_rate.gen_count(rng);
+        .filter_map(|row| {
+            let count = row.count(rng);
 
             if count == 0 {
                 None
             } else {
                 Some((
-                    (0..count).map(move |_| h.clone()).collect::<Vec<_>>(),
-                    spawn_rate.0,
+                    (0..count).map(move |_| row.output()).collect::<Vec<_>>(),
+                    row.rarity(),
                 ))
             }
         })
@@ -60,8 +92,7 @@ pub fn spawn_with_percentile<Handle: Clone>(
     (handles.into_iter().flat_map(|h| h.into_iter()).collect(), {
         let best_roll: f32 = table
             .iter()
-            .map(|(SpawnRate(c, _), _)| c)
-            .copied()
+            .map(|row| row.rarity())
             .product();
         1.0 - ((rows.into_iter().product::<f32>() - best_roll) / (1.0 - best_roll))
     })
@@ -561,9 +592,16 @@ impl Recipe<&Archetype> {
     }
 }
 
+/// a number between these two bounds is chosen (the first is the lower bound, the second is
+/// the higher bound). The floating point number is then split into its fractional and integral
+/// counterparts. The integral counterpart is the base number of items to award, and the
+/// fractional counterpart becomes a probability that an extra item is awarded. For example,
+/// 1.99 is one item guaranteed, with a 99% chance of a second item being awarded.
+pub type AmountBounds = (f32, f32);
+
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
-pub struct SpawnRate(pub f32, pub (f32, f32));
-impl SpawnRate {
+pub struct CountProbability(pub f32, pub AmountBounds);
+impl CountProbability {
     pub fn gen_count<R: rand::Rng>(self, rng: &mut R) -> usize {
         let Self(guard, (lo, hi)) = self;
         if rng.gen_range(0.0, 1.0) < guard {
@@ -590,27 +628,14 @@ pub struct Yield<Handle> {
     /// The chance this yield has of even occuring, in the domain [0.0, 1.0].
     /// Note that yields which do not occur yield neither xp nor items.
     chance: f32,
-    /// The number of items to produce. Like spawn rates in many other places in the configuration,
-    /// a number between these two bounds is chosen (the first is the lower bound, the second is
-    /// the higher bound). The floating point number is then split into its fractional and integral
-    /// counterparts. The integral counterpart is the base number of items to award, and the
-    /// fractional counterpart becomes a probability that an extra item is awarded. For example,
-    /// 1.99 is one item guaranteed, with a 99% chance of a second item being awarded.
-    amount: (f32, f32),
+    /// The number of items to produce, see the documentation on AmountBounds for more information.
+    amount: AmountBounds,
     /// An upper and lower bound for a random amount of xp to be awarded should this yield occur
     /// (as determined by the chance field)
     xp: (usize, usize),
     /// What item this yield outputs, should it occur as according to the chance field on this
     /// struct. Note that the amount of this item to be output is determined by the amount field.
     yields: Handle,
-}
-/// This implementation is useful for quickly turning your yield into a tuple which describes its
-/// likelihood to output some quanity of a certain item, discarding the information about earnable
-/// experience.
-impl<Handle> From<Yield<Handle>> for (SpawnRate, Handle) {
-    fn from(y: Yield<Handle>) -> Self {
-        (SpawnRate(y.chance, y.amount), y.yields)
-    }
 }
 impl Yield<String> {
     /// Takes ownership of an existing yield, producing an identical one which contains
@@ -627,6 +652,20 @@ impl Yield<String> {
             xp,
             yields: CONFIG.find_possession_handle(&yields)?,
         })
+    }
+}
+
+impl<Handle: Clone> SpawnTableRow for Yield<Handle> {
+    type Output = Handle;
+
+    fn rarity(&self) -> f32 {
+        self.chance
+    }
+    fn count(&self, rng: &mut impl rand::RngCore) -> usize {
+        CountProbability(self.chance, self.amount).gen_count(rng)
+    }
+    fn output(&self) -> Self::Output {
+        self.yields.clone()
     }
 }
 
