@@ -26,32 +26,54 @@ pub struct Config {
     pub possession_archetypes: Vec<Archetype>,
 }
 
-pub fn spawn<'rng, Handle: Clone>(
-    table: &'rng Vec<(SpawnRate, Handle)>,
+pub trait SpawnTableRow {
+    type Output;
+
+    fn rarity(&self) -> f32;
+    fn count(&self, rng: &mut impl rand::RngCore) -> usize;
+    fn output(&self) -> Self::Output;
+}
+
+impl<Handle: Clone> SpawnTableRow for (SpawnRate, Handle) {
+    type Output = Handle;
+
+    fn rarity(&self) -> f32 {
+        (self.0).0
+    }
+    fn count(&self, rng: &mut impl rand::RngCore) -> usize {
+        self.0.gen_count(rng)
+    }
+    fn output(&self) -> Self::Output {
+        self.1.clone()
+    }
+}
+
+pub fn spawn<'rng, Row: SpawnTableRow>(
+    table: &'rng Vec<Row>,
     rng: &'rng mut impl rand::RngCore,
-) -> impl Iterator<Item = Handle> + 'rng {
+) -> impl Iterator<Item = Row::Output> + 'rng {
     table
         .iter()
-        .flat_map(move |(spawn_rate, h)| (0..spawn_rate.gen_count(rng)).map(move |_| h.clone()))
+        .flat_map(move |row| (0..row.count(rng)).map(move |_| row.output()))
 }
 
 /// Quite similar to spawn(), but it also returns a list of the
 /// leading spawn rates for the rows in the table the spawn qualified for.
-pub fn spawn_with_percentile<Handle: Clone>(
-    table: &Vec<(SpawnRate, Handle)>,
+pub fn spawn_with_percentile<Row: SpawnTableRow>(
+    table: &Vec<Row>,
     rng: &mut impl rand::RngCore,
-) -> (Vec<Handle>, f32) {
-    let (handles, rows): (Vec<Vec<Handle>>, Vec<f32>) = table
+) -> (Vec<Row::Output>, f32) {
+    let (handles, rows): (Vec<Vec<Row::Output>>, Vec<f32>) = table
         .iter()
-        .filter_map(|(spawn_rate, h)| {
-            let count = spawn_rate.gen_count(rng);
+        .filter_map(|row| {
+            let count = row.count(rng);
 
             if count == 0 {
                 None
             } else {
                 Some((
-                    (0..count).map(move |_| h.clone()).collect::<Vec<_>>(),
-                    spawn_rate.0,
+                    (0..count).map(move |_| row.output()).collect::<Vec<_>>(),
+                    row.rarity(),
                 ))
             }
         })
@@ -60,8 +82,7 @@ pub fn spawn_with_percentile<Handle: Clone>(
     (handles.into_iter().flat_map(|h| h.into_iter()).collect(), {
         let best_roll: f32 = table
             .iter()
-            .map(|(SpawnRate(c, _), _)| c)
-            .copied()
+            .map(|row| row.rarity())
             .product();
         1.0 - ((rows.into_iter().product::<f32>() - best_roll) / (1.0 - best_roll))
     })
@@ -604,14 +625,6 @@ pub struct Yield<Handle> {
     /// struct. Note that the amount of this item to be output is determined by the amount field.
     yields: Handle,
 }
-/// This implementation is useful for quickly turning your yield into a tuple which describes its
-/// likelihood to output some quanity of a certain item, discarding the information about earnable
-/// experience.
-impl<Handle> From<Yield<Handle>> for (SpawnRate, Handle) {
-    fn from(y: Yield<Handle>) -> Self {
-        (SpawnRate(y.chance, y.amount), y.yields)
-    }
-}
 impl Yield<String> {
     /// Takes ownership of an existing yield, producing an identical one which contains
     /// a handle to the type of item the yield may output, which is guaranteed to point
@@ -627,6 +640,20 @@ impl Yield<String> {
             xp,
             yields: CONFIG.find_possession_handle(&yields)?,
         })
+    }
+}
+
+impl<Handle: Clone> SpawnTableRow for Yield<Handle> {
+    type Output = Handle;
+
+    fn rarity(&self) -> f32 {
+        self.chance
+    }
+    fn count(&self, rng: &mut impl rand::RngCore) -> usize {
+        SpawnRate(self.chance, self.amount).gen_count(rng)
+    }
+    fn output(&self) -> Self::Output {
+        self.yields.clone()
     }
 }
 
