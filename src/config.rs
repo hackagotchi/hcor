@@ -582,18 +582,32 @@ impl SpawnRate {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+/// Describes the output of a plant as may occur at set intervals.
+/// Yields occur conditionally, and produce a randomly chosen (within specific bounds) amount of a
+/// specified item, and some number of experience points, also randomly chosen from within
+/// arbitrary bounds.
 pub struct Yield<Handle> {
+    /// The chance this yield has of even occuring, in the domain [0.0, 1.0].
+    /// Note that yields which do not occur yield neither xp nor items.
     chance: f32,
     amount: (f32, f32),
     xp: (usize, usize),
     yields: Handle,
 }
+/// This implementation is useful for quickly turning your yield into a tuple which describes its
+/// likelihood to output some quanity of a certain item, discarding the information about earnable
+/// experience.
 impl<Handle> From<Yield<Handle>> for (SpawnRate, Handle) {
     fn from(y: Yield<Handle>) -> Self {
         (SpawnRate(y.chance, y.amount), y.yields)
     }
 }
 impl Yield<String> {
+    /// Takes ownership of an existing yield, producing an identical one which contains
+    /// a handle to the type of item the yield may output, which is guaranteed to point
+    /// to an Archetype which exists in the configuration, unlike the String which may
+    /// be invalid. If the String which specifies the possible output is invalid, an error is
+    /// returned.
     fn lookup_handles(self) -> Result<Yield<ArchetypeHandle>, ConfigError> {
         let Self { chance, amount, xp, yields } = self;
 
