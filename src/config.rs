@@ -637,14 +637,6 @@ pub struct Yield<Handle> {
     /// struct. Note that the amount of this item to be output is determined by the amount field.
     yields: Handle,
 }
-/// This implementation is useful for quickly turning your yield into a tuple which describes its
-/// likelihood to output some quanity of a certain item, discarding the information about earnable
-/// experience.
-impl<Handle> From<Yield<Handle>> for (SpawnRate, Handle) {
-    fn from(y: Yield<Handle>) -> Self {
-        (SpawnRate(y.chance, y.amount), y.yields)
-    }
-}
 impl Yield<String> {
     /// Takes ownership of an existing yield, producing an identical one which contains
     /// a handle to the type of item the yield may output, which is guaranteed to point
