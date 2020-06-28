@@ -16,7 +16,7 @@ impl fmt::Display for ConfigError {
 }
 
 pub type LootTableHandle = usize;
-pub type LootTable = Vec<(SpawnRate, String)>;
+pub type LootTable = Vec<(CountProbability, String)>;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
@@ -43,7 +43,7 @@ pub trait SpawnTableRow {
     fn output(&self) -> Self::Output;
 }
 
-impl<Handle: Clone> SpawnTableRow for (SpawnRate, Handle) {
+impl<Handle: Clone> SpawnTableRow for (CountProbability, Handle) {
     type Output = Handle;
 
     fn rarity(&self) -> f32 {
@@ -592,9 +592,16 @@ impl Recipe<&Archetype> {
     }
 }
 
+/// a number between these two bounds is chosen (the first is the lower bound, the second is
+/// the higher bound). The floating point number is then split into its fractional and integral
+/// counterparts. The integral counterpart is the base number of items to award, and the
+/// fractional counterpart becomes a probability that an extra item is awarded. For example,
+/// 1.99 is one item guaranteed, with a 99% chance of a second item being awarded.
+pub type AmountBounds = (f32, f32);
+
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
-pub struct SpawnRate(pub f32, pub (f32, f32));
-impl SpawnRate {
+pub struct CountProbability(pub f32, pub AmountBounds);
+impl CountProbability {
     pub fn gen_count<R: rand::Rng>(self, rng: &mut R) -> usize {
         let Self(guard, (lo, hi)) = self;
         if rng.gen_range(0.0, 1.0) < guard {
@@ -621,13 +628,8 @@ pub struct Yield<Handle> {
     /// The chance this yield has of even occuring, in the domain [0.0, 1.0].
     /// Note that yields which do not occur yield neither xp nor items.
     chance: f32,
-    /// The number of items to produce. Like spawn rates in many other places in the configuration,
-    /// a number between these two bounds is chosen (the first is the lower bound, the second is
-    /// the higher bound). The floating point number is then split into its fractional and integral
-    /// counterparts. The integral counterpart is the base number of items to award, and the
-    /// fractional counterpart becomes a probability that an extra item is awarded. For example,
-    /// 1.99 is one item guaranteed, with a 99% chance of a second item being awarded.
-    amount: (f32, f32),
+    /// The number of items to produce, see the documentation on AmountBounds for more information.
+    amount: AmountBounds,
     /// An upper and lower bound for a random amount of xp to be awarded should this yield occur
     /// (as determined by the chance field)
     xp: (usize, usize),
@@ -660,7 +662,7 @@ impl<Handle: Clone> SpawnTableRow for Yield<Handle> {
         self.chance
     }
     fn count(&self, rng: &mut impl rand::RngCore) -> usize {
-        SpawnRate(self.chance, self.amount).gen_count(rng)
+        CountProbability(self.chance, self.amount).gen_count(rng)
     }
     fn output(&self) -> Self::Output {
         self.yields.clone()
