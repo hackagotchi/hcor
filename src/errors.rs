@@ -15,6 +15,7 @@ pub enum ServiceError {
     Unauthorized,
 }
 
+#[cfg(feature="actix")]
 impl ResponseError for ServiceError {
     fn error_response(&self) -> HttpResponse {
         match self {

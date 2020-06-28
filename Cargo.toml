@@ -26,3 +26,5 @@ dotenv = "0.15"
 [lib]
 name = "hcor"
 
+[features]
+actix = []
