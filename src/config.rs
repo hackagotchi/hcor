@@ -581,6 +581,31 @@ impl SpawnRate {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct Yield<Handle> {
+    chance: f32,
+    amount: (f32, f32),
+    xp: (usize, usize),
+    yields: Handle,
+}
+impl<Handle> From<Yield<Handle>> for (SpawnRate, Handle) {
+    fn from(y: Yield<Handle>) -> Self {
+        (SpawnRate(y.chance, y.amount), y.yields)
+    }
+}
+impl Yield<String> {
+    fn lookup_handles(self) -> Result<Yield<ArchetypeHandle>, ConfigError> {
+        let Self { chance, amount, xp, yields } = self;
+
+        Ok(Yield {
+            chance,
+            amount,
+            xp,
+            yields: CONFIG.find_possession_handle(&yields)?,
+        })
+    }
+}
+
 /// A leading chance, then a min and max percent of things returned.
 /// Should be reminiscent of loot tables.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -592,7 +617,7 @@ pub enum PlantAdvancementKind {
     Xp(f32),
     YieldSpeedMultiplier(f32),
     YieldSizeMultiplier(f32),
-    Yield(Vec<(SpawnRate, String)>),
+    Yield(Vec<Yield<String>>),
     Craft(Vec<Recipe<String>>),
     CraftSpeedMultiplier(f32),
     CraftReturnChance(f32),
@@ -610,7 +635,7 @@ pub struct PlantAdvancementSum {
     // yield
     pub yield_speed_multiplier: f32,
     pub yield_size_multiplier: f32,
-    pub yields: Vec<(SpawnRate, ArchetypeHandle)>,
+    pub yields: Vec<Yield<ArchetypeHandle>>,
     // craft
     pub double_craft_yield_chance: f32,
     pub crafting_speed_multiplier: f32,
@@ -662,8 +687,9 @@ impl AdvancementSum for PlantAdvancementSum {
                 &YieldSizeMultiplier(multiplier) => yield_size_multiplier *= multiplier,
                 Yield(resources) => yields.append(
                     &mut resources
-                        .iter()
-                        .map(|(c, s)| Ok((*c, CONFIG.find_possession_handle(s)?)))
+                        .clone()
+                        .into_iter()
+                        .map(|y| y.lookup_handles())
                         .collect::<Result<Vec<_>, ConfigError>>()
                         .expect("couldn't find archetype for advancement yield"),
                 ),
@@ -707,14 +733,13 @@ impl AdvancementSum for PlantAdvancementSum {
 
         yields = yields
             .into_iter()
-            .map(|(SpawnRate(guard, (lo, hi)), name)| {
-                (
-                    SpawnRate(
-                        (guard * yield_size_multiplier).min(1.0),
-                        (lo * yield_size_multiplier, hi * yield_size_multiplier),
-                    ),
-                    name,
-                )
+            .map(|mut y| {
+                y.chance = (y.chance * yield_size_multiplier).min(1.0);
+
+                let (lo, hi) = y.amount;
+                y.amount = (lo * yield_size_multiplier, hi * yield_size_multiplier);
+
+                y
             })
             .collect();
 
@@ -942,12 +967,12 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
         use PlantAdvancementKind::*;
 
         match &adv.kind {
-            Yield(resources) => {
-                for (_, item_name) in resources.iter() {
-                    if config.find_possession(item_name).is_err() {
+            Yield(yields) => {
+                for y in yields.iter() {
+                    if config.find_possession(&y.yields).is_err() {
                         return Err(format!(
                             "Yield advancement {:?} for plant {:?} includes unknown resource {:?}",
-                            adv.title, arch.name, item_name,
+                            adv.title, arch.name, y.yields,
                         ));
                     }
                 }

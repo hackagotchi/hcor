@@ -161,8 +161,6 @@ impl Gotchi {
 }
 #[test]
 fn gotchi_serialize() -> Result<(), AttributeParseError> {
-    dotenv::dotenv().ok();
-
     let og = Gotchi::new(
         CONFIG
             .possession_archetypes
