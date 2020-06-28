@@ -1,7 +1,5 @@
-use actix_web::{error::ResponseError, HttpResponse};
 use derive_more::Display;
 use std::convert::From;
-use mongodb::error::Error as MongoError;
 
 #[derive(Debug, Display)]
 pub enum ServiceError {
@@ -19,15 +17,20 @@ pub enum ServiceError {
 }
 
 #[cfg(feature = "actix")]
-impl ResponseError for ServiceError {
-    fn error_response(&self) -> HttpResponse {
-        match self {
-            ServiceError::InternalServerError => {
-                HttpResponse::InternalServerError().body("Internal Server Error. Try again later.")
+mod actix {
+    use super::*;
+    use actix_web::{error::ResponseError, HttpResponse};
+
+    impl ResponseError for ServiceError {
+        fn error_response(&self) -> HttpResponse {
+            match self {
+                ServiceError::InternalServerError => {
+                    HttpResponse::InternalServerError().body("Internal Server Error. Try again later.")
+                }
+                ServiceError::BadRequest(s) => HttpResponse::BadRequest().body(s),
+                ServiceError::Unauthorized => HttpResponse::Unauthorized().body("Unauthorized"),
+                ServiceError::NoData => HttpResponse::NotFound().body("Data not found"),
             }
-            ServiceError::BadRequest(s) => HttpResponse::BadRequest().body(s),
-            ServiceError::Unauthorized => HttpResponse::Unauthorized().body("Unauthorized"),
-            ServiceError::NoData => HttpResponse::NotFound().body("Data not found"),
         }
     }
 }
@@ -40,8 +43,13 @@ impl From<Box<dyn std::error::Error>> for ServiceError {
 }
 
 #[cfg(feature = "mongo")]
-impl From<MongoError> for ServiceError {
-    fn from(_: MongoError) -> ServiceError {
-        ServiceError::InternalServerError
+mod mongo {
+    use super::*;
+    use mongodb::error::Error as MongoError;
+
+    impl From<MongoError> for ServiceError {
+        fn from(_: MongoError) -> ServiceError {
+            ServiceError::InternalServerError
+        }
     }
 }
