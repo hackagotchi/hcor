@@ -581,6 +581,55 @@ impl SpawnRate {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+/// Describes the output of a plant as may occur at set intervals.
+/// Yields occur conditionally, and produce a randomly chosen (within specific bounds) amount of a
+/// specified item, and some number of experience points, also randomly chosen from within
+/// arbitrary bounds.
+pub struct Yield<Handle> {
+    /// The chance this yield has of even occuring, in the domain [0.0, 1.0].
+    /// Note that yields which do not occur yield neither xp nor items.
+    chance: f32,
+    /// The number of items to produce. Like spawn rates in many other places in the configuration,
+    /// a number between these two bounds is chosen (the first is the lower bound, the second is
+    /// the higher bound). The floating point number is then split into its fractional and integral
+    /// counterparts. The integral counterpart is the base number of items to award, and the
+    /// fractional counterpart becomes a probability that an extra item is awarded. For example,
+    /// 1.99 is one item guaranteed, with a 99% chance of a second item being awarded.
+    amount: (f32, f32),
+    /// An upper and lower bound for a random amount of xp to be awarded should this yield occur
+    /// (as determined by the chance field)
+    xp: (usize, usize),
+    /// What item this yield outputs, should it occur as according to the chance field on this
+    /// struct. Note that the amount of this item to be output is determined by the amount field.
+    yields: Handle,
+}
+/// This implementation is useful for quickly turning your yield into a tuple which describes its
+/// likelihood to output some quanity of a certain item, discarding the information about earnable
+/// experience.
+impl<Handle> From<Yield<Handle>> for (SpawnRate, Handle) {
+    fn from(y: Yield<Handle>) -> Self {
+        (SpawnRate(y.chance, y.amount), y.yields)
+    }
+}
+impl Yield<String> {
+    /// Takes ownership of an existing yield, producing an identical one which contains
+    /// a handle to the type of item the yield may output, which is guaranteed to point
+    /// to an Archetype which exists in the configuration, unlike the String which may
+    /// be invalid. If the String which specifies the possible output is invalid, an error is
+    /// returned.
+    fn lookup_handles(self) -> Result<Yield<ArchetypeHandle>, ConfigError> {
+        let Self { chance, amount, xp, yields } = self;
+
+        Ok(Yield {
+            chance,
+            amount,
+            xp,
+            yields: CONFIG.find_possession_handle(&yields)?,
+        })
+    }
+}
+
 /// A leading chance, then a min and max percent of things returned.
 /// Should be reminiscent of loot tables.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -592,7 +641,7 @@ pub enum PlantAdvancementKind {
     Xp(f32),
     YieldSpeedMultiplier(f32),
     YieldSizeMultiplier(f32),
-    Yield(Vec<(SpawnRate, String)>),
+    Yield(Vec<Yield<String>>),
     Craft(Vec<Recipe<String>>),
     CraftSpeedMultiplier(f32),
     CraftReturnChance(f32),
@@ -610,7 +659,7 @@ pub struct PlantAdvancementSum {
     // yield
     pub yield_speed_multiplier: f32,
     pub yield_size_multiplier: f32,
-    pub yields: Vec<(SpawnRate, ArchetypeHandle)>,
+    pub yields: Vec<Yield<ArchetypeHandle>>,
     // craft
     pub double_craft_yield_chance: f32,
     pub crafting_speed_multiplier: f32,
@@ -662,8 +711,9 @@ impl AdvancementSum for PlantAdvancementSum {
                 &YieldSizeMultiplier(multiplier) => yield_size_multiplier *= multiplier,
                 Yield(resources) => yields.append(
                     &mut resources
-                        .iter()
-                        .map(|(c, s)| Ok((*c, CONFIG.find_possession_handle(s)?)))
+                        .clone()
+                        .into_iter()
+                        .map(|y| y.lookup_handles())
                         .collect::<Result<Vec<_>, ConfigError>>()
                         .expect("couldn't find archetype for advancement yield"),
                 ),
@@ -707,14 +757,13 @@ impl AdvancementSum for PlantAdvancementSum {
 
         yields = yields
             .into_iter()
-            .map(|(SpawnRate(guard, (lo, hi)), name)| {
-                (
-                    SpawnRate(
-                        (guard * yield_size_multiplier).min(1.0),
-                        (lo * yield_size_multiplier, hi * yield_size_multiplier),
-                    ),
-                    name,
-                )
+            .map(|mut y| {
+                y.chance = (y.chance * yield_size_multiplier).min(1.0);
+
+                let (lo, hi) = y.amount;
+                y.amount = (lo * yield_size_multiplier, hi * yield_size_multiplier);
+
+                y
             })
             .collect();
 
@@ -942,12 +991,12 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
         use PlantAdvancementKind::*;
 
         match &adv.kind {
-            Yield(resources) => {
-                for (_, item_name) in resources.iter() {
-                    if config.find_possession(item_name).is_err() {
+            Yield(yields) => {
+                for y in yields.iter() {
+                    if config.find_possession(&y.yields).is_err() {
                         return Err(format!(
                             "Yield advancement {:?} for plant {:?} includes unknown resource {:?}",
-                            adv.title, arch.name, item_name,
+                            adv.title, arch.name, y.yields,
                         ));
                     }
                 }
