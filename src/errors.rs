@@ -26,7 +26,7 @@ impl ResponseError for ServiceError {
             }
             ServiceError::BadRequest(s) => HttpResponse::BadRequest().body(s),
             ServiceError::Unauthorized => HttpResponse::Unauthorized().body("Unauthorized"),
-            ServiceError::NoData => HttpReponse::NotFound().body("Data not found"),
+            ServiceError::NoData => HttpResponse::NotFound().body("Data not found"),
         }
     }
 }
