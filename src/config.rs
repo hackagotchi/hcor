@@ -419,7 +419,7 @@ impl<Handle: Clone> RecipeMakes<Handle> {
 
         match self {
             OneOf(these) => Self::pick_one_weighted_of(these).all(),
-            Just(_, h) => [(h.clone(), 1)].iter().cloned().collect(),
+            Just(count, h) => [(h.clone(), *count)].iter().cloned().collect(),
             AllOf(these) => these.iter().map(|(count, h)| (h.clone(), *count)).collect(),
             Nothing => vec![],
         }
@@ -433,9 +433,13 @@ impl<Handle: Clone> RecipeMakes<Handle> {
 
         match &self {
             OneOf(these) => Self::pick_one_weighted_of(these).output(),
-            Just(_, _) => vec![self
-                .any()
-                .expect("RecipeMakes::Just.any() can't return None")],
+            Just(count, _) => (0..*count)
+                .map(|_| {
+                    self
+                        .any()
+                        .expect("RecipeMakes::Just.any() can't return None")
+                })
+                .collect(),
             AllOf(_) => self
                 .all()
                 .into_iter()
