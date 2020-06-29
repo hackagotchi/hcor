@@ -38,7 +38,7 @@ pub trait SpawnTableRow {
 
     /// How many of this item should be outputted?
     fn count(&self, rng: &mut impl rand::RngCore) -> usize;
-    
+
     /// What does this row actually produce?
     fn output(&self, index: usize) -> Self::Output;
 }
@@ -90,10 +90,7 @@ pub fn spawn_with_percentile<Row: SpawnTableRow>(
         .unzip();
 
     (handles.into_iter().flat_map(|h| h.into_iter()).collect(), {
-        let best_roll: f32 = table
-            .iter()
-            .map(|row| row.rarity())
-            .product();
+        let best_roll: f32 = table.iter().map(|row| row.rarity()).product();
         1.0 - ((rows.into_iter().product::<f32>() - best_roll) / (1.0 - best_roll))
     })
 }
@@ -435,8 +432,7 @@ impl<Handle: Clone> RecipeMakes<Handle> {
             OneOf(these) => Self::pick_one_weighted_of(these).output(),
             Just(count, _) => (0..*count)
                 .map(|_| {
-                    self
-                        .any()
+                    self.any()
                         .expect("RecipeMakes::Just.any() can't return None")
                 })
                 .collect(),
@@ -654,7 +650,13 @@ impl Yield<String> {
     /// be invalid. If the String which specifies the possible output is invalid, an error is
     /// returned.
     fn lookup_handles(self) -> Result<Yield<ArchetypeHandle>, ConfigError> {
-        let Self { chance, amount, xp, dropoff, yields } = self;
+        let Self {
+            chance,
+            amount,
+            xp,
+            dropoff,
+            yields,
+        } = self;
 
         Ok(Yield {
             chance,
@@ -678,15 +680,13 @@ impl<Handle: Clone> SpawnTableRow for Yield<Handle> {
         CountProbability(self.chance, self.amount).gen_count(rng)
     }
     fn output(&self, index: usize) -> Self::Output {
-        (
-            self.yields.clone(),
-            {
-                use rand::Rng;
+        (self.yields.clone(), {
+            use rand::Rng;
 
-                let (lo, hi) = self.xp;
-                (rand::thread_rng().gen_range(lo, hi) as f32 / ((index + 1) as f32 * self.dropoff)).round() as usize
-            }
-        )
+            let (lo, hi) = self.xp;
+            (rand::thread_rng().gen_range(lo, hi) as f32 / ((index + 1) as f32 * self.dropoff))
+                .round() as usize
+        })
     }
 }
 
