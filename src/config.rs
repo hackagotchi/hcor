@@ -40,7 +40,7 @@ pub trait SpawnTableRow {
     fn count(&self, rng: &mut impl rand::RngCore) -> usize;
     
     /// What does this row actually produce?
-    fn output(&self) -> Self::Output;
+    fn output(&self, index: usize) -> Self::Output;
 }
 
 impl<Handle: Clone> SpawnTableRow for (CountProbability, Handle) {
@@ -52,7 +52,7 @@ impl<Handle: Clone> SpawnTableRow for (CountProbability, Handle) {
     fn count(&self, rng: &mut impl rand::RngCore) -> usize {
         self.0.gen_count(rng)
     }
-    fn output(&self) -> Self::Output {
+    fn output(&self, _index: usize) -> Self::Output {
         self.1.clone()
     }
 }
@@ -64,7 +64,7 @@ pub fn spawn<'rng, Row: SpawnTableRow>(
 ) -> impl Iterator<Item = Row::Output> + 'rng {
     table
         .iter()
-        .flat_map(move |row| (0..row.count(rng)).map(move |_| row.output()))
+        .flat_map(move |row| (0..row.count(rng)).map(move |i| row.output(i)))
 }
 
 /// Quite similar to spawn(), but it also returns a list of the
@@ -82,7 +82,7 @@ pub fn spawn_with_percentile<Row: SpawnTableRow>(
                 None
             } else {
                 Some((
-                    (0..count).map(move |_| row.output()).collect::<Vec<_>>(),
+                    (0..count).map(move |i| row.output(i)).collect::<Vec<_>>(),
                     row.rarity(),
                 ))
             }
@@ -630,8 +630,14 @@ pub struct Yield<Handle> {
     pub chance: f32,
     /// The number of items to produce, see the documentation on AmountBounds for more information.
     pub amount: AmountBounds,
+    /// This field dictates how much less xp is earned per item in a yield.
+    /// The formula used is xp / (i * dropoff), where xp is an amount in the bounds below,
+    /// and i is the index of the item.
+    pub dropoff: f32,
     /// An upper and lower bound for a random amount of xp to be awarded should this yield occur
-    /// (as determined by the chance field)
+    /// (as determined by the chance field).
+    /// The xp is awarded on a per item basis, although dropoff can be used to ensure less and
+    /// lesss xp is awarded per item.
     pub xp: (usize, usize),
     /// What item this yield outputs, should it occur as according to the chance field on this
     /// struct. Note that the amount of this item to be output is determined by the amount field.
@@ -644,19 +650,22 @@ impl Yield<String> {
     /// be invalid. If the String which specifies the possible output is invalid, an error is
     /// returned.
     fn lookup_handles(self) -> Result<Yield<ArchetypeHandle>, ConfigError> {
-        let Self { chance, amount, xp, yields } = self;
+        let Self { chance, amount, xp, dropoff, yields } = self;
 
         Ok(Yield {
             chance,
             amount,
             xp,
+            dropoff,
             yields: CONFIG.find_possession_handle(&yields)?,
         })
     }
 }
 
 impl<Handle: Clone> SpawnTableRow for Yield<Handle> {
-    type Output = Handle;
+    /// Yields also return a certain amount of xp,
+    /// alongside something you can use to spawn an item with.
+    type Output = (Handle, usize);
 
     fn rarity(&self) -> f32 {
         self.chance
@@ -664,8 +673,16 @@ impl<Handle: Clone> SpawnTableRow for Yield<Handle> {
     fn count(&self, rng: &mut impl rand::RngCore) -> usize {
         CountProbability(self.chance, self.amount).gen_count(rng)
     }
-    fn output(&self) -> Self::Output {
-        self.yields.clone()
+    fn output(&self, index: usize) -> Self::Output {
+        (
+            self.yields.clone(),
+            {
+                use rand::Rng;
+
+                let (lo, hi) = self.xp;
+                (rand::thread_rng().gen_range(lo, hi) as f32 / ((index + 1) as f32 * self.dropoff)).round() as usize
+            }
+        )
     }
 }
 
