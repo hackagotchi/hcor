@@ -1,6 +1,6 @@
 [package]
 name = "hcor"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Cedric Hutchings <cedhut02@gmail.com>"]
 edition = "2018"
 
