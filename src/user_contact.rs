@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum UserContact {
@@ -27,7 +27,6 @@ impl UserContact {
         })
     }
 }
-
 
 #[cfg(test)]
 mod test {

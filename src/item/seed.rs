@@ -17,9 +17,9 @@ impl std::ops::Deref for Seed {
             .expect("invalid archetype handle")
             .seed
             .as_ref()
-            .unwrap_or_else(|| panic!(
-                "archetype kind corresponds to archetype of a different type"
-            ))
+            .unwrap_or_else(|| {
+                panic!("archetype kind corresponds to archetype of a different type")
+            })
     }
 }
 impl Seed {

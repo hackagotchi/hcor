@@ -25,10 +25,12 @@ impl std::ops::Deref for Gotchi {
             .expect("invalid archetype handle")
             .gotchi
             .as_ref()
-            .unwrap_or_else(|| panic!(
-                "gotchi has non-gotchi archetype handle {}",
-                self.archetype_handle
-            ))
+            .unwrap_or_else(|| {
+                panic!(
+                    "gotchi has non-gotchi archetype handle {}",
+                    self.archetype_handle
+                )
+            })
     }
 }
 impl Gotchi {

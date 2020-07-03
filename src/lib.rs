@@ -2,9 +2,9 @@
 #![warn(missing_docs)]
 
 mod errors;
-pub use errors::ServiceError;
-#[cfg(feature="mongo")]
+#[cfg(feature = "mongo")]
 pub use errors::RequestError;
+pub use errors::ServiceError;
 
 /// All of the game design switches and levers are handled here, with a focus on how they interact
 /// with the rest of the data in the game.

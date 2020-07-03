@@ -1,6 +1,6 @@
 use crate::{config, item};
-use config::{CONFIG, ArchetypeHandle, PlantArchetype};
-use serde::{Serialize, Deserialize};
+use config::{ArchetypeHandle, PlantArchetype, CONFIG};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct Plant {
@@ -39,77 +39,63 @@ impl Plant {
     }
 
     fn effect_advancements<'a>(&'a self) -> impl Iterator<Item = &'a config::PlantAdvancement> {
-        self
-            .effects
+        self.effects
             .iter()
-            .filter_map(|e| CONFIG.get_item_application_plant_advancement(
-                e.item_archetype_handle,
-                e.effect_archetype_handle
-            ))
+            .filter_map(|e| {
+                CONFIG.get_item_application_plant_advancement(
+                    e.item_archetype_handle,
+                    e.effect_archetype_handle,
+                )
+            })
             .map(|(_effect, adv)| adv)
     }
-    
+
     /// Excludes neighbor bonuses
     pub fn advancements_sum<'a>(
         &'a self,
         extra_advancements: impl Iterator<Item = &'a config::PlantAdvancement>,
     ) -> config::PlantAdvancementSum {
-        self
-            .advancements
-            .sum(
-                self.xp,
-                self
-                    .effect_advancements()
-                    .chain(extra_advancements)
-            )
+        self.advancements.sum(
+            self.xp,
+            self.effect_advancements().chain(extra_advancements),
+        )
     }
-    
+
     /// A sum struct for all of the possible advancements for this plant,
     /// plus any effects it has active.
     pub fn advancements_max_sum<'a>(
         &'a self,
         extra_advancements: impl Iterator<Item = &'a config::PlantAdvancement>,
     ) -> config::PlantAdvancementSum {
-        self
-            .advancements
-            .max(
-                self
-                    .effect_advancements()
-                    .chain(extra_advancements)
-            )
+        self.advancements
+            .max(self.effect_advancements().chain(extra_advancements))
     }
 
     pub fn neighborless_advancements_sum<'a>(
         &'a self,
         extra_advancements: impl Iterator<Item = &'a config::PlantAdvancement>,
     ) -> config::PlantAdvancementSum {
-        self
-            .advancements
-            .raw_sum(
-                self.xp,
-                self
-                    .effect_advancements()
-                    .chain(extra_advancements)
-            )
+        self.advancements.raw_sum(
+            self.xp,
+            self.effect_advancements().chain(extra_advancements),
+        )
     }
 
     pub fn unlocked_advancements<'a>(
         &'a self,
         extra_advancements: impl Iterator<Item = &'a config::PlantAdvancement>,
     ) -> impl Iterator<Item = &'a config::PlantAdvancement> {
-        self
-            .advancements
+        self.advancements
             .unlocked(self.xp)
             .chain(self.effect_advancements())
             .chain(extra_advancements)
     }
-    
+
     pub fn all_advancements<'a>(
         &'a self,
         extra_advancements: impl Iterator<Item = &'a config::PlantAdvancement>,
     ) -> impl Iterator<Item = &'a config::PlantAdvancement> {
-        self
-            .advancements
+        self.advancements
             .all()
             .chain(self.effect_advancements())
             .chain(extra_advancements)
@@ -135,26 +121,30 @@ impl Plant {
     }
 
     pub fn current_recipe_raw(&self) -> Option<config::Recipe<ArchetypeHandle>> {
-        self.craft.as_ref().and_then(|c| self.get_recipe_raw(c.recipe_archetype_handle))
+        self.craft
+            .as_ref()
+            .and_then(|c| self.get_recipe_raw(c.recipe_archetype_handle))
     }
 
     pub fn current_recipe(&self) -> Option<config::Recipe<&'static config::Archetype>> {
-        self
-            .current_recipe_raw()
-            .and_then(|x| x.lookup_handles())
+        self.current_recipe_raw().and_then(|x| x.lookup_handles())
     }
 
-    pub fn get_recipe_raw(&self, recipe_ah: ArchetypeHandle) -> Option<config::Recipe<ArchetypeHandle>> {
-        self
-            .advancements_sum(std::iter::empty())
+    pub fn get_recipe_raw(
+        &self,
+        recipe_ah: ArchetypeHandle,
+    ) -> Option<config::Recipe<ArchetypeHandle>> {
+        self.advancements_sum(std::iter::empty())
             .recipes
             .get(recipe_ah)
             .cloned()
     }
 
-    pub fn get_recipe(&self, recipe_ah: ArchetypeHandle) -> Option<config::Recipe<&'static config::Archetype>> {
-        self
-            .get_recipe_raw(recipe_ah)
+    pub fn get_recipe(
+        &self,
+        recipe_ah: ArchetypeHandle,
+    ) -> Option<config::Recipe<&'static config::Archetype>> {
+        self.get_recipe_raw(recipe_ah)
             .and_then(|x| x.lookup_handles())
     }
 }
