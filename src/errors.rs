@@ -21,7 +21,9 @@ pub enum ServiceError {
 }
 impl ServiceError {
     /// A shortcut for making a `ServiceError::BadRequest`.
-    /// ```rs
+    /// ```
+    /// use hcor::ServiceError;
+    ///
     /// let br = ServiceError::bad_request("you're bad and you should feel bad");
     /// let is_br = match br {
     ///     ServiceError::BadRequest(_) => true,
