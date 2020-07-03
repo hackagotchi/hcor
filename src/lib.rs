@@ -26,5 +26,3 @@ pub mod frontend {
         format!(":{}:", txt.to_string().replace(" ", "_"))
     }
 }
-
-pub const TABLE_NAME: &'static str = "hackagotchi";
