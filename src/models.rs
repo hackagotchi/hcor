@@ -1,8 +1,9 @@
 use crate::config::{ArchetypeHandle, PlantArchetype};
 use crate::*;
 use std::time::SystemTime;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Hacksteader {
     pub user_id: String,
     pub profile: Profile,
@@ -11,7 +12,7 @@ pub struct Hacksteader {
     pub gotchis: Vec<Possessed<possess::Gotchi>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Tile {
     pub acquired: SystemTime,
     pub plant: Option<Plant>,
@@ -19,7 +20,7 @@ pub struct Tile {
     pub steader: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Profile {
     /// Indicates when this Hacksteader first joined the elite community.
     pub joined: SystemTime,
@@ -30,7 +31,7 @@ pub struct Profile {
     pub xp: u64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Plant {
     pub xp: u64,
     pub until_yield: f32,
@@ -39,7 +40,7 @@ pub struct Plant {
     pub archetype_handle: ArchetypeHandle,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Craft {
     pub until_finish: f32,
     pub total_cycles: f32,

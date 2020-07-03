@@ -4,18 +4,16 @@ packages:
 repositories: {}
 shell: false
 sources:
-  - https://git.sr.ht/~muirrum/hackagotchi-core
+  - https://github.com/hackagotchi/hcor
 tasks:
 - setup: |
     rustup toolchain install nightly
-    cd hackagotchi-core/
+    cd hcor/
     rustup run nightly cargo fetch
-- fmt: |
-    cd hackagotchi-core/
-    cargo fmt -- --check
-- stable: |
+- nightly: |
     rustup default nightly
-    cd hackagotchi-core/
+    cd hcor/
     cargo build
     cargo test
-
+- fmt: |
+    cargo fmt -- --check
