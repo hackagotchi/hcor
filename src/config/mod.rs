@@ -2,6 +2,9 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
+#[cfg(test)]
+mod test;
+
 #[derive(Debug, Clone)]
 pub enum ConfigError {
     UnknownArchetypeName(String),
@@ -120,8 +123,6 @@ impl Config {
     ) -> Option<&ItemApplicationEffect> {
         self.possession_archetypes
             .get(item_archetype_handle)?
-            .kind
-            .keepsake()?
             .item_application
             .as_ref()?
             .effects
@@ -304,45 +305,15 @@ pub struct ItemApplicationEffect {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct KeepsakeArchetype {
+pub struct Archetype {
+    pub name: String,
+    pub description: String,
+    pub gotchi: Option<GotchiArchetype>,
+    pub seed: Option<SeedArchetype>,
     pub unlocks_land: Option<LandUnlock>,
     #[serde(default)]
     pub plant_effects: Vec<SelectivePlantAdvancement>,
     pub item_application: Option<ItemApplication>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum ArchetypeKind {
-    Gotchi(GotchiArchetype),
-    Seed(SeedArchetype),
-    Keepsake(KeepsakeArchetype),
-}
-impl ArchetypeKind {
-    pub fn category(&self) -> crate::Category {
-        use crate::Category;
-        match self {
-            ArchetypeKind::Gotchi(_) => Category::Gotchi,
-            _ => Category::Misc,
-        }
-    }
-    pub fn keepsake(&self) -> Option<&KeepsakeArchetype> {
-        match self {
-            ArchetypeKind::Keepsake(k) => Some(k),
-            _ => None,
-        }
-    }
-    pub fn gotchi(&self) -> Option<&GotchiArchetype> {
-        match self {
-            ArchetypeKind::Gotchi(g) => Some(g),
-            _ => None,
-        }
-    }
-}
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Archetype {
-    pub name: String,
-    pub description: String,
-    pub kind: ArchetypeKind,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -543,7 +514,7 @@ pub struct Recipe<Handle: Clone> {
     pub xp: (u64, u64),
 }
 impl Recipe<ArchetypeHandle> {
-    pub fn satisfies(&self, inv: &[crate::Possession]) -> bool {
+    pub fn satisfies(&self, inv: &[crate::Item]) -> bool {
         self.needs.iter().copied().all(|(count, ah)| {
             let has = inv.iter().filter(|x| x.archetype_handle == ah).count();
             count <= has
@@ -963,81 +934,52 @@ impl<S: AdvancementSum> AdvancementSet<S> {
     }
 }
 
-#[test]
-fn upgrade_increase() {
-    for arch in CONFIG.plant_archetypes.iter() {
-        let adv = &arch.advancements;
-        let last = adv.rest.last().unwrap();
-        for xp in 0..last.xp {
-            assert!(
-                adv.current(xp).xp <= xp,
-                "when xp is {} for {} the current advancement has more xp({})",
-                xp,
-                arch.name,
-                adv.current(xp).xp
-            );
-        }
-    }
-}
-
 /// In the config, you can specify the names of archetypes.
 /// If you're Rishi, you might spell one of those names wrong.
 /// This function helps you make sure you didn't do that.
 pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
     for a in config.possession_archetypes.iter() {
-        match &a.kind {
-            ArchetypeKind::Seed(sa) => {
-                if config.find_plant(&sa.grows_into).is_err() {
+        if let Some(sa) = &a.seed {
+            if config.find_plant(&sa.grows_into).is_err() {
+                return Err(format!(
+                    "seed archetype {:?} claims it grows into unknown plant archetype {:?}",
+                    a.name, sa.grows_into,
+                ));
+            }
+        }
+        if let Some(ga) = &a.gotchi {
+            if let Some(table) = &ga.hatch_table {
+                for (_, spawn) in table.iter() {
+                    if config.find_possession(spawn).is_err() {
+                        return Err(format!(
+                            "gotchi archetype {:?} claims it hatches into unknown possession archetype {:?}",
+                            a.name,
+                            spawn,
+                        ));
+                    }
+                }
+            }
+        }
+        for SelectivePlantAdvancement { keep_plants, .. } in &a.plant_effects {
+            if let Err(e) = keep_plants.lookup_handles() {
+                return Err(format!(
+                    "possession archetype {:?} keep plants error: {}\nkeep plants: {:?}",
+                    a.name, e, keep_plants,
+                ));
+            }
+        }
+        if let Some(ia) = &a.item_application {
+            for iaa in ia.effects.iter() {
+                if let Err(e) = iaa.keep_plants.lookup_handles() {
                     return Err(format!(
-                        "seed archetype {:?} claims it grows into unknown plant archetype {:?}",
-                        a.name, sa.grows_into,
+                        concat!(
+                            "possession archetype {:?} ",
+                            "item application adv {:?} ",
+                            "keep plants error: {}\n",
+                            "keep plants: {:?}",
+                        ),
+                        a.name, ia.short_description, e, iaa.keep_plants,
                     ));
-                }
-            }
-            ArchetypeKind::Gotchi(ga) => {
-                if let Some(table) = &ga.hatch_table {
-                    for (_, spawn) in table.iter() {
-                        if config.find_possession(spawn).is_err() {
-                            return Err(format!(
-                                "gotchi archetype {:?} claims it hatches into unknown possession archetype {:?}",
-                                a.name,
-                                spawn,
-                            ));
-                        }
-                    }
-                }
-                for SelectivePlantAdvancement { keep_plants, .. } in &ga.plant_effects {
-                    if let Err(e) = keep_plants.lookup_handles() {
-                        return Err(format!(
-                            "gotchi archetype {:?} keep plants error: {}\nkeep plants: {:?}",
-                            a.name, e, keep_plants,
-                        ));
-                    }
-                }
-            }
-            ArchetypeKind::Keepsake(ka) => {
-                for SelectivePlantAdvancement { keep_plants, .. } in &ka.plant_effects {
-                    if let Err(e) = keep_plants.lookup_handles() {
-                        return Err(format!(
-                            "keepsake archetype {:?} keep plants error: {}\nkeep plants: {:?}",
-                            a.name, e, keep_plants,
-                        ));
-                    }
-                }
-                if let Some(ia) = &ka.item_application {
-                    for iaa in ia.effects.iter() {
-                        if let Err(e) = iaa.keep_plants.lookup_handles() {
-                            return Err(format!(
-                                concat!(
-                                    "keepsake archetype {:?} ",
-                                    "item application adv {:?} ",
-                                    "keep plants error: {}\n",
-                                    "keep plants: {:?}",
-                                ),
-                                a.name, ia.short_description, e, iaa.keep_plants,
-                            ));
-                        }
-                    }
                 }
             }
         }
@@ -1092,9 +1034,4 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
     }
 
     Ok(())
-}
-
-#[test]
-fn archetype_name_matches() {
-    check_archetype_name_matches(&*CONFIG).unwrap_or_else(|e| panic!("{}", e));
 }

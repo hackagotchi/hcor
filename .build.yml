@@ -16,4 +16,5 @@ tasks:
     cargo build
     cargo test
 - fmt: |
+    cd hcor/
     cargo fmt -- --check
