@@ -2,11 +2,15 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum UserContact {
+    /// A user known only by their email.
     Email(String),
+    /// A user known only by their slack id.
     Slack(String),
+    /// A user known by both their slack id and their email.
     Both { email: String, slack: String },
 }
 impl UserContact {
+    /// Returns an email for a user, if available.
     pub fn email(&self) -> Option<&str> {
         Some(match self {
             UserContact::Email(s) => s,
@@ -14,6 +18,7 @@ impl UserContact {
             _ => return None,
         })
     }
+    /// Returns a slack id for a user, if available.
     pub fn slack(&self) -> Option<&str> {
         Some(match self {
             UserContact::Slack(s) => s,
