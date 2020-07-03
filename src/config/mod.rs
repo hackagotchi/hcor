@@ -2,6 +2,8 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
+mod test;
+
 #[derive(Debug, Clone)]
 pub enum ConfigError {
     UnknownArchetypeName(String),
@@ -931,23 +933,6 @@ impl<S: AdvancementSum> AdvancementSet<S> {
     }
 }
 
-#[test]
-fn upgrade_increase() {
-    for arch in CONFIG.plant_archetypes.iter() {
-        let adv = &arch.advancements;
-        let last = adv.rest.last().unwrap();
-        for xp in 0..last.xp {
-            assert!(
-                adv.current(xp).xp <= xp,
-                "when xp is {} for {} the current advancement has more xp({})",
-                xp,
-                arch.name,
-                adv.current(xp).xp
-            );
-        }
-    }
-}
-
 /// In the config, you can specify the names of archetypes.
 /// If you're Rishi, you might spell one of those names wrong.
 /// This function helps you make sure you didn't do that.
@@ -1048,9 +1033,4 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
     }
 
     Ok(())
-}
-
-#[test]
-fn archetype_name_matches() {
-    check_archetype_name_matches(&*CONFIG).unwrap_or_else(|e| panic!("{}", e));
 }
