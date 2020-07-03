@@ -637,7 +637,7 @@ pub struct Yield<Handle> {
     /// An upper and lower bound for a random amount of xp to be awarded should this yield occur
     /// (as determined by the chance field).
     /// The xp is awarded on a per item basis, although dropoff can be used to ensure less and
-    /// lesss xp is awarded per item.
+    /// less xp is awarded per item.
     pub xp: (usize, usize),
     /// What item this yield outputs, should it occur as according to the chance field on this
     /// struct. Note that the amount of this item to be output is determined by the amount field.
