@@ -6,28 +6,59 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-serde = { version = "1.0.105", features = ["derive"] }
-serde_json = "1.0.49"
-rand = "0.7.3"
-rusoto_core = "0.43.0"
-rusoto_dynamodb = "0.43.0"
-uuid = { version = "0.8.1", features = ["v4", "serde"] }
-futures = { version = "0.3.4", features = ["compat"] }
-regex = "1.3.6"
-lazy_static = "1.4.0"
-humantime = "2.0.0"
-log = "0.4.8"
-actix-web = { version = "2.0", optional = true }
-derive_more = "0.99"
-dotenv = "0.15"
-
-mongodb = {version = "1.0", optional = true}
-
-
 [lib]
 name = "hcor"
 
+[[bin]]
+name = "verify"
+path = "./src/config/verify/bin.rs"
+required-features = [ "config_verify" ]
+
+[[bin]]
+name = "message_size"
+path = "./src/wormhole/message_size.rs"
+required-features = [ "flate2", "serde_json" ]
+
 [features]
-actix = ["actix-web"]
-mongo = ["mongodb"]
+config_verify = [ "serde_yaml", "yaml-merge-keys", "ngrammatic", "pretty_env_logger", "serde_json" ]
+message_derive = [ "actix" ]
+simultaneous_systems = [ "client", "dashmap" ]
+client = [ "awc", "actix", "bytes", "actix-codec", "tokio", "futures" ]
+
+[dependencies]
+# (de)serialize
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", optional = true }
+bincode = "1.3.1"
+zstd = "0.5.3"
+serde-diff = "0.3.1"
+
+# misc. util
+uuid = { version = "0.8", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = [ "serde" ] }
+rand = "0.7"
+lazy_static = "1.4"
+
+# client
+awc = { version = "1.0.1", optional = true }
+# wormhole_client
+actix = { version = "0.9.0", optional = true }
+bytes = { version = "0.5.6", optional = true }
+actix-codec = { version = "0.2.0", optional = true }
+tokio = { version = "0.2.22", optional = true }
+futures = { version = "0.3.5", optional = true }
+log = "0.4.11"
+
+# simultaneous systems
+dashmap = { version = "3.11.10", optional = true }
+walkdir = "2.3.1"
+
+# config verify
+yaml-merge-keys = { version = "0.4.1", features = [ "serde_yaml" ], optional = true }
+serde_yaml = { version = "0.8.13", optional = true }
+ngrammatic = { version = "0.3.1", optional = true }
+pretty_env_logger = { version = "0.4.0", optional = true }
+flate2 = { version = "1.0.17", optional = true }
+
+[dev-dependencies]
+pretty_env_logger = "0.4.0"
