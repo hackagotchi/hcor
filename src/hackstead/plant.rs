@@ -28,7 +28,7 @@ impl std::ops::Deref for Plant {
     }
 }
 impl Plant {
-    pub fn from_seed(item: item::Item, seed: item::Seed) -> Self {
+    pub fn from_seed(seed: item::Seed) -> Self {
         let mut s = Self {
             archetype_handle: CONFIG.find_plant_handle(&seed.grows_into).unwrap(),
             pedigree: seed.pedigree,

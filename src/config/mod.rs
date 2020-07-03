@@ -2,6 +2,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
+#[cfg(test)]
 mod test;
 
 #[derive(Debug, Clone)]
