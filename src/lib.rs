@@ -1,11 +1,10 @@
 #![feature(try_trait)]
-#![warn(missing_docs)]
+//#![warn(missing_docs)]
 
-use humantime::{format_rfc3339, parse_rfc3339};
 use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient};
+use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
 use std::fmt;
-use std::time::SystemTime;
 
 pub mod errors;
 
@@ -13,8 +12,9 @@ pub mod category;
 pub mod config;
 
 pub mod market;
-pub mod models;
 pub mod possess;
+pub mod hackstead;
+pub use hackstead::Hackstead;
 
 pub mod frontend {
     pub fn emojify<S: ToString>(txt: S) -> String {
@@ -28,6 +28,80 @@ pub use possess::{Possessed, Possession};
 
 pub const TABLE_NAME: &'static str = "hackagotchi";
 pub type Item = HashMap<String, AttributeValue>;
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum UserContact {
+    Email(String),
+    Slack(String),
+    Both { email: String, slack: String },
+}
+impl UserContact {
+    pub fn email(&self) -> Option<&str> {
+        Some(match self {
+            UserContact::Email(s) => s,
+            UserContact::Both { email, .. } => email,
+            _ => return None,
+        })
+    }
+    pub fn slack(&self) -> Option<&str> {
+        Some(match self {
+            UserContact::Slack(s) => s,
+            UserContact::Both { slack, .. } => slack,
+            _ => return None,
+        })
+    }
+}
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    const USER_1: &'static str = "U1";
+    const USER_2: &'static str = "U2";
+    const USER_3: &'static str = "U3";
+
+    #[test]
+    fn slack_contact_fetching() {
+        let s = UserContact::Slack(USER_1.to_string());
+        assert_eq!(s.email(), None, "slack only contact should not have email");
+        assert_eq!(
+            s.slack(),
+            Some(USER_1),
+            "slack only contact doesn't store user properly"
+        );
+    }
+
+    #[test]
+    fn email_contact_fetching() {
+        let e = UserContact::Email(USER_2.to_string());
+        assert_eq!(
+            e.email(),
+            Some(USER_2),
+            "email only contact doesn't store email properly"
+        );
+        assert_eq!(e.slack(), None, "email only contact shouldn't have slack");
+    }
+
+    #[test]
+    fn both_contact_fetching() {
+        let both = UserContact::Both {
+            slack: USER_1.to_string(),
+            email: USER_3.to_string(),
+        };
+        assert_eq!(
+            both.slack(),
+            Some(USER_1),
+            "both contact doesn't store slack properly"
+        );
+
+        assert_eq!(
+            both.email(),
+            Some(USER_3),
+            "both contact doesn't store email properly"
+        );
+    }
+}
+
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum AttributeParseError {
@@ -75,191 +149,6 @@ impl fmt::Display for AttributeParseError {
             Unknown => write!(f, "unknown parsing error"),
             Custom(e) => write!(f, "{}", e),
         }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct Profile {
-    /// Indicates when this Hacksteader first joined the elite community.
-    pub joined: SystemTime,
-    pub last_active: SystemTime,
-    pub last_farm: SystemTime,
-    /// This is not an uuid::Uuid because it's actually the steader id of the person who owns this Profile
-    pub id: String,
-    pub xp: u64,
-}
-
-impl std::ops::Deref for Profile {
-    type Target = config::ProfileArchetype;
-
-    fn deref(&self) -> &Self::Target {
-        &CONFIG.profile_archetype
-    }
-}
-
-impl Profile {
-    pub fn new(owner_id: String) -> Self {
-        Self {
-            joined: SystemTime::now(),
-            last_active: SystemTime::now(),
-            last_farm: SystemTime::now(),
-            xp: 0,
-            id: owner_id,
-        }
-    }
-
-    // TODO: store xp in advancements so methods like these aren't necessary
-    pub fn current_advancement(&self) -> &config::HacksteadAdvancement {
-        self.advancements.current(self.xp)
-    }
-
-    pub fn next_advancement(&self) -> Option<&config::HacksteadAdvancement> {
-        self.advancements.next(self.xp)
-    }
-
-    pub fn advancements_sum(&self) -> config::HacksteadAdvancementSum {
-        self.advancements.sum(self.xp, std::iter::empty())
-    }
-
-    pub fn increase_xp(&mut self, amt: u64) -> Option<&config::HacksteadAdvancement> {
-        CONFIG
-            .profile_archetype
-            .advancements
-            .increase_xp(&mut self.xp, amt)
-    }
-
-    pub async fn fetch_all(db: &DynamoDbClient) -> Result<Vec<Profile>, String> {
-        let query = db
-            .query(rusoto_dynamodb::QueryInput {
-                table_name: TABLE_NAME.to_string(),
-                key_condition_expression: Some("cat = :profile_cat".to_string()),
-                expression_attribute_values: Some(
-                    [(":profile_cat".to_string(), Category::Profile.into_av())]
-                        .iter()
-                        .cloned()
-                        .collect(),
-                ),
-                ..Default::default()
-            })
-            .await;
-
-        Ok(query
-            .map_err(|e| format!("Couldn't search land cat: {}", e))?
-            .items
-            .ok_or_else(|| format!("profile query returned no items"))?
-            .iter_mut()
-            .filter_map(|i| match Profile::from_item(i) {
-                Ok(profile) => Some(profile),
-                Err(e) => {
-                    println!("error parsing profile: {}", e);
-                    None
-                }
-            })
-            .collect())
-    }
-
-    /// Returns an empty profile Item for the given slack ID.
-    /// Useful for searching for a given slack user's Hacksteader profile
-    pub fn key_item(id: String) -> Item {
-        [
-            ("cat".to_string(), Category::Profile.into_av()),
-            (
-                "id".to_string(),
-                AttributeValue {
-                    s: Some(id),
-                    ..Default::default()
-                },
-            ),
-        ]
-        .iter()
-        .cloned()
-        .collect()
-    }
-
-    pub fn item(&self) -> Item {
-        let mut m = Self::key_item(self.id.clone());
-        m.insert(
-            "steader".to_string(),
-            AttributeValue {
-                s: Some(self.id.clone()),
-                ..Default::default()
-            },
-        );
-        m.insert(
-            "joined".to_string(),
-            AttributeValue {
-                s: Some(format_rfc3339(self.joined).to_string()),
-                ..Default::default()
-            },
-        );
-        m.insert(
-            "last_active".to_string(),
-            AttributeValue {
-                s: Some(format_rfc3339(self.last_active).to_string()),
-                ..Default::default()
-            },
-        );
-        m.insert(
-            "last_farm".to_string(),
-            AttributeValue {
-                s: Some(format_rfc3339(self.last_farm).to_string()),
-                ..Default::default()
-            },
-        );
-        m.insert(
-            "xp".to_string(),
-            AttributeValue {
-                n: Some(self.xp.to_string()),
-                ..Default::default()
-            },
-        );
-        m
-    }
-
-    pub fn from_item(item: &Item) -> Result<Self, AttributeParseError> {
-        use AttributeParseError::*;
-        Ok(Self {
-            id: item
-                .get("id")
-                .ok_or(MissingField("id"))?
-                .s
-                .as_ref()
-                .ok_or(WronglyTypedField("id"))?
-                .clone(),
-            xp: match item.get("xp") {
-                Some(xp_attribtue_value) => xp_attribtue_value
-                    .n
-                    .as_ref()
-                    .ok_or(WronglyTypedField("xp"))?
-                    .parse()
-                    .map_err(|x| IntFieldParse("xp", x))?,
-                None => 0,
-            },
-            joined: parse_rfc3339(
-                item.get("joined")
-                    .ok_or(MissingField("joined"))?
-                    .s
-                    .as_ref()
-                    .ok_or(WronglyTypedField("joined"))?,
-            )
-            .map_err(|e| TimeFieldParse("joined", e))?,
-            last_active: parse_rfc3339(
-                item.get("last_active")
-                    .ok_or(MissingField("last_active"))?
-                    .s
-                    .as_ref()
-                    .ok_or(WronglyTypedField("last_active"))?,
-            )
-            .map_err(|e| TimeFieldParse("last_active", e))?,
-            last_farm: parse_rfc3339(
-                item.get("last_farm")
-                    .ok_or(MissingField("last_farm"))?
-                    .s
-                    .as_ref()
-                    .ok_or(WronglyTypedField("last_farm"))?,
-            )
-            .map_err(|e| TimeFieldParse("last_farm", e))?,
-        })
     }
 }
 

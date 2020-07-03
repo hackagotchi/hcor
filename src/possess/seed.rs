@@ -20,6 +20,7 @@ impl Possessable for Seed {
 #[derive(Serialize, Deserialize, Default, Debug, Clone, PartialEq)]
 pub struct SeedGrower {
     pub id: String,
+    #[serde(with = "bson::compat::u2f")]
     pub generations: u64,
 }
 impl SeedGrower {

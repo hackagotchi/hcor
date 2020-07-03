@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Default, Debug, Clone, PartialEq)]
 pub struct GotchiHarvestOwner {
     pub id: String,
+    #[serde(with = "bson::compat::u2f")]
     pub harvested: u64,
 }
 impl GotchiHarvestOwner {
