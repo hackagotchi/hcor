@@ -1,5 +1,5 @@
 use super::{Possessable, PossessionKind};
-use crate::{config, AttributeParseError, Item, CONFIG};
+use crate::{config, CONFIG};
 use config::{ArchetypeHandle, ArchetypeKind};
 use serde::{Deserialize, Serialize};
 
@@ -37,8 +37,4 @@ impl Keepsake {
     pub fn new(archetype_handle: ArchetypeHandle, _owner_id: &str) -> Self {
         Self { archetype_handle }
     }
-    pub fn fill_from_item(&mut self, _item: &Item) -> Result<(), AttributeParseError> {
-        Ok(())
-    }
-    pub fn write_item(&self, _item: &mut Item) {}
 }

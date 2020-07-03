@@ -1,6 +1,5 @@
-use crate::{config, market, AttributeParseError, Category, Item, Key, CONFIG};
+use crate::{config, market, CONFIG};
 use config::{Archetype, ArchetypeHandle, ArchetypeKind};
-use rusoto_dynamodb::AttributeValue;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -24,12 +23,6 @@ pub enum PossessionKind {
     Keepsake(Keepsake),
 }
 impl PossessionKind {
-    pub fn category(&self) -> Category {
-        match self {
-            PossessionKind::Gotchi(_) => Category::Gotchi,
-            _ => Category::Misc,
-        }
-    }
     fn new(ah: ArchetypeHandle, owner_id: &str) -> Self {
         match CONFIG
             .possession_archetypes
@@ -40,20 +33,6 @@ impl PossessionKind {
             ArchetypeKind::Gotchi(_) => PossessionKind::Gotchi(Gotchi::new(ah, owner_id)),
             ArchetypeKind::Seed(_) => PossessionKind::Seed(Seed::new(ah, owner_id)),
             ArchetypeKind::Keepsake(_) => PossessionKind::Keepsake(Keepsake::new(ah, owner_id)),
-        }
-    }
-    fn fill_from_item(&mut self, item: &Item) -> Result<(), AttributeParseError> {
-        match self {
-            PossessionKind::Gotchi(g) => g.fill_from_item(item),
-            PossessionKind::Seed(s) => s.fill_from_item(item),
-            PossessionKind::Keepsake(k) => k.fill_from_item(item),
-        }
-    }
-    fn write_item(&self, item: &mut Item) {
-        match self {
-            PossessionKind::Gotchi(g) => g.write_item(item),
-            PossessionKind::Seed(s) => s.write_item(item),
-            PossessionKind::Keepsake(k) => k.write_item(item),
         }
     }
 
@@ -166,62 +145,6 @@ impl Owner {
             acquisition: Acquisition::Hatched,
         }
     }
-    fn from_item(item: &Item) -> Result<Self, AttributeParseError> {
-        use AttributeParseError::*;
-
-        Ok(Self {
-            id: item
-                .get("id")
-                .ok_or(MissingField("id"))?
-                .s
-                .as_ref()
-                .ok_or(WronglyTypedField("id"))?
-                .clone(),
-            acquisition: Acquisition::from_item(
-                item.get("acquisition")
-                    .ok_or(MissingField("acquisition"))?
-                    .m
-                    .as_ref()
-                    .ok_or(WronglyTypedField("acquisition"))?,
-            )?,
-        })
-    }
-}
-impl Into<AttributeValue> for Owner {
-    fn into(self) -> AttributeValue {
-        let Self { id, acquisition } = self;
-        AttributeValue {
-            m: Some(
-                [
-                    (
-                        "id".into(),
-                        AttributeValue {
-                            s: Some(id),
-                            ..Default::default()
-                        },
-                    ),
-                    ("acquisition".into(), acquisition.into()),
-                ]
-                .iter()
-                .cloned()
-                .collect(),
-            ),
-            ..Default::default()
-        }
-    }
-}
-#[test]
-fn owner_serialize() {
-    let og = Owner {
-        id: "bob".to_string(),
-        acquisition: Acquisition::spawned(),
-    };
-
-    let og_av: AttributeValue = og.clone().into();
-    let item = &og_av.m.unwrap();
-    let og_copy = Owner::from_item(item).unwrap();
-
-    assert_eq!(og, og_copy);
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -233,34 +156,6 @@ pub enum Acquisition {
     Hatched,
 }
 impl Acquisition {
-    fn from_item(item: &Item) -> Result<Self, AttributeParseError> {
-        use AttributeParseError::*;
-
-        let kind = item
-            .get("type")
-            .ok_or(MissingField("type"))?
-            .s
-            .as_ref()
-            .ok_or(WronglyTypedField("type"))?
-            .clone();
-        match kind.as_str() {
-            "Trade" => Ok(Acquisition::Trade),
-            "Farmed" => Ok(Acquisition::Farmed),
-            "Crafted" => Ok(Acquisition::Crafted),
-            "Hatched" => Ok(Acquisition::Hatched),
-            "Purchase" => Ok(Acquisition::Purchase {
-                price: item
-                    .get("price")
-                    .ok_or(MissingField("price"))?
-                    .n
-                    .as_ref()
-                    .ok_or(WronglyTypedField("price"))?
-                    .parse()
-                    .map_err(|e| IntFieldParse("price", e))?,
-            }),
-            _ => Err(Custom("unknown Acquisition type")),
-        }
-    }
     pub fn spawned() -> Self {
         Acquisition::Trade
     }
@@ -275,60 +170,6 @@ impl fmt::Display for Acquisition {
             Acquisition::Purchase { price } => write!(f, "Purchase({}gp)", price),
         }
     }
-}
-impl Into<AttributeValue> for Acquisition {
-    fn into(self) -> AttributeValue {
-        use Acquisition::*;
-
-        AttributeValue {
-            m: match self {
-                Trade | Farmed | Crafted | Hatched => Some(
-                    [(
-                        "type".to_string(),
-                        AttributeValue {
-                            s: Some(format!("{}", self)),
-                            ..Default::default()
-                        },
-                    )]
-                    .iter()
-                    .cloned()
-                    .collect(),
-                ),
-                Purchase { price } => Some(
-                    [
-                        (
-                            "type".to_string(),
-                            AttributeValue {
-                                s: Some("Purchase".to_string()),
-                                ..Default::default()
-                            },
-                        ),
-                        (
-                            "price".to_string(),
-                            AttributeValue {
-                                n: Some(price.to_string()),
-                                ..Default::default()
-                            },
-                        ),
-                    ]
-                    .iter()
-                    .cloned()
-                    .collect(),
-                ),
-            },
-            ..Default::default()
-        }
-    }
-}
-#[test]
-fn acquisition_serialize() {
-    let og = Acquisition::spawned();
-
-    let og_av: AttributeValue = og.clone().into();
-    let item = &og_av.m.unwrap();
-    let og_copy = Acquisition::from_item(item).unwrap();
-
-    assert_eq!(og, og_copy);
 }
 
 /// A copy of Possession for when you know what variant of PossessionKind
@@ -453,118 +294,4 @@ impl Possession {
             .get(self.archetype_handle)
             .expect("invalid archetype handle")
     }
-
-    pub fn key(&self) -> Key {
-        Key {
-            id: self.id.clone(),
-            category: self.kind.category(),
-        }
-    }
-
-    pub fn item(&self) -> Item {
-        let mut m = self.key().into_item();
-        m.insert(
-            "steader".to_string(),
-            AttributeValue {
-                s: Some(self.steader.clone()),
-                ..Default::default()
-            },
-        );
-        m.insert(
-            "ownership_log".to_string(),
-            AttributeValue {
-                l: Some(
-                    self.ownership_log
-                        .clone()
-                        .into_iter()
-                        .map(|x| x.into())
-                        .collect(),
-                ),
-                ..Default::default()
-            },
-        );
-        m.insert(
-            "archetype_handle".to_string(),
-            AttributeValue {
-                n: Some(self.archetype_handle.to_string()),
-                ..Default::default()
-            },
-        );
-        self.kind.write_item(&mut m);
-        m
-    }
-
-    pub fn from_item(item: &Item) -> Result<Self, AttributeParseError> {
-        use AttributeParseError::*;
-
-        let steader = item
-            .get("steader")
-            .ok_or(MissingField("steader"))?
-            .s
-            .as_ref()
-            .ok_or(WronglyTypedField("steader"))?
-            .clone();
-        let Key { id, category } = Key::from_item(item)?;
-
-        // make sure this is the right category of item
-        let archetype_handle = item
-            .get("archetype_handle")
-            .ok_or(MissingField("archetype_handle"))?
-            .n
-            .as_ref()
-            .ok_or(WronglyTypedField("archetype_handle"))?
-            .parse()
-            .map_err(|e| IntFieldParse("archetype_handle", e))?;
-
-        let mut kind = PossessionKind::new(archetype_handle, &steader);
-        kind.fill_from_item(item)?;
-
-        if category == kind.category() {
-            Ok(Self {
-                steader,
-                kind,
-                archetype_handle,
-                id,
-                ownership_log: item
-                    .get("ownership_log")
-                    .ok_or(MissingField("ownership_log"))?
-                    .l
-                    .as_ref()
-                    .ok_or(WronglyTypedField("ownership_log"))?
-                    .iter()
-                    .filter_map(|x| {
-                        match x.m.as_ref() {
-                            Some(m) => match Owner::from_item(m) {
-                                Ok(o) => return Some(o),
-                                Err(e) => println!("error parsing item in ownership log: {}", e),
-                            },
-                            None => println!("non-map item in ownership log"),
-                        };
-                        None
-                    })
-                    .collect(),
-                sale: market::Sale::from_item(item).ok(),
-            })
-        } else {
-            Err(Custom("Category mismatch"))
-        }
-    }
-}
-#[test]
-fn possessed_gotchi_serialize() {
-    let og = Possession::new(
-        CONFIG
-            .possession_archetypes
-            .iter()
-            .position(|x| x.name == "Adorpheus")
-            .unwrap(),
-        Owner {
-            id: "bob".to_string(),
-            acquisition: Acquisition::spawned(),
-        },
-    );
-
-    let og_item = og.item();
-
-    assert_eq!(og, Possession::from_item(&og_item).unwrap());
 }

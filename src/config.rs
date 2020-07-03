@@ -318,13 +318,6 @@ pub enum ArchetypeKind {
     Keepsake(KeepsakeArchetype),
 }
 impl ArchetypeKind {
-    pub fn category(&self) -> crate::Category {
-        use crate::Category;
-        match self {
-            ArchetypeKind::Gotchi(_) => Category::Gotchi,
-            _ => Category::Misc,
-        }
-    }
     pub fn keepsake(&self) -> Option<&KeepsakeArchetype> {
         match self {
             ArchetypeKind::Keepsake(k) => Some(k),

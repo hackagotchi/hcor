@@ -1,5 +1,4 @@
 use derive_more::Display;
-use std::convert::From;
 
 #[derive(Debug, Display)]
 pub enum ServiceError {
