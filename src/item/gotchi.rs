@@ -1,6 +1,5 @@
-use super::{Possessable, PossessionKind};
 use crate::{config, CONFIG};
-use config::{ArchetypeHandle, ArchetypeKind};
+use config::ArchetypeHandle;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone, PartialEq)]
@@ -16,33 +15,22 @@ pub struct Gotchi {
     pub nickname: String,
     pub harvest_log: Vec<GotchiHarvestOwner>,
 }
-impl Possessable for Gotchi {
-    fn from_possession_kind(pk: PossessionKind) -> Option<Self> {
-        pk.as_gotchi()
-    }
-    fn into_possession_kind(self) -> PossessionKind {
-        PossessionKind::Gotchi(self)
-    }
-}
 impl std::ops::Deref for Gotchi {
     type Target = config::GotchiArchetype;
 
     fn deref(&self) -> &Self::Target {
-        match &CONFIG
+        &CONFIG
             .possession_archetypes
             .get(self.archetype_handle)
             .expect("invalid archetype handle")
-            .kind
-        {
-            ArchetypeKind::Gotchi(g) => g,
-            _ => panic!(
+            .gotchi
+            .as_ref()
+            .unwrap_or_else(|| panic!(
                 "gotchi has non-gotchi archetype handle {}",
                 self.archetype_handle
-            ),
-        }
+            ))
     }
 }
-
 impl Gotchi {
     pub fn new(archetype_handle: ArchetypeHandle, owner_id: &str) -> Self {
         Self {

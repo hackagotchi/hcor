@@ -9,8 +9,8 @@ pub use errors::RequestError;
 pub mod config;
 pub use config::CONFIG;
 
-pub mod possess;
-pub use possess::{Possessed, Possession};
+pub mod item;
+pub use item::Item;
 
 pub mod hackstead;
 pub use hackstead::Hackstead;

@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
-use crate::{config, possess};
+use crate::{config, item};
 use config::CONFIG;
-use possess::Possession;
+use item::Item;
 use chrono::{NaiveDateTime, Utc};
 
 mod plant;
@@ -12,7 +12,7 @@ pub struct Hackstead {
     pub id: String,
     pub profile: Profile,
     pub land: Vec<Tile>,
-    pub inventory: Vec<Possession>,
+    pub inventory: Vec<Item>,
 }
 impl Hackstead {
     pub fn new<T: ToString>(owner_id: T) -> Self {

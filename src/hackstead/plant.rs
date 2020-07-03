@@ -1,4 +1,4 @@
-use crate::{config, possess};
+use crate::{config, item};
 use config::{CONFIG, ArchetypeHandle, PlantArchetype};
 use serde::{Serialize, Deserialize};
 
@@ -8,7 +8,7 @@ pub struct Plant {
     pub xp: u64,
     pub until_yield: f32,
     pub craft: Option<Craft>,
-    pub pedigree: Vec<possess::seed::SeedGrower>,
+    pub pedigree: Vec<item::seed::SeedGrower>,
     /// Effects from potions, warp powder, etc. that actively change the behavior of this plant.
     pub effects: Vec<Effect>,
     pub archetype_handle: ArchetypeHandle,
@@ -28,10 +28,10 @@ impl std::ops::Deref for Plant {
     }
 }
 impl Plant {
-    pub fn from_seed(seed: possess::Possessed<possess::Seed>) -> Self {
+    pub fn from_seed(item: item::Item, seed: item::Seed) -> Self {
         let mut s = Self {
-            archetype_handle: CONFIG.find_plant_handle(&seed.inner.grows_into).unwrap(),
-            pedigree: seed.inner.pedigree,
+            archetype_handle: CONFIG.find_plant_handle(&seed.grows_into).unwrap(),
+            pedigree: seed.pedigree,
             ..Default::default()
         };
         s.until_yield = s.base_yield_duration.unwrap_or(0.0);
