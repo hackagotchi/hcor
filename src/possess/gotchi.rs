@@ -165,8 +165,8 @@ fn gotchi_serialize() -> Result<(), AttributeParseError> {
         CONFIG
             .possession_archetypes
             .iter()
-            .position(|x| x.name == "Adorpheus")
-            .unwrap(),
+            .position(|x| x.name == "Gempheus")
+            .expect("No possession named 'Gempheus' in the config"),
         "bob",
     );
 
