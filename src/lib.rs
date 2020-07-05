@@ -1,33 +1,29 @@
 #![feature(try_trait)]
-#![warn(missing_docs)]
+//#![warn(missing_docs)]
 
-mod errors;
-#[cfg(feature = "mongo")]
-pub use errors::RequestError;
-pub use errors::ServiceError;
+#[cfg(feature = "client")]
+mod client;
+#[cfg(feature = "client")]
+pub use client::{ClientError, ClientResult, IdentifiesItem, IdentifiesSteader, IdentifiesUser};
+#[cfg(feature = "client")]
+/// This is exposed to aid those extending hcor's wrappers around the API.
+pub mod client_internal {
+    pub use super::client::request;
+}
 
 /// All of the game design switches and levers are handled here, with a focus on how they interact
 /// with the rest of the data in the game.
 pub mod config;
-pub use config::CONFIG;
-
-/// Some items boost the growth of plants; others accelerate their growth or give you more land.
-/// This module facilitates handling all of them.
-pub mod item;
-pub use item::Item;
+pub use config::{ConfigError, ConfigResult, CONFIG};
 
 /// What are those Hackagotchi farms made of, anyway?
 pub mod hackstead;
-pub use hackstead::Hackstead;
+pub use hackstead::{item, plant, tile, Hackstead, Item, Plant, Tile};
 
 /// Store user emails/slack ids with a compile time check that we'll have at least one of those
 /// two.
-pub mod user_contact;
-pub use user_contact::UserContact;
-
-/// Addresses Hackagotchi's market platform.
-pub mod market;
-pub use market::Sale;
+pub mod user_id;
+pub use user_id::UserId;
 
 /// Contains code common across frontends.
 pub mod frontend {

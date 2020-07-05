@@ -5,15 +5,23 @@ use std::hash::{Hash, Hasher};
 #[cfg(test)]
 mod test;
 
+pub type ConfigResult<T> = Result<T, ConfigError>;
 #[derive(Debug, Clone)]
 pub enum ConfigError {
     UnknownArchetypeName(String),
+    UnknownArchetype(Archetype),
+    UnknownArchetypeHandle(i32),
 }
+impl std::error::Error for ConfigError {}
 impl fmt::Display for ConfigError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use ConfigError::*;
         match self {
-            UnknownArchetypeName(name) => write!(f, "no archetype by the name of {:?}", name),
+            UnknownArchetypeName(name) => {
+                write!(f, "no archetype in config by the name of {:?}", name)
+            }
+            UnknownArchetype(a) => write!(f, "no archetype in config {:#?}", a),
+            UnknownArchetypeHandle(ah) => write!(f, "no archetype in config with handle {}", ah),
         }
     }
 }
@@ -37,7 +45,7 @@ pub trait SpawnTableRow {
     /// percentiles for eggs, perhaps we want to replace this with
     /// some configurably-defined "desireability" factor?
     /// Rarity does not strictly correlate with the value of something.
-    fn rarity(&self) -> f32;
+    fn rarity(&self) -> f64;
 
     /// How many of this item should be outputted?
     fn count(&self, rng: &mut impl rand::RngCore) -> usize;
@@ -49,7 +57,7 @@ pub trait SpawnTableRow {
 impl<Handle: Clone> SpawnTableRow for (CountProbability, Handle) {
     type Output = Handle;
 
-    fn rarity(&self) -> f32 {
+    fn rarity(&self) -> f64 {
         (self.0).0
     }
     fn count(&self, rng: &mut impl rand::RngCore) -> usize {
@@ -75,8 +83,8 @@ pub fn spawn<'rng, Row: SpawnTableRow>(
 pub fn spawn_with_percentile<Row: SpawnTableRow>(
     table: &Vec<Row>,
     rng: &mut impl rand::RngCore,
-) -> (Vec<Row::Output>, f32) {
-    let (handles, rows): (Vec<Vec<Row::Output>>, Vec<f32>) = table
+) -> (Vec<Row::Output>, f64) {
+    let (handles, rows): (Vec<Vec<Row::Output>>, Vec<f64>) = table
         .iter()
         .filter_map(|row| {
             let count = row.count(rng);
@@ -93,23 +101,29 @@ pub fn spawn_with_percentile<Row: SpawnTableRow>(
         .unzip();
 
     (handles.into_iter().flat_map(|h| h.into_iter()).collect(), {
-        let best_roll: f32 = table.iter().map(|row| row.rarity()).product();
-        1.0 - ((rows.into_iter().product::<f32>() - best_roll) / (1.0 - best_roll))
+        let best_roll: f64 = table.iter().map(|row| row.rarity()).product();
+        1.0 - ((rows.into_iter().product::<f64>() - best_roll) / (1.0 - best_roll))
     })
 }
 
 impl Config {
+    pub fn land_unlocking_item_archetypes(&self) -> impl Iterator<Item = (&Archetype, LandUnlock)> {
+        self.possession_archetypes
+            .iter()
+            .filter_map(|a| Some((a, a.unlocks_land.clone()?)))
+    }
+
     pub fn get_item_application_plant_advancement(
         &self,
         item_archetype_handle: ArchetypeHandle,
         effect_archetype_handle: ArchetypeHandle,
-    ) -> Option<(&ItemApplicationEffect, &PlantAdvancement)> {
+    ) -> Option<(&PlantApplicationEffect, &PlantAdvancement)> {
         self.get_item_application_effect(item_archetype_handle, effect_archetype_handle)
             .and_then(|e| {
                 Some((
                     e,
                     match &e.kind {
-                        ItemApplicationEffectKind::PlantAdvancement(pa) => Some(pa),
+                        PlantApplicationEffectKind::PlantAdvancement(pa) => Some(pa),
                         _ => None,
                     }?,
                 ))
@@ -120,20 +134,20 @@ impl Config {
         &self,
         item_archetype_handle: ArchetypeHandle,
         effect_archetype_handle: ArchetypeHandle,
-    ) -> Option<&ItemApplicationEffect> {
+    ) -> Option<&PlantApplicationEffect> {
         self.possession_archetypes
-            .get(item_archetype_handle)?
-            .item_application
+            .get(item_archetype_handle as usize)?
+            .plant_application
             .as_ref()?
             .effects
-            .get(effect_archetype_handle)
+            .get(effect_archetype_handle as usize)
     }
 
     pub fn find_plant<S: AsRef<str>>(&self, name: &S) -> Result<&PlantArchetype, ConfigError> {
         self.plant_archetypes
             .iter()
             .find(|x| name.as_ref() == x.name)
-            .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
+            .ok_or_else(|| ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
     }
 
     pub fn find_plant_handle<S: AsRef<str>>(
@@ -144,6 +158,7 @@ impl Config {
             .iter()
             .position(|x| name.as_ref() == x.name)
             .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
+            .map(|x| x as ArchetypeHandle)
     }
 
     pub fn find_possession<S: AsRef<str>>(&self, name: &S) -> Result<&Archetype, ConfigError> {
@@ -153,7 +168,7 @@ impl Config {
             .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
     }
 
-    pub fn find_possession_handle<S: AsRef<str>>(
+    pub fn possession_name_to_handle<S: AsRef<str>>(
         &self,
         name: &S,
     ) -> Result<ArchetypeHandle, ConfigError> {
@@ -161,11 +176,20 @@ impl Config {
             .iter()
             .position(|x| name.as_ref() == x.name)
             .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
+            .map(|x| x as ArchetypeHandle)
+    }
+
+    pub fn possession_archetype_to_handle(&self, a: &Archetype) -> ConfigResult<ArchetypeHandle> {
+        self.possession_archetypes
+            .iter()
+            .position(|x| x == a)
+            .map(|x| x as ArchetypeHandle)
+            .ok_or_else(|| ConfigError::UnknownArchetype(a.clone()))
     }
 }
 
 // I should _really_ use a different version of this for PlantArchetypes and PossessionArchetypes ...
-pub type ArchetypeHandle = usize;
+pub type ArchetypeHandle = i32;
 
 lazy_static::lazy_static! {
     pub static ref CONFIG: Config = {
@@ -190,7 +214,7 @@ lazy_static::lazy_static! {
     };
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ProfileArchetype {
     pub advancements: AdvancementSet<HacksteadAdvancementSum>,
 }
@@ -199,12 +223,12 @@ pub type HacksteadAdvancement = Advancement<HacksteadAdvancementSum>;
 pub type HacksteadAdvancementSet = AdvancementSet<HacksteadAdvancementSum>;
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum HacksteadAdvancementKind {
-    Land { pieces: u32 },
+    Land { pieces: i32 },
 }
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct HacksteadAdvancementSum {
-    pub land: u32,
-    pub xp: u64,
+    pub land: i32,
+    pub xp: i32,
 }
 impl AdvancementSum for HacksteadAdvancementSum {
     type Kind = HacksteadAdvancementKind;
@@ -226,15 +250,15 @@ impl AdvancementSum for HacksteadAdvancementSum {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum KeepPlants<Handle> {
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub enum PlantFilter<Handle> {
     Only(Vec<Handle>),
     Not(Vec<Handle>),
     All,
 }
-impl KeepPlants<String> {
-    pub fn lookup_handles(&self) -> Result<KeepPlants<ArchetypeHandle>, ConfigError> {
-        use KeepPlants::*;
+impl PlantFilter<String> {
+    pub fn lookup_handles(&self) -> Result<PlantFilter<ArchetypeHandle>, ConfigError> {
+        use PlantFilter::*;
 
         Ok(match self {
             Only(these) => Only(
@@ -251,9 +275,9 @@ impl KeepPlants<String> {
         })
     }
 }
-impl<Handle: PartialEq> KeepPlants<Handle> {
+impl<Handle: PartialEq> PlantFilter<Handle> {
     pub fn allows(&self, h: &Handle) -> bool {
-        use KeepPlants::*;
+        use PlantFilter::*;
 
         match self {
             Only(these) => these.contains(h),
@@ -263,63 +287,106 @@ impl<Handle: PartialEq> KeepPlants<Handle> {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct SelectivePlantAdvancement {
-    pub keep_plants: KeepPlants<String>,
+    pub for_plants: PlantFilter<String>,
     pub advancement: PlantAdvancement,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct GotchiArchetype {
-    pub base_happiness: u64,
-    #[serde(default)]
-    pub plant_effects: Vec<SelectivePlantAdvancement>,
-    pub hatch_table: Option<LootTable>,
-    #[serde(default)]
-    pub welcome_gift: bool,
+    pub base_happiness: i32,
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct SeedArchetype {
     pub grows_into: String,
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct LandUnlock {
     pub requires_xp: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ItemApplication {
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct PlantApplication {
     pub short_description: String,
-    pub effects: Vec<ItemApplicationEffect>,
+    pub effects: Vec<PlantApplicationEffect>,
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum ItemApplicationEffectKind {
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub enum PlantApplicationEffectKind {
     PlantAdvancement(PlantAdvancement),
     TurnsPlantInto(String),
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ItemApplicationEffect {
-    pub duration: Option<f32>,
-    pub keep_plants: KeepPlants<String>,
-    pub kind: ItemApplicationEffectKind,
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct PlantApplicationEffect {
+    pub duration: Option<f64>,
+    pub for_plants: PlantFilter<String>,
+    pub kind: PlantApplicationEffectKind,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Archetype {
     pub name: String,
     pub description: String,
+    #[serde(default)]
     pub gotchi: Option<GotchiArchetype>,
+    #[serde(default)]
     pub seed: Option<SeedArchetype>,
+    #[serde(default)]
     pub unlocks_land: Option<LandUnlock>,
     #[serde(default)]
-    pub plant_effects: Vec<SelectivePlantAdvancement>,
-    pub item_application: Option<ItemApplication>,
+    pub welcome_gift: bool,
+    #[serde(default)]
+    pub passive_plant_effects: Vec<SelectivePlantAdvancement>,
+    #[serde(default)]
+    pub plant_application: Option<PlantApplication>,
+    #[serde(default)]
+    pub hatch_table: Option<LootTable>,
+}
+
+#[cfg(feature = "client")]
+mod client {
+    use super::*;
+    use crate::client::{request, request_one, ClientResult, IdentifiesUser};
+    use crate::item::ItemSpawnRequest;
+    const SPAWN_ROUTE: &'static str = "item/godyeet";
+
+    fn item_spawn_request(
+        arch: &Archetype,
+        iu: impl IdentifiesUser,
+        amount: usize
+    ) -> ItemSpawnRequest {
+        ItemSpawnRequest {
+            receiver_id: iu.user_id(),
+            item_archetype_handle: CONFIG
+                .possession_archetype_to_handle(arch)
+                .expect("archetype not found in config"),
+            amount,
+        }
+    }
+
+    impl Archetype {
+        pub async fn spawn_some_for(
+            &self,
+            iu: impl IdentifiesUser,
+            amount: usize,
+        ) -> ClientResult<Vec<crate::Item>> {
+            request(
+                SPAWN_ROUTE,
+                &item_spawn_request(self, iu, amount),
+            )
+            .await
+        }
+
+        pub async fn spawn_for(&self, iu: impl IdentifiesUser) -> ClientResult<crate::Item> {
+            request_one(SPAWN_ROUTE, &item_spawn_request(self, iu, 1)).await
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PlantArchetype {
     pub name: String,
-    pub base_yield_duration: Option<f32>,
+    pub base_yield_duration: Option<f64>,
     pub advancements: AdvancementSet<PlantAdvancementSum>,
 }
 impl Eq for PlantArchetype {}
@@ -340,13 +407,13 @@ pub type PlantAdvancementSet = AdvancementSet<PlantAdvancementSum>;
 pub enum RecipeMakes<Handle: Clone> {
     Just(usize, Handle),
     Nothing,
-    OneOf(Vec<(f32, RecipeMakes<Handle>)>),
+    OneOf(Vec<(f64, RecipeMakes<Handle>)>),
     AllOf(Vec<(usize, Handle)>),
 }
 impl<Handle: Clone> RecipeMakes<Handle> {
-    fn pick_one_weighted_of<T: Clone>(from: &Vec<(f32, T)>) -> T {
+    fn pick_one_weighted_of<T: Clone>(from: &Vec<(f64, T)>) -> T {
         use rand::Rng;
-        let mut x: f32 = rand::thread_rng().gen_range(0.0, 1.0);
+        let mut x: f64 = rand::thread_rng().gen_range(0.0, 1.0);
         from.iter()
             .find_map(|(chance, h)| {
                 x -= chance;
@@ -369,11 +436,11 @@ impl<Handle: Clone> RecipeMakes<Handle> {
             OneOf(these) => Self::pick_one_weighted_of(these).any(),
             Just(_, h) => Some(h.clone()),
             AllOf(these) => {
-                let total = these.iter().map(|(count, _)| *count).sum::<usize>() as f32;
+                let total = these.iter().map(|(count, _)| *count).sum::<usize>() as f64;
                 Some(Self::pick_one_weighted_of(
                     &these
                         .iter()
-                        .map(|(count, h)| (*count as f32 / total, h.clone()))
+                        .map(|(count, h)| (*count as f64 / total, h.clone()))
                         .collect(),
                 ))
             }
@@ -454,7 +521,7 @@ impl RecipeMakes<ArchetypeHandle> {
         use RecipeMakes::*;
 
         fn lookup(ah: ArchetypeHandle) -> Option<&'static Archetype> {
-            CONFIG.possession_archetypes.get(ah)
+            CONFIG.possession_archetypes.get(ah as usize)
         }
 
         Some(match self {
@@ -479,7 +546,7 @@ impl RecipeMakes<String> {
         use RecipeMakes::*;
 
         fn find(name: String) -> Result<ArchetypeHandle, ConfigError> {
-            CONFIG.find_possession_handle(&name)
+            CONFIG.possession_name_to_handle(&name)
         }
 
         Ok(match self {
@@ -510,13 +577,13 @@ pub struct Recipe<Handle: Clone> {
     pub makes: RecipeMakes<Handle>,
     #[serde(default)]
     pub destroys_plant: bool,
-    pub time: f32,
-    pub xp: (u64, u64),
+    pub time: f64,
+    pub xp: (i32, i32),
 }
 impl Recipe<ArchetypeHandle> {
     pub fn satisfies(&self, inv: &[crate::Item]) -> bool {
         self.needs.iter().copied().all(|(count, ah)| {
-            let has = inv.iter().filter(|x| x.archetype_handle == ah).count();
+            let has = inv.iter().filter(|x| x.base.archetype_handle == ah).count();
             count <= has
         })
     }
@@ -534,7 +601,7 @@ impl Recipe<ArchetypeHandle> {
             makes: makes.lookup_handles()?,
             needs: needs
                 .into_iter()
-                .map(|(n, x)| Some((n, CONFIG.possession_archetypes.get(x)?)))
+                .map(|(n, x)| Some((n, CONFIG.possession_archetypes.get(x as usize)?)))
                 .collect::<Option<Vec<(_, &Archetype)>>>()?,
             time,
             destroys_plant,
@@ -568,10 +635,10 @@ impl Recipe<&Archetype> {
 /// counterparts. The integral counterpart is the base number of items to award, and the
 /// fractional counterpart becomes a probability that an extra item is awarded. For example,
 /// 1.99 is one item guaranteed, with a 99% chance of a second item being awarded.
-pub type AmountBounds = (f32, f32);
+pub type AmountBounds = (f64, f64);
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
-pub struct CountProbability(pub f32, pub AmountBounds);
+pub struct CountProbability(pub f64, pub AmountBounds);
 impl CountProbability {
     pub fn gen_count<R: rand::Rng>(self, rng: &mut R) -> usize {
         let Self(guard, (lo, hi)) = self;
@@ -598,13 +665,13 @@ impl CountProbability {
 pub struct Yield<Handle> {
     /// The chance this yield has of even occuring, in the domain [0.0, 1.0].
     /// Note that yields which do not occur yield neither xp nor items.
-    pub chance: f32,
+    pub chance: f64,
     /// The number of items to produce, see the documentation on AmountBounds for more information.
     pub amount: AmountBounds,
     /// This field dictates how much less xp is earned per item in a yield.
     /// The formula used is xp / (i * dropoff), where xp is an amount in the bounds below,
     /// and i is the index of the item.
-    pub dropoff: f32,
+    pub dropoff: f64,
     /// An upper and lower bound for a random amount of xp to be awarded should this yield occur
     /// (as determined by the chance field).
     /// The xp is awarded on a per item basis, although dropoff can be used to ensure less and
@@ -634,7 +701,7 @@ impl Yield<String> {
             amount,
             xp,
             dropoff,
-            yields: CONFIG.find_possession_handle(&yields)?,
+            yields: CONFIG.possession_name_to_handle(&yields)?,
         })
     }
 }
@@ -644,7 +711,7 @@ impl<Handle: Clone> SpawnTableRow for Yield<Handle> {
     /// alongside something you can use to spawn an item with.
     type Output = (Handle, usize);
 
-    fn rarity(&self) -> f32 {
+    fn rarity(&self) -> f64 {
         self.chance
     }
     fn count(&self, rng: &mut impl rand::RngCore) -> usize {
@@ -655,7 +722,7 @@ impl<Handle: Clone> SpawnTableRow for Yield<Handle> {
             use rand::Rng;
 
             let (lo, hi) = self.xp;
-            (rand::thread_rng().gen_range(lo, hi) as f32 / ((index + 1) as f32 * self.dropoff))
+            (rand::thread_rng().gen_range(lo, hi) as f64 / ((index + 1) as f64 * self.dropoff))
                 .round() as usize
         })
     }
@@ -667,16 +734,16 @@ impl<Handle: Clone> SpawnTableRow for Yield<Handle> {
 pub enum PlantAdvancementKind {
     Neighbor(Box<PlantAdvancementKind>),
     /// Stores the number of extra cycles to add for the duration of the effect
-    ExtraTimeTicks(u32),
-    TimeTicksMultiplier(f32),
-    Xp(f32),
-    YieldSpeedMultiplier(f32),
-    YieldSizeMultiplier(f32),
+    ExtraTimeTicks(i32),
+    TimeTicksMultiplier(f64),
+    Xp(f64),
+    YieldSpeedMultiplier(f64),
+    YieldSizeMultiplier(f64),
     Yield(Vec<Yield<String>>),
     Craft(Vec<Recipe<String>>),
-    CraftSpeedMultiplier(f32),
-    CraftReturnChance(f32),
-    DoubleCraftYield(f32),
+    CraftSpeedMultiplier(f64),
+    CraftReturnChance(f64),
+    DoubleCraftYield(f64),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
@@ -685,16 +752,16 @@ pub struct PlantAdvancementSum {
     // time acceleration
     pub total_extra_time_ticks: u128,
     // xp
-    pub xp: u64,
-    pub xp_multiplier: u64,
+    pub xp: i32,
+    pub xp_multiplier: i32,
     // yield
-    pub yield_speed_multiplier: f32,
-    pub yield_size_multiplier: f32,
+    pub yield_speed_multiplier: f64,
+    pub yield_size_multiplier: f64,
     pub yields: Vec<Yield<ArchetypeHandle>>,
     // craft
-    pub double_craft_yield_chance: f32,
-    pub crafting_speed_multiplier: f32,
-    pub craft_return_chance: f32,
+    pub double_craft_yield_chance: f64,
+    pub crafting_speed_multiplier: f64,
+    pub craft_return_chance: f64,
     pub recipes: Vec<Recipe<ArchetypeHandle>>,
 }
 impl AdvancementSum for PlantAdvancementSum {
@@ -704,8 +771,8 @@ impl AdvancementSum for PlantAdvancementSum {
         use PlantAdvancementKind::*;
 
         // time
-        let mut time_ticks_multiplier: f32 = 1.0;
-        let mut extra_time_ticks: u32 = 0;
+        let mut time_ticks_multiplier: f64 = 1.0;
+        let mut extra_time_ticks: i32 = 0;
         // xp
         let mut xp = 0;
         let mut xp_multiplier = 0;
@@ -735,7 +802,7 @@ impl AdvancementSum for PlantAdvancementSum {
                 &ExtraTimeTicks(extra) => extra_time_ticks += extra,
 
                 // xp
-                &Xp(xp_gain) => xp_multiplier += xp_gain as u64,
+                &Xp(xp_gain) => xp_multiplier += xp_gain as i32,
 
                 // yield
                 &YieldSpeedMultiplier(multiplier) => yield_speed_multiplier *= multiplier,
@@ -771,7 +838,7 @@ impl AdvancementSum for PlantAdvancementSum {
                                 makes: makes.clone().find_handles()?,
                                 needs: needs
                                     .iter()
-                                    .map(|(c, s)| Ok((*c, CONFIG.find_possession_handle(s)?)))
+                                    .map(|(c, s)| Ok((*c, CONFIG.possession_name_to_handle(s)?)))
                                     .collect::<Result<Vec<_>, ConfigError>>()?,
                                 time,
                                 destroys_plant,
@@ -799,7 +866,7 @@ impl AdvancementSum for PlantAdvancementSum {
             .collect();
 
         Self {
-            total_extra_time_ticks: ((extra_time_ticks as f32) * time_ticks_multiplier).ceil()
+            total_extra_time_ticks: ((extra_time_ticks as f64) * time_ticks_multiplier).ceil()
                 as u128,
             // xp
             xp,
@@ -836,13 +903,13 @@ pub trait AdvancementSum: DeserializeOwned + Serialize + PartialEq + fmt::Debug 
 #[serde(bound(deserialize = ""))]
 pub struct Advancement<S: AdvancementSum> {
     pub kind: S::Kind,
-    pub xp: u64,
+    pub xp: i32,
     pub art: String,
     pub title: String,
     pub description: String,
     pub achiever_title: String,
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(bound(deserialize = ""))]
 pub struct AdvancementSet<S: AdvancementSum> {
     pub base: Advancement<S>,
@@ -853,7 +920,7 @@ impl<S: AdvancementSum> AdvancementSet<S> {
     pub fn all(&self) -> impl Iterator<Item = &Advancement<S>> {
         std::iter::once(&self.base).chain(self.rest.iter())
     }
-    pub fn unlocked(&self, xp: u64) -> impl Iterator<Item = &Advancement<S>> {
+    pub fn unlocked(&self, xp: i32) -> impl Iterator<Item = &Advancement<S>> {
         std::iter::once(&self.base).chain(self.rest.iter().take(self.current_position(xp)))
     }
 
@@ -865,7 +932,7 @@ impl<S: AdvancementSum> AdvancementSet<S> {
         }
     }
 
-    pub fn increase_xp(&self, xp: &mut u64, amt: u64) -> Option<&Advancement<S>> {
+    pub fn increase_xp(&self, xp: &mut i32, amt: i32) -> Option<&Advancement<S>> {
         *xp += amt;
         self.next(xp.checked_sub(1).unwrap_or(0))
             .filter(|&x| self.next(*xp).map(|n| *x != *n).unwrap_or(false))
@@ -876,7 +943,7 @@ impl<S: AdvancementSum> AdvancementSet<S> {
     /// compiles all of the bonuses into one easily accessible place
     pub fn sum<'a>(
         &'a self,
-        xp: u64,
+        xp: i32,
         extra_advancements: impl Iterator<Item = &'a Advancement<S>>,
     ) -> S {
         S::new(
@@ -891,7 +958,7 @@ impl<S: AdvancementSum> AdvancementSet<S> {
     /// Unfiltered advancements
     pub fn raw_sum<'a>(
         &'a self,
-        xp: u64,
+        xp: i32,
         extra_advancements: impl Iterator<Item = &'a Advancement<S>>,
     ) -> S {
         S::new(
@@ -913,15 +980,15 @@ impl<S: AdvancementSum> AdvancementSet<S> {
         )
     }
 
-    pub fn current(&self, xp: u64) -> &Advancement<S> {
+    pub fn current(&self, xp: i32) -> &Advancement<S> {
         self.get(self.current_position(xp)).unwrap_or(&self.base)
     }
 
-    pub fn next(&self, xp: u64) -> Option<&Advancement<S>> {
+    pub fn next(&self, xp: i32) -> Option<&Advancement<S>> {
         self.get(self.current_position(xp) + 1)
     }
 
-    pub fn current_position(&self, xp: u64) -> usize {
+    pub fn current_position(&self, xp: i32) -> usize {
         let mut state = 0;
         self.all()
             .position(|x| {
@@ -947,30 +1014,28 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                 ));
             }
         }
-        if let Some(ga) = &a.gotchi {
-            if let Some(table) = &ga.hatch_table {
-                for (_, spawn) in table.iter() {
-                    if config.find_possession(spawn).is_err() {
-                        return Err(format!(
-                            "gotchi archetype {:?} claims it hatches into unknown possession archetype {:?}",
-                            a.name,
-                            spawn,
-                        ));
-                    }
+        if let Some(table) = &a.hatch_table {
+            for (_, spawn) in table.iter() {
+                if config.find_possession(spawn).is_err() {
+                    return Err(format!(
+                        "gotchi archetype {:?} claims it hatches into unknown possession archetype {:?}",
+                        a.name,
+                        spawn,
+                    ));
                 }
             }
         }
-        for SelectivePlantAdvancement { keep_plants, .. } in &a.plant_effects {
-            if let Err(e) = keep_plants.lookup_handles() {
+        for SelectivePlantAdvancement { for_plants, .. } in &a.passive_plant_effects {
+            if let Err(e) = for_plants.lookup_handles() {
                 return Err(format!(
                     "possession archetype {:?} keep plants error: {}\nkeep plants: {:?}",
-                    a.name, e, keep_plants,
+                    a.name, e, for_plants,
                 ));
             }
         }
-        if let Some(ia) = &a.item_application {
+        if let Some(ia) = &a.plant_application {
             for iaa in ia.effects.iter() {
-                if let Err(e) = iaa.keep_plants.lookup_handles() {
+                if let Err(e) = iaa.for_plants.lookup_handles() {
                     return Err(format!(
                         concat!(
                             "possession archetype {:?} ",
@@ -978,7 +1043,7 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                             "keep plants error: {}\n",
                             "keep plants: {:?}",
                         ),
-                        a.name, ia.short_description, e, iaa.keep_plants,
+                        a.name, ia.short_description, e, iaa.for_plants,
                     ));
                 }
             }
