@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone, PartialEq)]
 pub struct Seed {
+    #[serde(with = "bson::compat::u2f")]
     pub archetype_handle: ArchetypeHandle,
     pub pedigree: Vec<SeedGrower>,
 }
@@ -13,7 +14,7 @@ impl std::ops::Deref for Seed {
     fn deref(&self) -> &Self::Target {
         CONFIG
             .possession_archetypes
-            .get(self.archetype_handle)
+            .get(self.archetype_handle as usize)
             .expect("invalid archetype handle")
             .seed
             .as_ref()

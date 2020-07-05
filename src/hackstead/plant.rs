@@ -10,11 +10,13 @@ pub struct Plant {
     pub craft: Option<Craft>,
     pub pedigree: Vec<item::seed::SeedGrower>,
     /// Effects from potions, warp powder, etc. that actively change the behavior of this plant.
+    #[serde(default)]
     pub effects: Vec<Effect>,
+    #[serde(with = "bson::compat::u2f")]
     pub archetype_handle: ArchetypeHandle,
     /// This field isn't saved to the database, and is just used
     /// when `plant.increase_xp()` is called.
-    #[serde(with = "bson::compat::u2f")]
+    #[serde(default, with = "bson::compat::u2f")]
     pub queued_xp_bonus: u64,
 }
 impl std::ops::Deref for Plant {
@@ -23,7 +25,7 @@ impl std::ops::Deref for Plant {
     fn deref(&self) -> &Self::Target {
         &CONFIG
             .plant_archetypes
-            .get(self.archetype_handle)
+            .get(self.archetype_handle as usize)
             .expect("invalid archetype handle")
     }
 }
@@ -114,7 +116,7 @@ impl Plant {
         self.queued_xp_bonus = 0;
         CONFIG
             .plant_archetypes
-            .get(self.archetype_handle)
+            .get(self.archetype_handle as usize)
             .expect("invalid archetype handle")
             .advancements
             .increase_xp(&mut self.xp, amt)
@@ -136,7 +138,7 @@ impl Plant {
     ) -> Option<config::Recipe<ArchetypeHandle>> {
         self.advancements_sum(std::iter::empty())
             .recipes
-            .get(recipe_ah)
+            .get(recipe_ah as usize)
             .cloned()
     }
 
@@ -152,6 +154,7 @@ impl Plant {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Craft {
     pub until_finish: f32,
+    #[serde(default, with = "bson::compat::u2f")]
     pub recipe_archetype_handle: ArchetypeHandle,
 }
 
@@ -159,8 +162,10 @@ pub struct Craft {
 pub struct Effect {
     pub until_finish: Option<f32>,
     /// The archetype of the item that was consumed to apply this effect.
+    #[serde(default, with = "bson::compat::u2f")]
     pub item_archetype_handle: ArchetypeHandle,
     /// The archetype of the effect within this item that describes this effect.
+    #[serde(default, with = "bson::compat::u2f")]
     pub effect_archetype_handle: ArchetypeHandle,
 }
 impl std::ops::Deref for Effect {
@@ -169,7 +174,7 @@ impl std::ops::Deref for Effect {
     fn deref(&self) -> &Self::Target {
         &CONFIG
             .possession_archetypes
-            .get(self.item_archetype_handle)
+            .get(self.item_archetype_handle as usize)
             .expect("invalid archetype handle")
     }
 }

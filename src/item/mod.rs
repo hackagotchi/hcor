@@ -38,7 +38,10 @@ impl Owner {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum Acquisition {
     Trade,
-    Purchase { price: u64 },
+    Purchase {
+        #[serde(with = "bson::compat::u2f")]
+        price: u64
+    },
     Farmed,
     Crafted,
     Hatched,
@@ -64,11 +67,12 @@ impl fmt::Display for Acquisition {
 pub struct Item {
     pub seed: Option<Seed>,
     pub gotchi: Option<Gotchi>,
+    #[serde(with = "bson::compat::u2f")]
     pub archetype_handle: ArchetypeHandle,
     pub id: uuid::Uuid,
     pub steader: String,
     pub ownership_log: Vec<Owner>,
-    pub sale: Option<market::Sale>,
+    pub sale_price: Option<i32>,
 }
 
 impl std::ops::Deref for Item {
@@ -89,7 +93,7 @@ impl Item {
             archetype_handle: ah,
             steader: owner.id.clone(),
             ownership_log: vec![owner],
-            sale: None,
+            sale_price: None,
         }
     }
 
@@ -103,7 +107,7 @@ impl Item {
     fn archetype(ah: ArchetypeHandle) -> &'static Archetype {
         CONFIG
             .possession_archetypes
-            .get(ah)
+            .get(ah as usize)
             .expect("invalid archetype handle")
     }
 }

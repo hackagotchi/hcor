@@ -40,7 +40,7 @@ impl ServiceError {
 mod request_err {
     use super::*;
 
-    #[derive(Display)]
+    #[derive(Debug, Display)]
     /// A Request was unable to be fulfilled, for a specific reason.
     /// For use inside of `ServiceError::BadRequest`s.
     pub enum RequestError {
@@ -65,6 +65,27 @@ mod request_err {
         }
     }
 }
+#[cfg(feature="client")]
+mod backend_err {
+    /// Something went wrong while trying to fetch some information from a Hackagotchi backend.
+    pub enum BackendError {
+        Deserialization(serde_json::Error),
+        HttpRequest(reqwest::Error),
+    }
+    impl From<serde_json::Error> for BackendError {
+        fn from(e: serde_json::Error) -> BackendError {
+            BackendError::Deserialization(e)
+        }
+    }
+    impl From<reqwest::Error> for BackendError {
+        fn from(e: reqwest::Error) -> BackendError {
+            BackendError::HttpRequest(e)
+        }
+    }
+}
+#[cfg(feature="client")]
+pub use backend_err::BackendError;
+
 #[cfg(feature = "mongo")]
 pub use request_err::RequestError;
 

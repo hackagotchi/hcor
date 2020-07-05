@@ -4,6 +4,8 @@
 mod errors;
 #[cfg(feature = "mongo")]
 pub use errors::RequestError;
+#[cfg(feature = "client")]
+pub use errors::BackendError;
 pub use errors::ServiceError;
 
 /// All of the game design switches and levers are handled here, with a focus on how they interact

@@ -122,11 +122,11 @@ impl Config {
         effect_archetype_handle: ArchetypeHandle,
     ) -> Option<&ItemApplicationEffect> {
         self.possession_archetypes
-            .get(item_archetype_handle)?
+            .get(item_archetype_handle as usize)?
             .item_application
             .as_ref()?
             .effects
-            .get(effect_archetype_handle)
+            .get(effect_archetype_handle as usize)
     }
 
     pub fn find_plant<S: AsRef<str>>(&self, name: &S) -> Result<&PlantArchetype, ConfigError> {
@@ -144,6 +144,7 @@ impl Config {
             .iter()
             .position(|x| name.as_ref() == x.name)
             .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
+            .map(|x| x as ArchetypeHandle)
     }
 
     pub fn find_possession<S: AsRef<str>>(&self, name: &S) -> Result<&Archetype, ConfigError> {
@@ -161,11 +162,12 @@ impl Config {
             .iter()
             .position(|x| name.as_ref() == x.name)
             .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
+            .map(|x| x as ArchetypeHandle)
     }
 }
 
 // I should _really_ use a different version of this for PlantArchetypes and PossessionArchetypes ...
-pub type ArchetypeHandle = usize;
+pub type ArchetypeHandle = u32;
 
 lazy_static::lazy_static! {
     pub static ref CONFIG: Config = {
@@ -454,7 +456,7 @@ impl RecipeMakes<ArchetypeHandle> {
         use RecipeMakes::*;
 
         fn lookup(ah: ArchetypeHandle) -> Option<&'static Archetype> {
-            CONFIG.possession_archetypes.get(ah)
+            CONFIG.possession_archetypes.get(ah as usize)
         }
 
         Some(match self {
@@ -534,7 +536,7 @@ impl Recipe<ArchetypeHandle> {
             makes: makes.lookup_handles()?,
             needs: needs
                 .into_iter()
-                .map(|(n, x)| Some((n, CONFIG.possession_archetypes.get(x)?)))
+                .map(|(n, x)| Some((n, CONFIG.possession_archetypes.get(x as usize)?)))
                 .collect::<Option<Vec<(_, &Archetype)>>>()?,
             time,
             destroys_plant,

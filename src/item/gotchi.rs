@@ -11,7 +11,8 @@ pub struct GotchiHarvestOwner {
 
 #[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 pub struct Gotchi {
-    archetype_handle: ArchetypeHandle,
+    #[serde(with = "bson::compat::u2f")]
+    pub archetype_handle: ArchetypeHandle,
     pub nickname: String,
     pub harvest_log: Vec<GotchiHarvestOwner>,
 }
@@ -21,7 +22,7 @@ impl std::ops::Deref for Gotchi {
     fn deref(&self) -> &Self::Target {
         &CONFIG
             .possession_archetypes
-            .get(self.archetype_handle)
+            .get(self.archetype_handle as usize)
             .expect("invalid archetype handle")
             .gotchi
             .as_ref()
@@ -37,7 +38,7 @@ impl Gotchi {
     pub fn new(archetype_handle: ArchetypeHandle, owner_id: &str) -> Self {
         Self {
             archetype_handle,
-            nickname: CONFIG.possession_archetypes[archetype_handle].name.clone(),
+            nickname: CONFIG.possession_archetypes[archetype_handle as usize].name.clone(),
             harvest_log: vec![GotchiHarvestOwner {
                 id: owner_id.to_string(),
                 harvested: 0,

@@ -23,6 +23,17 @@ impl Hackstead {
             inventory: vec![],
         }
     }
+    #[cfg(feature="client")]
+    pub async fn fetch(uc: crate::UserContact) -> Result<Self, crate::BackendError> {
+        let client = reqwest::Client::new();
+        Ok(client
+            .get("http://127.0.0.1:8000/hackstead/")
+            .json(&uc)
+            .send()
+            .await?
+            .json()
+            .await?)
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
