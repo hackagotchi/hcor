@@ -556,8 +556,8 @@ fn possessed_gotchi_serialize() {
         CONFIG
             .possession_archetypes
             .iter()
-            .position(|x| x.name == "Adorpheus")
-            .unwrap(),
+            .position(|x| x.name == "Gempheus")
+            .expect("No possession named 'Gempheus' in the config"),
         Owner {
             id: "bob".to_string(),
             acquisition: Acquisition::spawned(),

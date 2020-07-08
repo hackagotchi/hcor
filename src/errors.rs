@@ -1,5 +1,4 @@
 use derive_more::Display;
-use std::convert::From;
 
 #[derive(Debug, Display)]
 pub enum ServiceError {
@@ -24,9 +23,8 @@ mod actix {
     impl ResponseError for ServiceError {
         fn error_response(&self) -> HttpResponse {
             match self {
-                ServiceError::InternalServerError => {
-                    HttpResponse::InternalServerError().body("Internal Server Error. Try again later.")
-                }
+                ServiceError::InternalServerError => HttpResponse::InternalServerError()
+                    .body("Internal Server Error. Try again later."),
                 ServiceError::BadRequest(s) => HttpResponse::BadRequest().body(s),
                 ServiceError::Unauthorized => HttpResponse::Unauthorized().body("Unauthorized"),
                 ServiceError::NoData => HttpResponse::NotFound().body("Data not found"),
