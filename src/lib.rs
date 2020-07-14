@@ -1,3 +1,4 @@
+#![recursion_limit="256"]
 #![feature(try_trait)]
 #![warn(missing_docs)]
 
@@ -15,6 +16,7 @@ pub mod config;
 pub mod market;
 pub mod models;
 pub mod possess;
+pub mod yank_config;
 
 pub mod frontend {
     pub fn emojify<S: ToString>(txt: S) -> String {

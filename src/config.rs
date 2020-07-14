@@ -232,22 +232,25 @@ pub enum KeepPlants<Handle> {
     All,
 }
 impl KeepPlants<String> {
-    pub fn lookup_handles(&self) -> Result<KeepPlants<ArchetypeHandle>, ConfigError> {
+    pub fn lookup_handles_with_config(&self, config: &Config) -> Result<KeepPlants<ArchetypeHandle>, ConfigError> {
         use KeepPlants::*;
 
         Ok(match self {
             Only(these) => Only(
                 these
                     .iter()
-                    .map(|h| CONFIG.find_plant_handle(h))
+                    .map(|h| config.find_plant_handle(h))
                     .collect::<Result<_, _>>()?,
             ),
             Not(these) => Not(these
                 .iter()
-                .map(|h| CONFIG.find_plant_handle(h))
+                .map(|h| config.find_plant_handle(h))
                 .collect::<Result<_, _>>()?),
             All => All,
         })
+    }
+    pub fn lookup_handles(&self) -> Result<KeepPlants<ArchetypeHandle>, ConfigError> {
+        self.lookup_handles_with_config(&CONFIG)
     }
 }
 impl<Handle: PartialEq> KeepPlants<Handle> {
@@ -479,27 +482,30 @@ impl fmt::Display for RecipeMakes<&'static Archetype> {
 }
 
 impl RecipeMakes<ArchetypeHandle> {
-    pub fn lookup_handles(self) -> Option<RecipeMakes<&'static Archetype>> {
+    pub fn lookup_handles_with_config<'a>(&self, config: &'a Config) -> Option<RecipeMakes<&'a Archetype>> {
         use RecipeMakes::*;
 
-        fn lookup(ah: ArchetypeHandle) -> Option<&'static Archetype> {
-            CONFIG.possession_archetypes.get(ah)
-        }
+        let lookup = |ah: ArchetypeHandle| -> Option<&'a Archetype> {
+            config.possession_archetypes.get(ah)
+        };
 
         Some(match self {
-            Just(n, ah) => Just(n, lookup(ah)?),
+            &Just(n, ah) => Just(n, lookup(ah)?),
             OneOf(l) => OneOf(
                 l.into_iter()
-                    .map(|(c, recipe)| Some((c, recipe.lookup_handles()?)))
+                    .map(|(c, recipe)| Some((*c, recipe.lookup_handles_with_config(config)?)))
                     .collect::<Option<_>>()?,
             ),
             AllOf(l) => AllOf(
                 l.into_iter()
-                    .map(|(c, ah)| Some((c, lookup(ah)?)))
+                    .map(|&(c, ah)| Some((c, lookup(ah)?)))
                     .collect::<Option<_>>()?,
             ),
             Nothing => Nothing,
         })
+    }
+    pub fn lookup_handles(&self) -> Option<RecipeMakes<&'static Archetype>> {
+        self.lookup_handles_with_config(&CONFIG)
     }
 }
 
@@ -549,7 +555,7 @@ impl Recipe<ArchetypeHandle> {
             count <= has
         })
     }
-    pub fn lookup_handles(self) -> Option<Recipe<&'static Archetype>> {
+    pub fn lookup_handles_with_config(self, config: &Config) -> Option<Recipe<&Archetype>> {
         let Recipe {
             time,
             destroys_plant,
@@ -560,10 +566,10 @@ impl Recipe<ArchetypeHandle> {
             xp,
         } = self;
         Some(Recipe {
-            makes: makes.lookup_handles()?,
+            makes: makes.lookup_handles_with_config(config)?,
             needs: needs
                 .into_iter()
-                .map(|(n, x)| Some((n, CONFIG.possession_archetypes.get(x)?)))
+                .map(|(n, x)| Some((n, config.possession_archetypes.get(x)?)))
                 .collect::<Option<Vec<(_, &Archetype)>>>()?,
             time,
             destroys_plant,
@@ -571,6 +577,9 @@ impl Recipe<ArchetypeHandle> {
             explanation,
             xp,
         })
+    }
+    pub fn lookup_handles(self) -> Option<Recipe<&'static Archetype>> {
+        self.lookup_handles_with_config(&CONFIG)
     }
 }
 impl Recipe<&Archetype> {
@@ -649,7 +658,7 @@ impl Yield<String> {
     /// to an Archetype which exists in the configuration, unlike the String which may
     /// be invalid. If the String which specifies the possible output is invalid, an error is
     /// returned.
-    fn lookup_handles(self) -> Result<Yield<ArchetypeHandle>, ConfigError> {
+    fn lookup_handles_with_config(self, config: &Config) -> Result<Yield<ArchetypeHandle>, ConfigError> {
         let Self {
             chance,
             amount,
@@ -663,8 +672,11 @@ impl Yield<String> {
             amount,
             xp,
             dropoff,
-            yields: CONFIG.find_possession_handle(&yields)?,
+            yields: config.find_possession_handle(&yields)?,
         })
+    }
+    fn lookup_handles(self) -> Result<Yield<ArchetypeHandle>, ConfigError> {
+        self.lookup_handles_with_config(&CONFIG)
     }
 }
 
@@ -1007,7 +1019,7 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                     }
                 }
                 for SelectivePlantAdvancement { keep_plants, .. } in &ga.plant_effects {
-                    if let Err(e) = keep_plants.lookup_handles() {
+                    if let Err(e) = keep_plants.lookup_handles_with_config(&config) {
                         return Err(format!(
                             "gotchi archetype {:?} keep plants error: {}\nkeep plants: {:?}",
                             a.name, e, keep_plants,
@@ -1017,7 +1029,7 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
             }
             ArchetypeKind::Keepsake(ka) => {
                 for SelectivePlantAdvancement { keep_plants, .. } in &ka.plant_effects {
-                    if let Err(e) = keep_plants.lookup_handles() {
+                    if let Err(e) = keep_plants.lookup_handles_with_config(config) {
                         return Err(format!(
                             "keepsake archetype {:?} keep plants error: {}\nkeep plants: {:?}",
                             a.name, e, keep_plants,
@@ -1026,7 +1038,7 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                 }
                 if let Some(ia) = &ka.item_application {
                     for iaa in ia.effects.iter() {
-                        if let Err(e) = iaa.keep_plants.lookup_handles() {
+                        if let Err(e) = iaa.keep_plants.lookup_handles_with_config(config) {
                             return Err(format!(
                                 concat!(
                                     "keepsake archetype {:?} ",
