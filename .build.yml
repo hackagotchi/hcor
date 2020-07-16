@@ -16,6 +16,10 @@ tasks:
 - nightly: |
     rustup default nightly
     cd hcor/
+    set +x
+    source .env
+    set -x
+    cargo run --bin yank_config
     cargo build
     cargo test
 - fmt: |
