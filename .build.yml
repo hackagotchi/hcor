@@ -6,7 +6,7 @@ shell: false
 sources:
   - https://github.com/hackagotchi/hcor
 secrets:
-  - f508211e-bb73-44ed-ad6e-b67a299f1858
+  - 2c543725-886e-43b5-9b10-80c8131a621d
 tasks:
 - setup: |
     rustup toolchain install nightly
