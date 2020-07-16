@@ -172,8 +172,7 @@ lazy_static::lazy_static! {
             serde_json::from_str(
                 &std::fs::read_to_string(format!(
                     concat!(
-                        env!("CARGO_MANIFEST_DIR"),
-                        "/config/{}.json",
+                        "./config/{}.json",
                     ),
                     p
                 ))
