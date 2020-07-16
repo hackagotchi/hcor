@@ -1,4 +1,4 @@
-#![recursion_limit="256"]
+#![recursion_limit = "256"]
 use hcor::yank_config::{yank_config, YankError};
 
 #[tokio::main]

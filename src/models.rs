@@ -1,7 +1,7 @@
 use crate::config::{ArchetypeHandle, PlantArchetype};
 use crate::*;
-use std::time::SystemTime;
 use serde::Serialize;
+use std::time::SystemTime;
 
 #[derive(Clone, Debug, Serialize)]
 pub struct Hacksteader {

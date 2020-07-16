@@ -1,4 +1,4 @@
-#![recursion_limit="256"]
+#![recursion_limit = "256"]
 #![feature(try_trait)]
 #![warn(missing_docs)]
 

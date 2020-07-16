@@ -231,7 +231,10 @@ pub enum KeepPlants<Handle> {
     All,
 }
 impl KeepPlants<String> {
-    pub fn lookup_handles_in_config(&self, config: &Config) -> Result<KeepPlants<ArchetypeHandle>, ConfigError> {
+    pub fn lookup_handles_in_config(
+        &self,
+        config: &Config,
+    ) -> Result<KeepPlants<ArchetypeHandle>, ConfigError> {
         use KeepPlants::*;
 
         Ok(match self {
@@ -481,12 +484,14 @@ impl fmt::Display for RecipeMakes<&'static Archetype> {
 }
 
 impl RecipeMakes<ArchetypeHandle> {
-    pub fn lookup_handles_in_config<'a>(&self, config: &'a Config) -> Option<RecipeMakes<&'a Archetype>> {
+    pub fn lookup_handles_in_config<'a>(
+        &self,
+        config: &'a Config,
+    ) -> Option<RecipeMakes<&'a Archetype>> {
         use RecipeMakes::*;
 
-        let lookup = |ah: ArchetypeHandle| -> Option<&'a Archetype> {
-            config.possession_archetypes.get(ah)
-        };
+        let lookup =
+            |ah: ArchetypeHandle| -> Option<&'a Archetype> { config.possession_archetypes.get(ah) };
 
         Some(match self {
             &Just(n, ah) => Just(n, lookup(ah)?),
@@ -657,7 +662,10 @@ impl Yield<String> {
     /// to an Archetype which exists in the configuration, unlike the String which may
     /// be invalid. If the String which specifies the possible output is invalid, an error is
     /// returned.
-    fn lookup_handles_in_config(self, config: &Config) -> Result<Yield<ArchetypeHandle>, ConfigError> {
+    fn lookup_handles_in_config(
+        self,
+        config: &Config,
+    ) -> Result<Yield<ArchetypeHandle>, ConfigError> {
         let Self {
             chance,
             amount,
