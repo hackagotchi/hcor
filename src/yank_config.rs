@@ -101,7 +101,7 @@ impl fmt::Display for SheetError {
 }
 
 lazy_static::lazy_static! {
-    static ref KEY: String = env!("GOOGLE_CONFIG_KEY").to_string();
+    static ref KEY: String = std::env::var("GOOGLE_CONFIG_KEY").unwrap().to_string();
 
     // Every good configuration file management utility has a configuration file.
     static ref C_CONFIG: CConfig = {
