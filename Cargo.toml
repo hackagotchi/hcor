@@ -21,9 +21,14 @@ log = "0.4.8"
 actix-web = { version = "2.0", optional = true }
 derive_more = "0.99"
 dotenv = "0.15"
+reqwest = { version = "0.10.6", features = ["json"] }
+tokio = "0.2.21"
 
 mongodb = {version = "1.0", optional = true}
 
+[[bin]]
+name = "yank_config"
+path = "src/bin/yank_config.rs"
 
 [lib]
 name = "hcor"

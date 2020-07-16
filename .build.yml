@@ -5,15 +5,23 @@ repositories: {}
 shell: false
 sources:
   - https://github.com/hackagotchi/hcor
+secrets:
+  - efff06ae-f3ff-4269-bcee-391e1e3b7f03
 tasks:
 - setup: |
     rustup toolchain install nightly
     cd hcor/
     rustup run nightly cargo fetch
+    cp ~/.env .
 - nightly: |
     rustup default nightly
     cd hcor/
+    set +x
+    source .env
+    set -x
+    cargo run --bin yank_config
     cargo build
     cargo test
 - fmt: |
+    cd hcor/
     cargo fmt -- --check
