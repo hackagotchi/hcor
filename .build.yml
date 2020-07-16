@@ -5,11 +5,14 @@ repositories: {}
 shell: false
 sources:
   - https://github.com/hackagotchi/hcor
+secrets:
+  - f508211e-bb73-44ed-ad6e-b67a299f1858
 tasks:
 - setup: |
     rustup toolchain install nightly
     cd hcor/
     rustup run nightly cargo fetch
+    cp ~/.env .
 - nightly: |
     rustup default nightly
     cd hcor/
