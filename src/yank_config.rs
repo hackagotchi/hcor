@@ -106,8 +106,7 @@ lazy_static::lazy_static! {
     // Every good configuration file management utility has a configuration file.
     static ref C_CONFIG: CConfig = {
         const PATH: &'static str = concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/config/config_config.json"
+           "./config/config_config.json"
         );
 
         serde_json::from_str(
@@ -432,10 +431,7 @@ pub async fn yank_config() -> Result<(), YankError> {
     config::check_archetype_name_matches(&config).map_err(|e| YankError::ArchetypeNameError(e))?;
 
     std::fs::write(
-        std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-            .parent()
-            .unwrap()
-            .join("hcor/config/content.json"),
+        std::path::Path::new("../hcor/config/content.json"),
         &serde_json::to_string_pretty(&config).map_err(|e| YankError::SerializeConfigError(e))?,
     )
     .map_err(|e| YankError::WriteConfigError(e))
