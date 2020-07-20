@@ -6,27 +6,27 @@ use serde::{Deserialize, Serialize};
 /// Format for requesting than an item to be applied to a plant
 pub struct PlantApplicationRequest {
     /// the item to be applied to a plant
-    applicable_item_id: uuid::Uuid,
+    pub applicable_item_id: uuid::Uuid,
     /// the tile that the plant to apply this to rests on
-    tile_id: uuid::Uuid,
+    pub tile_id: uuid::Uuid,
     /// the steader who owns the item, plant and tile
-    steader: crate::UserContact,
+    pub steader: crate::UserContact,
 }
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 /// Format for requesting than a plant be removed from its tile
 pub struct PlantRemovalRequest {
     /// The tile that the plant the user wants to remove sits on
-    tile_id: uuid::Uuid,
+    pub tile_id: uuid::Uuid,
     /// The hacksteader who owns the plant and tile
-    steader: crate::UserContact,
+    pub steader: crate::UserContact,
 }
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 /// Format for requesting that a plant begin crafting something.
 pub struct PlantCraftRequest {
     /// The tile that the plant that should craft sits on
-    tile_id: uuid::Uuid,
+    pub tile_id: uuid::Uuid,
     /// The index of the recipe in the list of this plant's recipes
-    recipe_index: usize
+    pub recipe_index: usize
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
