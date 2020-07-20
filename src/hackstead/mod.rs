@@ -38,9 +38,9 @@ impl Hackstead {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 /// Format for requesting that a user's item is consumed in exchange for a new tile of land.
-struct LandCreationRequest {
+struct TileCreationRequest {
     /// id for an item that is capable of being removed in exchange for another tile of land.
-    land_consumable_item_id: uuid::Uuid,
+    tile_consumable_item_id: uuid::Uuid,
     /// contact info for the steader who owns this item
     steader: crate::UserContact,
 }
