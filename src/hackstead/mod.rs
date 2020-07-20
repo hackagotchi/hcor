@@ -4,7 +4,7 @@ use config::CONFIG;
 use item::Item;
 use serde::{Deserialize, Serialize};
 
-mod plant;
+pub mod plant;
 pub use plant::Plant;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -36,6 +36,14 @@ impl Hackstead {
     }
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+/// Format for requesting that a user's item is consumed in exchange for a new tile of land.
+struct LandCreationRequest {
+    /// id for an item that is capable of being removed in exchange for another tile of land.
+    land_consumable_item_id: uuid::Uuid,
+    /// contact info for the steader who owns this item
+    steader: crate::UserContact,
+}
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Tile {
     pub acquired: NaiveDateTime,
