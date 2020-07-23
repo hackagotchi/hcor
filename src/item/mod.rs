@@ -4,10 +4,8 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 pub mod gotchi;
-pub mod seed;
 
 pub use gotchi::Gotchi;
-pub use seed::Seed;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Owner {
@@ -65,7 +63,6 @@ impl fmt::Display for Acquisition {
 
 #[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct Item {
-    pub seed: Option<Seed>,
     pub gotchi: Option<Gotchi>,
     #[serde(with = "bson::compat::u2f")]
     pub archetype_handle: ArchetypeHandle,
@@ -87,7 +84,6 @@ impl Item {
     pub fn new(ah: ArchetypeHandle, owner: Owner) -> Self {
         let a = Self::archetype(ah);
         Self {
-            seed: Some(Seed::new(ah, &owner.id)).filter(|_| a.seed.is_some()),
             gotchi: Some(Gotchi::new(ah, &owner.id)).filter(|_| a.gotchi.is_some()),
             id: uuid::Uuid::new_v4(),
             archetype_handle: ah,
