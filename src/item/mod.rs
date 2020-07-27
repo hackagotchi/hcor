@@ -1,8 +1,8 @@
 use crate::{config, CONFIG};
 use config::{Archetype, ArchetypeHandle};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use std::fmt;
+use uuid::Uuid;
 
 pub mod gotchi;
 

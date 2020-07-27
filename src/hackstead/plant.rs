@@ -26,7 +26,7 @@ pub struct PlantCraftRequest {
     /// The tile that the plant that should craft sits on
     pub tile_id: uuid::Uuid,
     /// The index of the recipe in the list of this plant's recipes
-    pub recipe_index: usize
+    pub recipe_index: usize,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]

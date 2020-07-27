@@ -1,4 +1,4 @@
-#[cfg(feature="client")]
+#[cfg(feature = "client")]
 mod backend_err {
     /// Something went wrong while trying to fetch some information from a Hackagotchi backend.
     pub enum BackendError {
@@ -16,6 +16,5 @@ mod backend_err {
         }
     }
 }
-#[cfg(feature="client")]
+#[cfg(feature = "client")]
 pub use backend_err::BackendError;
-

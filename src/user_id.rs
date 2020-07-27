@@ -22,7 +22,7 @@ impl UserId {
     pub fn uuid_or_else(&self, f: impl FnOnce(&str) -> Uuid) -> Uuid {
         match self {
             UserId::Uuid(uuid) | UserId::Both { uuid, .. } => *uuid,
-            UserId::Slack(slack) => f(slack)
+            UserId::Slack(slack) => f(slack),
         }
     }
     /// Returns a slack id for a user, if available.
@@ -40,6 +40,9 @@ mod test {
     const USER_1: &'static str = "U1";
     const USER_2: &'static str = "U2";
     const USER_3: &'static str = "U3";
+    lazy_static::lazy_static! {
+        static ref UUID: Uuid = Uuid::new_v4();
+    }
 
     #[test]
     fn slack_id_fetching() {
@@ -48,15 +51,16 @@ mod test {
         assert_eq!(
             s.slack(),
             Some(USER_1),
-            "slack only id doesn't store user properly");
+            "slack only id doesn't store user properly"
+        );
     }
 
     #[test]
     fn uuid_id_fetching() {
-        let e = UserId::Email(USER_2.to_string());
+        let e = UserId::Uuid(*UUID);
         assert_eq!(
             e.uuid(),
-            Some(USER_2),
+            Some(*UUID),
             "uuid only id doesn't store uuid properly"
         );
         assert_eq!(e.slack(), None, "uuid only id shouldn't have slack");
@@ -66,7 +70,7 @@ mod test {
     fn both_id_fetching() {
         let both = UserId::Both {
             slack: USER_1.to_string(),
-            uuid: USER_3.to_string(),
+            uuid: *UUID,
         };
         assert_eq!(
             both.slack(),
@@ -76,7 +80,7 @@ mod test {
 
         assert_eq!(
             both.uuid(),
-            Some(USER_3),
+            Some(*UUID),
             "both id doesn't store uuid properly"
         );
     }

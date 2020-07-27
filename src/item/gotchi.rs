@@ -11,7 +11,9 @@ impl Gotchi {
     pub fn new(item_id: uuid::Uuid, archetype_handle: ArchetypeHandle) -> Self {
         Self {
             item_id,
-            nickname: CONFIG.possession_archetypes[archetype_handle as usize].name.clone(),
+            nickname: CONFIG.possession_archetypes[archetype_handle as usize]
+                .name
+                .clone(),
         }
     }
 }

@@ -1,9 +1,9 @@
 use crate::{config, item};
 use chrono::{DateTime, Utc};
-use uuid::Uuid;
 use config::CONFIG;
 use item::Item;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 pub mod plant;
 pub use plant::Plant;
@@ -22,7 +22,7 @@ impl Hackstead {
             inventory: vec![],
         }
     }
-    #[cfg(feature="client")]
+    #[cfg(feature = "client")]
     pub async fn fetch(uc: crate::UserId) -> Result<Self, crate::BackendError> {
         let client = reqwest::Client::new();
         Ok(client
