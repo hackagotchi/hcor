@@ -1,12 +1,9 @@
 #![feature(try_trait)]
-#![warn(missing_docs)]
+//#![warn(missing_docs)]
 
 mod errors;
-#[cfg(feature = "mongo")]
-pub use errors::RequestError;
 #[cfg(feature = "client")]
 pub use errors::BackendError;
-pub use errors::ServiceError;
 
 /// All of the game design switches and levers are handled here, with a focus on how they interact
 /// with the rest of the data in the game.
@@ -24,8 +21,8 @@ pub use hackstead::Hackstead;
 
 /// Store user emails/slack ids with a compile time check that we'll have at least one of those
 /// two.
-pub mod user_contact;
-pub use user_contact::UserContact;
+pub mod user_id;
+pub use user_id::UserId;
 
 /// Addresses Hackagotchi's market platform.
 pub mod market;

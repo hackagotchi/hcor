@@ -1,4 +1,4 @@
-use crate::{config, item};
+use crate::config;
 use config::{ArchetypeHandle, PlantArchetype, CONFIG};
 use serde::{Deserialize, Serialize};
 
@@ -10,7 +10,7 @@ pub struct PlantApplicationRequest {
     /// the tile that the plant to apply this to rests on
     pub tile_id: uuid::Uuid,
     /// the steader who owns the item, plant and tile
-    pub steader: crate::UserContact,
+    pub steader: crate::UserId,
 }
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 /// Format for requesting than a plant be removed from its tile
@@ -18,7 +18,7 @@ pub struct PlantRemovalRequest {
     /// The tile that the plant the user wants to remove sits on
     pub tile_id: uuid::Uuid,
     /// The hacksteader who owns the plant and tile
-    pub steader: crate::UserContact,
+    pub steader: crate::UserId,
 }
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 /// Format for requesting that a plant begin crafting something.
@@ -31,19 +31,17 @@ pub struct PlantCraftRequest {
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct Plant {
-    #[serde(with = "bson::compat::u2f")]
-    pub xp: u64,
+    pub xp: i32,
     pub until_yield: f32,
     pub craft: Option<Craft>,
     /// Effects from potions, warp powder, etc. that actively change the behavior of this plant.
     #[serde(default)]
     pub effects: Vec<Effect>,
-    #[serde(with = "bson::compat::u2f")]
     pub archetype_handle: ArchetypeHandle,
     /// This field isn't saved to the database, and is just used
     /// when `plant.increase_xp()` is called.
-    #[serde(default, with = "bson::compat::u2f")]
-    pub queued_xp_bonus: u64,
+    #[serde(skip)]
+    pub queued_xp_bonus: i32,
 }
 impl std::ops::Deref for Plant {
     type Target = PlantArchetype;
@@ -136,7 +134,7 @@ impl Plant {
         self.advancements.next(self.xp)
     }
 
-    pub fn increase_xp(&mut self, mut amt: u64) -> Option<&'static config::PlantAdvancement> {
+    pub fn increase_xp(&mut self, mut amt: i32) -> Option<&'static config::PlantAdvancement> {
         amt += self.queued_xp_bonus;
         self.queued_xp_bonus = 0;
         CONFIG
@@ -179,7 +177,7 @@ impl Plant {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Craft {
     pub until_finish: f32,
-    #[serde(default, with = "bson::compat::u2f")]
+    #[serde(alias = "makes")]
     pub recipe_archetype_handle: ArchetypeHandle,
 }
 
@@ -187,10 +185,8 @@ pub struct Craft {
 pub struct Effect {
     pub until_finish: Option<f32>,
     /// The archetype of the item that was consumed to apply this effect.
-    #[serde(default, with = "bson::compat::u2f")]
     pub item_archetype_handle: ArchetypeHandle,
     /// The archetype of the effect within this item that describes this effect.
-    #[serde(default, with = "bson::compat::u2f")]
     pub effect_archetype_handle: ArchetypeHandle,
 }
 impl std::ops::Deref for Effect {

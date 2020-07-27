@@ -2,9 +2,6 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
-#[cfg(test)]
-mod test;
-
 #[derive(Debug, Clone)]
 pub enum ConfigError {
     UnknownArchetypeName(String),
@@ -122,11 +119,13 @@ impl Config {
         effect_archetype_handle: ArchetypeHandle,
     ) -> Option<&ItemApplicationEffect> {
         self.possession_archetypes
-            .get(item_archetype_handle as usize)?
+            .get(item_archetype_handle)?
+            .kind
+            .keepsake()?
             .item_application
             .as_ref()?
             .effects
-            .get(effect_archetype_handle as usize)
+            .get(effect_archetype_handle)
     }
 
     pub fn find_plant<S: AsRef<str>>(&self, name: &S) -> Result<&PlantArchetype, ConfigError> {
@@ -144,7 +143,6 @@ impl Config {
             .iter()
             .position(|x| name.as_ref() == x.name)
             .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
-            .map(|x| x as ArchetypeHandle)
     }
 
     pub fn find_possession<S: AsRef<str>>(&self, name: &S) -> Result<&Archetype, ConfigError> {
@@ -162,12 +160,11 @@ impl Config {
             .iter()
             .position(|x| name.as_ref() == x.name)
             .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
-            .map(|x| x as ArchetypeHandle)
     }
 }
 
 // I should _really_ use a different version of this for PlantArchetypes and PossessionArchetypes ...
-pub type ArchetypeHandle = i32;
+pub type ArchetypeHandle = usize;
 
 lazy_static::lazy_static! {
     pub static ref CONFIG: Config = {
@@ -201,12 +198,12 @@ pub type HacksteadAdvancement = Advancement<HacksteadAdvancementSum>;
 pub type HacksteadAdvancementSet = AdvancementSet<HacksteadAdvancementSum>;
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum HacksteadAdvancementKind {
-    Land { pieces: i32 },
+    Land { pieces: u32 },
 }
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct HacksteadAdvancementSum {
-    pub land: i32,
-    pub xp: i32,
+    pub land: u32,
+    pub xp: u64,
 }
 impl AdvancementSum for HacksteadAdvancementSum {
     type Kind = HacksteadAdvancementKind;
@@ -235,22 +232,25 @@ pub enum KeepPlants<Handle> {
     All,
 }
 impl KeepPlants<String> {
-    pub fn lookup_handles(&self) -> Result<KeepPlants<ArchetypeHandle>, ConfigError> {
+    pub fn lookup_handles_in_config(&self, config: &Config) -> Result<KeepPlants<ArchetypeHandle>, ConfigError> {
         use KeepPlants::*;
 
         Ok(match self {
             Only(these) => Only(
                 these
                     .iter()
-                    .map(|h| CONFIG.find_plant_handle(h))
+                    .map(|h| config.find_plant_handle(h))
                     .collect::<Result<_, _>>()?,
             ),
             Not(these) => Not(these
                 .iter()
-                .map(|h| CONFIG.find_plant_handle(h))
+                .map(|h| config.find_plant_handle(h))
                 .collect::<Result<_, _>>()?),
             All => All,
         })
+    }
+    pub fn lookup_handles(&self) -> Result<KeepPlants<ArchetypeHandle>, ConfigError> {
+        self.lookup_handles_in_config(&CONFIG)
     }
 }
 impl<Handle: PartialEq> KeepPlants<Handle> {
@@ -273,7 +273,7 @@ pub struct SelectivePlantAdvancement {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GotchiArchetype {
-    pub base_happiness: i32,
+    pub base_happiness: u64,
     #[serde(default)]
     pub plant_effects: Vec<SelectivePlantAdvancement>,
     pub hatch_table: Option<LootTable>,
@@ -307,15 +307,45 @@ pub struct ItemApplicationEffect {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Archetype {
-    pub name: String,
-    pub description: String,
-    pub gotchi: Option<GotchiArchetype>,
-    pub seed: Option<SeedArchetype>,
+pub struct KeepsakeArchetype {
     pub unlocks_land: Option<LandUnlock>,
     #[serde(default)]
     pub plant_effects: Vec<SelectivePlantAdvancement>,
     pub item_application: Option<ItemApplication>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum ArchetypeKind {
+    Gotchi(GotchiArchetype),
+    Seed(SeedArchetype),
+    Keepsake(KeepsakeArchetype),
+}
+impl ArchetypeKind {
+    pub fn category(&self) -> crate::Category {
+        use crate::Category;
+        match self {
+            ArchetypeKind::Gotchi(_) => Category::Gotchi,
+            _ => Category::Misc,
+        }
+    }
+    pub fn keepsake(&self) -> Option<&KeepsakeArchetype> {
+        match self {
+            ArchetypeKind::Keepsake(k) => Some(k),
+            _ => None,
+        }
+    }
+    pub fn gotchi(&self) -> Option<&GotchiArchetype> {
+        match self {
+            ArchetypeKind::Gotchi(g) => Some(g),
+            _ => None,
+        }
+    }
+}
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Archetype {
+    pub name: String,
+    pub description: String,
+    pub kind: ArchetypeKind,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -452,27 +482,30 @@ impl fmt::Display for RecipeMakes<&'static Archetype> {
 }
 
 impl RecipeMakes<ArchetypeHandle> {
-    pub fn lookup_handles(self) -> Option<RecipeMakes<&'static Archetype>> {
+    pub fn lookup_handles_in_config<'a>(&self, config: &'a Config) -> Option<RecipeMakes<&'a Archetype>> {
         use RecipeMakes::*;
 
-        fn lookup(ah: ArchetypeHandle) -> Option<&'static Archetype> {
-            CONFIG.possession_archetypes.get(ah as usize)
-        }
+        let lookup = |ah: ArchetypeHandle| -> Option<&'a Archetype> {
+            config.possession_archetypes.get(ah)
+        };
 
         Some(match self {
-            Just(n, ah) => Just(n, lookup(ah)?),
+            &Just(n, ah) => Just(n, lookup(ah)?),
             OneOf(l) => OneOf(
                 l.into_iter()
-                    .map(|(c, recipe)| Some((c, recipe.lookup_handles()?)))
+                    .map(|(c, recipe)| Some((*c, recipe.lookup_handles_in_config(config)?)))
                     .collect::<Option<_>>()?,
             ),
             AllOf(l) => AllOf(
                 l.into_iter()
-                    .map(|(c, ah)| Some((c, lookup(ah)?)))
+                    .map(|&(c, ah)| Some((c, lookup(ah)?)))
                     .collect::<Option<_>>()?,
             ),
             Nothing => Nothing,
         })
+    }
+    pub fn lookup_handles(&self) -> Option<RecipeMakes<&'static Archetype>> {
+        self.lookup_handles_in_config(&CONFIG)
     }
 }
 
@@ -513,16 +546,16 @@ pub struct Recipe<Handle: Clone> {
     #[serde(default)]
     pub destroys_plant: bool,
     pub time: f32,
-    pub xp: (i32, i32),
+    pub xp: (u64, u64),
 }
 impl Recipe<ArchetypeHandle> {
-    pub fn satisfies(&self, inv: &[crate::Item]) -> bool {
+    pub fn satisfies(&self, inv: &[crate::Possession]) -> bool {
         self.needs.iter().copied().all(|(count, ah)| {
-            let has = inv.iter().filter(|x| x.base.archetype_handle == ah).count();
+            let has = inv.iter().filter(|x| x.archetype_handle == ah).count();
             count <= has
         })
     }
-    pub fn lookup_handles(self) -> Option<Recipe<&'static Archetype>> {
+    pub fn lookup_handles_in_config(self, config: &Config) -> Option<Recipe<&Archetype>> {
         let Recipe {
             time,
             destroys_plant,
@@ -533,10 +566,10 @@ impl Recipe<ArchetypeHandle> {
             xp,
         } = self;
         Some(Recipe {
-            makes: makes.lookup_handles()?,
+            makes: makes.lookup_handles_in_config(config)?,
             needs: needs
                 .into_iter()
-                .map(|(n, x)| Some((n, CONFIG.possession_archetypes.get(x as usize)?)))
+                .map(|(n, x)| Some((n, config.possession_archetypes.get(x)?)))
                 .collect::<Option<Vec<(_, &Archetype)>>>()?,
             time,
             destroys_plant,
@@ -544,6 +577,9 @@ impl Recipe<ArchetypeHandle> {
             explanation,
             xp,
         })
+    }
+    pub fn lookup_handles(self) -> Option<Recipe<&'static Archetype>> {
+        self.lookup_handles_in_config(&CONFIG)
     }
 }
 impl Recipe<&Archetype> {
@@ -610,7 +646,7 @@ pub struct Yield<Handle> {
     /// An upper and lower bound for a random amount of xp to be awarded should this yield occur
     /// (as determined by the chance field).
     /// The xp is awarded on a per item basis, although dropoff can be used to ensure less and
-    /// lesss xp is awarded per item.
+    /// less xp is awarded per item.
     pub xp: (usize, usize),
     /// What item this yield outputs, should it occur as according to the chance field on this
     /// struct. Note that the amount of this item to be output is determined by the amount field.
@@ -622,7 +658,7 @@ impl Yield<String> {
     /// to an Archetype which exists in the configuration, unlike the String which may
     /// be invalid. If the String which specifies the possible output is invalid, an error is
     /// returned.
-    fn lookup_handles(self) -> Result<Yield<ArchetypeHandle>, ConfigError> {
+    fn lookup_handles_in_config(self, config: &Config) -> Result<Yield<ArchetypeHandle>, ConfigError> {
         let Self {
             chance,
             amount,
@@ -636,8 +672,11 @@ impl Yield<String> {
             amount,
             xp,
             dropoff,
-            yields: CONFIG.find_possession_handle(&yields)?,
+            yields: config.find_possession_handle(&yields)?,
         })
+    }
+    fn lookup_handles(self) -> Result<Yield<ArchetypeHandle>, ConfigError> {
+        self.lookup_handles_in_config(&CONFIG)
     }
 }
 
@@ -669,7 +708,7 @@ impl<Handle: Clone> SpawnTableRow for Yield<Handle> {
 pub enum PlantAdvancementKind {
     Neighbor(Box<PlantAdvancementKind>),
     /// Stores the number of extra cycles to add for the duration of the effect
-    ExtraTimeTicks(i32),
+    ExtraTimeTicks(u32),
     TimeTicksMultiplier(f32),
     Xp(f32),
     YieldSpeedMultiplier(f32),
@@ -687,8 +726,8 @@ pub struct PlantAdvancementSum {
     // time acceleration
     pub total_extra_time_ticks: u128,
     // xp
-    pub xp: i32,
-    pub xp_multiplier: i32,
+    pub xp: u64,
+    pub xp_multiplier: u64,
     // yield
     pub yield_speed_multiplier: f32,
     pub yield_size_multiplier: f32,
@@ -707,7 +746,7 @@ impl AdvancementSum for PlantAdvancementSum {
 
         // time
         let mut time_ticks_multiplier: f32 = 1.0;
-        let mut extra_time_ticks: i32 = 0;
+        let mut extra_time_ticks: u32 = 0;
         // xp
         let mut xp = 0;
         let mut xp_multiplier = 0;
@@ -737,7 +776,7 @@ impl AdvancementSum for PlantAdvancementSum {
                 &ExtraTimeTicks(extra) => extra_time_ticks += extra,
 
                 // xp
-                &Xp(xp_gain) => xp_multiplier += xp_gain as i32,
+                &Xp(xp_gain) => xp_multiplier += xp_gain as u64,
 
                 // yield
                 &YieldSpeedMultiplier(multiplier) => yield_speed_multiplier *= multiplier,
@@ -838,7 +877,7 @@ pub trait AdvancementSum: DeserializeOwned + Serialize + PartialEq + fmt::Debug 
 #[serde(bound(deserialize = ""))]
 pub struct Advancement<S: AdvancementSum> {
     pub kind: S::Kind,
-    pub xp: i32,
+    pub xp: u64,
     pub art: String,
     pub title: String,
     pub description: String,
@@ -855,7 +894,7 @@ impl<S: AdvancementSum> AdvancementSet<S> {
     pub fn all(&self) -> impl Iterator<Item = &Advancement<S>> {
         std::iter::once(&self.base).chain(self.rest.iter())
     }
-    pub fn unlocked(&self, xp: i32) -> impl Iterator<Item = &Advancement<S>> {
+    pub fn unlocked(&self, xp: u64) -> impl Iterator<Item = &Advancement<S>> {
         std::iter::once(&self.base).chain(self.rest.iter().take(self.current_position(xp)))
     }
 
@@ -867,7 +906,7 @@ impl<S: AdvancementSum> AdvancementSet<S> {
         }
     }
 
-    pub fn increase_xp(&self, xp: &mut i32, amt: i32) -> Option<&Advancement<S>> {
+    pub fn increase_xp(&self, xp: &mut u64, amt: u64) -> Option<&Advancement<S>> {
         *xp += amt;
         self.next(xp.checked_sub(1).unwrap_or(0))
             .filter(|&x| self.next(*xp).map(|n| *x != *n).unwrap_or(false))
@@ -878,7 +917,7 @@ impl<S: AdvancementSum> AdvancementSet<S> {
     /// compiles all of the bonuses into one easily accessible place
     pub fn sum<'a>(
         &'a self,
-        xp: i32,
+        xp: u64,
         extra_advancements: impl Iterator<Item = &'a Advancement<S>>,
     ) -> S {
         S::new(
@@ -893,7 +932,7 @@ impl<S: AdvancementSum> AdvancementSet<S> {
     /// Unfiltered advancements
     pub fn raw_sum<'a>(
         &'a self,
-        xp: i32,
+        xp: u64,
         extra_advancements: impl Iterator<Item = &'a Advancement<S>>,
     ) -> S {
         S::new(
@@ -915,15 +954,15 @@ impl<S: AdvancementSum> AdvancementSet<S> {
         )
     }
 
-    pub fn current(&self, xp: i32) -> &Advancement<S> {
+    pub fn current(&self, xp: u64) -> &Advancement<S> {
         self.get(self.current_position(xp)).unwrap_or(&self.base)
     }
 
-    pub fn next(&self, xp: i32) -> Option<&Advancement<S>> {
+    pub fn next(&self, xp: u64) -> Option<&Advancement<S>> {
         self.get(self.current_position(xp) + 1)
     }
 
-    pub fn current_position(&self, xp: i32) -> usize {
+    pub fn current_position(&self, xp: u64) -> usize {
         let mut state = 0;
         self.all()
             .position(|x| {
@@ -936,52 +975,83 @@ impl<S: AdvancementSum> AdvancementSet<S> {
     }
 }
 
+#[tokio::test]
+async fn upgrade_increase() {
+    crate::yank_config::yank_config().await.expect("couldn't yank config");
+
+    for arch in CONFIG.plant_archetypes.iter() {
+        let adv = &arch.advancements;
+        let last = adv.rest.last().unwrap();
+        for xp in 0..last.xp {
+            assert!(
+                adv.current(xp).xp <= xp,
+                "when xp is {} for {} the current advancement has more xp({})",
+                xp,
+                arch.name,
+                adv.current(xp).xp
+            );
+        }
+    }
+}
+
 /// In the config, you can specify the names of archetypes.
 /// If you're Rishi, you might spell one of those names wrong.
 /// This function helps you make sure you didn't do that.
 pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
     for a in config.possession_archetypes.iter() {
-        if let Some(sa) = &a.seed {
-            if config.find_plant(&sa.grows_into).is_err() {
-                return Err(format!(
-                    "seed archetype {:?} claims it grows into unknown plant archetype {:?}",
-                    a.name, sa.grows_into,
-                ));
+        match &a.kind {
+            ArchetypeKind::Seed(sa) => {
+                if config.find_plant(&sa.grows_into).is_err() {
+                    return Err(format!(
+                        "seed archetype {:?} claims it grows into unknown plant archetype {:?}",
+                        a.name, sa.grows_into,
+                    ));
+                }
             }
-        }
-        if let Some(ga) = &a.gotchi {
-            if let Some(table) = &ga.hatch_table {
-                for (_, spawn) in table.iter() {
-                    if config.find_possession(spawn).is_err() {
+            ArchetypeKind::Gotchi(ga) => {
+                if let Some(table) = &ga.hatch_table {
+                    for (_, spawn) in table.iter() {
+                        if config.find_possession(spawn).is_err() {
+                            return Err(format!(
+                                "gotchi archetype {:?} claims it hatches into unknown possession archetype {:?}",
+                                a.name,
+                                spawn,
+                            ));
+                        }
+                    }
+                }
+                for SelectivePlantAdvancement { keep_plants, .. } in &ga.plant_effects {
+                    if let Err(e) = keep_plants.lookup_handles_in_config(&config) {
                         return Err(format!(
-                            "gotchi archetype {:?} claims it hatches into unknown possession archetype {:?}",
-                            a.name,
-                            spawn,
+                            "gotchi archetype {:?} keep plants error: {}\nkeep plants: {:?}",
+                            a.name, e, keep_plants,
                         ));
                     }
                 }
             }
-        }
-        for SelectivePlantAdvancement { keep_plants, .. } in &a.plant_effects {
-            if let Err(e) = keep_plants.lookup_handles() {
-                return Err(format!(
-                    "possession archetype {:?} keep plants error: {}\nkeep plants: {:?}",
-                    a.name, e, keep_plants,
-                ));
-            }
-        }
-        if let Some(ia) = &a.item_application {
-            for iaa in ia.effects.iter() {
-                if let Err(e) = iaa.keep_plants.lookup_handles() {
-                    return Err(format!(
-                        concat!(
-                            "possession archetype {:?} ",
-                            "item application adv {:?} ",
-                            "keep plants error: {}\n",
-                            "keep plants: {:?}",
-                        ),
-                        a.name, ia.short_description, e, iaa.keep_plants,
-                    ));
+            ArchetypeKind::Keepsake(ka) => {
+                for SelectivePlantAdvancement { keep_plants, .. } in &ka.plant_effects {
+                    if let Err(e) = keep_plants.lookup_handles_in_config(config) {
+                        return Err(format!(
+                            "keepsake archetype {:?} keep plants error: {}\nkeep plants: {:?}",
+                            a.name, e, keep_plants,
+                        ));
+                    }
+                }
+                if let Some(ia) = &ka.item_application {
+                    for iaa in ia.effects.iter() {
+                        if let Err(e) = iaa.keep_plants.lookup_handles_in_config(config) {
+                            return Err(format!(
+                                concat!(
+                                    "keepsake archetype {:?} ",
+                                    "item application adv {:?} ",
+                                    "keep plants error: {}\n",
+                                    "keep plants: {:?}",
+                                ),
+                                a.name, ia.short_description, e, iaa.keep_plants,
+                            ));
+                        }
+                    }
                 }
             }
         }
@@ -1036,4 +1106,9 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
     }
 
     Ok(())
+}
+
+#[test]
+fn archetype_name_matches() {
+    check_archetype_name_matches(&*CONFIG).unwrap_or_else(|e| panic!("{}", e));
 }
