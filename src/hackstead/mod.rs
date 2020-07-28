@@ -15,13 +15,32 @@ pub struct Hackstead {
     pub inventory: Vec<Item>,
 }
 impl Hackstead {
-    pub fn new<T: ToString>(slack_id: Option<T>) -> Self {
+    pub fn empty(slack_id: Option<impl ToString>) -> Self {
         Hackstead {
             profile: Profile::new(slack_id.map(|s| s.to_string())),
             land: vec![],
             inventory: vec![],
         }
     }
+
+    pub fn new_user(slack_id: Option<impl ToString>) -> Self {
+        let profile = Profile::new(slack_id.map(|s| s.to_string()));
+        Hackstead {
+            inventory: CONFIG
+                .possession_archetypes
+                .iter()
+                .filter(|a| a.welcome_gift)
+                .map(|a| Item::from_archetype(
+                    a,
+                    profile.steader_id,
+                    item::Acquisition::spawned()
+                ))
+                .collect(),
+            land: vec![Tile::new(profile.steader_id)],
+            profile,
+        }
+    }
+
     #[cfg(feature = "client")]
     pub async fn fetch(uc: crate::UserId) -> Result<Self, crate::BackendError> {
         let client = reqwest::Client::new();
@@ -43,20 +62,27 @@ pub struct TileCreationRequest {
     /// contact info for the steader who owns this item
     pub steader: crate::UserId,
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct TileBase {
+    pub owner_id: Uuid,
+    pub tile_id: Uuid,
+    pub acquired: DateTime<Utc>,
+}
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Tile {
-    pub acquired: DateTime<Utc>,
     pub plant: Option<Plant>,
-    pub id: Uuid,
-    pub steader: String,
+    pub base: TileBase,
 }
 impl Tile {
-    pub fn new(steader: String) -> Tile {
+    pub fn new(owner_id: Uuid) -> Tile {
         Tile {
-            acquired: Utc::now(),
             plant: None,
-            id: Uuid::new_v4(),
-            steader,
+            base: TileBase {
+                acquired: Utc::now(),
+                tile_id: Uuid::new_v4(),
+                owner_id,
+            },
         }
     }
 }

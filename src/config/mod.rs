@@ -37,7 +37,7 @@ pub trait SpawnTableRow {
     /// percentiles for eggs, perhaps we want to replace this with
     /// some configurably-defined "desireability" factor?
     /// Rarity does not strictly correlate with the value of something.
-    fn rarity(&self) -> f32;
+    fn rarity(&self) -> f64;
 
     /// How many of this item should be outputted?
     fn count(&self, rng: &mut impl rand::RngCore) -> usize;
@@ -49,7 +49,7 @@ pub trait SpawnTableRow {
 impl<Handle: Clone> SpawnTableRow for (CountProbability, Handle) {
     type Output = Handle;
 
-    fn rarity(&self) -> f32 {
+    fn rarity(&self) -> f64 {
         (self.0).0
     }
     fn count(&self, rng: &mut impl rand::RngCore) -> usize {
@@ -75,8 +75,8 @@ pub fn spawn<'rng, Row: SpawnTableRow>(
 pub fn spawn_with_percentile<Row: SpawnTableRow>(
     table: &Vec<Row>,
     rng: &mut impl rand::RngCore,
-) -> (Vec<Row::Output>, f32) {
-    let (handles, rows): (Vec<Vec<Row::Output>>, Vec<f32>) = table
+) -> (Vec<Row::Output>, f64) {
+    let (handles, rows): (Vec<Vec<Row::Output>>, Vec<f64>) = table
         .iter()
         .filter_map(|row| {
             let count = row.count(rng);
@@ -93,8 +93,8 @@ pub fn spawn_with_percentile<Row: SpawnTableRow>(
         .unzip();
 
     (handles.into_iter().flat_map(|h| h.into_iter()).collect(), {
-        let best_roll: f32 = table.iter().map(|row| row.rarity()).product();
-        1.0 - ((rows.into_iter().product::<f32>() - best_roll) / (1.0 - best_roll))
+        let best_roll: f64 = table.iter().map(|row| row.rarity()).product();
+        1.0 - ((rows.into_iter().product::<f64>() - best_roll) / (1.0 - best_roll))
     })
 }
 
@@ -154,7 +154,7 @@ impl Config {
             .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
     }
 
-    pub fn find_possession_handle<S: AsRef<str>>(
+    pub fn possession_name_to_handle<S: AsRef<str>>(
         &self,
         name: &S,
     ) -> Result<ArchetypeHandle, ConfigError> {
@@ -162,6 +162,13 @@ impl Config {
             .iter()
             .position(|x| name.as_ref() == x.name)
             .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
+            .map(|x| x as ArchetypeHandle)
+    }
+
+    pub fn possession_archetype_to_handle(&self, a: &Archetype) -> Option<ArchetypeHandle> {
+        self.possession_archetypes
+            .iter()
+            .position(|x| x == a)
             .map(|x| x as ArchetypeHandle)
     }
 }
@@ -192,7 +199,7 @@ lazy_static::lazy_static! {
     };
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ProfileArchetype {
     pub advancements: AdvancementSet<HacksteadAdvancementSum>,
 }
@@ -228,7 +235,7 @@ impl AdvancementSum for HacksteadAdvancementSum {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum KeepPlants<Handle> {
     Only(Vec<Handle>),
     Not(Vec<Handle>),
@@ -265,54 +272,53 @@ impl<Handle: PartialEq> KeepPlants<Handle> {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct SelectivePlantAdvancement {
     pub keep_plants: KeepPlants<String>,
     pub advancement: PlantAdvancement,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct GotchiArchetype {
     pub base_happiness: i32,
     #[serde(default)]
-    pub plant_effects: Vec<SelectivePlantAdvancement>,
     pub hatch_table: Option<LootTable>,
-    #[serde(default)]
-    pub welcome_gift: bool,
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct SeedArchetype {
     pub grows_into: String,
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct LandUnlock {
     pub requires_xp: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ItemApplication {
     pub short_description: String,
     pub effects: Vec<ItemApplicationEffect>,
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ItemApplicationEffectKind {
     PlantAdvancement(PlantAdvancement),
     TurnsPlantInto(String),
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ItemApplicationEffect {
-    pub duration: Option<f32>,
+    pub duration: Option<f64>,
     pub keep_plants: KeepPlants<String>,
     pub kind: ItemApplicationEffectKind,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Archetype {
     pub name: String,
     pub description: String,
     pub gotchi: Option<GotchiArchetype>,
     pub seed: Option<SeedArchetype>,
     pub unlocks_land: Option<LandUnlock>,
+    #[serde(default)]
+    pub welcome_gift: bool,
     #[serde(default)]
     pub plant_effects: Vec<SelectivePlantAdvancement>,
     pub item_application: Option<ItemApplication>,
@@ -321,7 +327,7 @@ pub struct Archetype {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PlantArchetype {
     pub name: String,
-    pub base_yield_duration: Option<f32>,
+    pub base_yield_duration: Option<f64>,
     pub advancements: AdvancementSet<PlantAdvancementSum>,
 }
 impl Eq for PlantArchetype {}
@@ -342,13 +348,13 @@ pub type PlantAdvancementSet = AdvancementSet<PlantAdvancementSum>;
 pub enum RecipeMakes<Handle: Clone> {
     Just(usize, Handle),
     Nothing,
-    OneOf(Vec<(f32, RecipeMakes<Handle>)>),
+    OneOf(Vec<(f64, RecipeMakes<Handle>)>),
     AllOf(Vec<(usize, Handle)>),
 }
 impl<Handle: Clone> RecipeMakes<Handle> {
-    fn pick_one_weighted_of<T: Clone>(from: &Vec<(f32, T)>) -> T {
+    fn pick_one_weighted_of<T: Clone>(from: &Vec<(f64, T)>) -> T {
         use rand::Rng;
-        let mut x: f32 = rand::thread_rng().gen_range(0.0, 1.0);
+        let mut x: f64 = rand::thread_rng().gen_range(0.0, 1.0);
         from.iter()
             .find_map(|(chance, h)| {
                 x -= chance;
@@ -371,11 +377,11 @@ impl<Handle: Clone> RecipeMakes<Handle> {
             OneOf(these) => Self::pick_one_weighted_of(these).any(),
             Just(_, h) => Some(h.clone()),
             AllOf(these) => {
-                let total = these.iter().map(|(count, _)| *count).sum::<usize>() as f32;
+                let total = these.iter().map(|(count, _)| *count).sum::<usize>() as f64;
                 Some(Self::pick_one_weighted_of(
                     &these
                         .iter()
-                        .map(|(count, h)| (*count as f32 / total, h.clone()))
+                        .map(|(count, h)| (*count as f64 / total, h.clone()))
                         .collect(),
                 ))
             }
@@ -481,7 +487,7 @@ impl RecipeMakes<String> {
         use RecipeMakes::*;
 
         fn find(name: String) -> Result<ArchetypeHandle, ConfigError> {
-            CONFIG.find_possession_handle(&name)
+            CONFIG.possession_name_to_handle(&name)
         }
 
         Ok(match self {
@@ -512,7 +518,7 @@ pub struct Recipe<Handle: Clone> {
     pub makes: RecipeMakes<Handle>,
     #[serde(default)]
     pub destroys_plant: bool,
-    pub time: f32,
+    pub time: f64,
     pub xp: (i32, i32),
 }
 impl Recipe<ArchetypeHandle> {
@@ -570,10 +576,10 @@ impl Recipe<&Archetype> {
 /// counterparts. The integral counterpart is the base number of items to award, and the
 /// fractional counterpart becomes a probability that an extra item is awarded. For example,
 /// 1.99 is one item guaranteed, with a 99% chance of a second item being awarded.
-pub type AmountBounds = (f32, f32);
+pub type AmountBounds = (f64, f64);
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
-pub struct CountProbability(pub f32, pub AmountBounds);
+pub struct CountProbability(pub f64, pub AmountBounds);
 impl CountProbability {
     pub fn gen_count<R: rand::Rng>(self, rng: &mut R) -> usize {
         let Self(guard, (lo, hi)) = self;
@@ -600,13 +606,13 @@ impl CountProbability {
 pub struct Yield<Handle> {
     /// The chance this yield has of even occuring, in the domain [0.0, 1.0].
     /// Note that yields which do not occur yield neither xp nor items.
-    pub chance: f32,
+    pub chance: f64,
     /// The number of items to produce, see the documentation on AmountBounds for more information.
     pub amount: AmountBounds,
     /// This field dictates how much less xp is earned per item in a yield.
     /// The formula used is xp / (i * dropoff), where xp is an amount in the bounds below,
     /// and i is the index of the item.
-    pub dropoff: f32,
+    pub dropoff: f64,
     /// An upper and lower bound for a random amount of xp to be awarded should this yield occur
     /// (as determined by the chance field).
     /// The xp is awarded on a per item basis, although dropoff can be used to ensure less and
@@ -636,7 +642,7 @@ impl Yield<String> {
             amount,
             xp,
             dropoff,
-            yields: CONFIG.find_possession_handle(&yields)?,
+            yields: CONFIG.possession_name_to_handle(&yields)?,
         })
     }
 }
@@ -646,7 +652,7 @@ impl<Handle: Clone> SpawnTableRow for Yield<Handle> {
     /// alongside something you can use to spawn an item with.
     type Output = (Handle, usize);
 
-    fn rarity(&self) -> f32 {
+    fn rarity(&self) -> f64 {
         self.chance
     }
     fn count(&self, rng: &mut impl rand::RngCore) -> usize {
@@ -657,7 +663,7 @@ impl<Handle: Clone> SpawnTableRow for Yield<Handle> {
             use rand::Rng;
 
             let (lo, hi) = self.xp;
-            (rand::thread_rng().gen_range(lo, hi) as f32 / ((index + 1) as f32 * self.dropoff))
+            (rand::thread_rng().gen_range(lo, hi) as f64 / ((index + 1) as f64 * self.dropoff))
                 .round() as usize
         })
     }
@@ -670,15 +676,15 @@ pub enum PlantAdvancementKind {
     Neighbor(Box<PlantAdvancementKind>),
     /// Stores the number of extra cycles to add for the duration of the effect
     ExtraTimeTicks(i32),
-    TimeTicksMultiplier(f32),
-    Xp(f32),
-    YieldSpeedMultiplier(f32),
-    YieldSizeMultiplier(f32),
+    TimeTicksMultiplier(f64),
+    Xp(f64),
+    YieldSpeedMultiplier(f64),
+    YieldSizeMultiplier(f64),
     Yield(Vec<Yield<String>>),
     Craft(Vec<Recipe<String>>),
-    CraftSpeedMultiplier(f32),
-    CraftReturnChance(f32),
-    DoubleCraftYield(f32),
+    CraftSpeedMultiplier(f64),
+    CraftReturnChance(f64),
+    DoubleCraftYield(f64),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
@@ -690,13 +696,13 @@ pub struct PlantAdvancementSum {
     pub xp: i32,
     pub xp_multiplier: i32,
     // yield
-    pub yield_speed_multiplier: f32,
-    pub yield_size_multiplier: f32,
+    pub yield_speed_multiplier: f64,
+    pub yield_size_multiplier: f64,
     pub yields: Vec<Yield<ArchetypeHandle>>,
     // craft
-    pub double_craft_yield_chance: f32,
-    pub crafting_speed_multiplier: f32,
-    pub craft_return_chance: f32,
+    pub double_craft_yield_chance: f64,
+    pub crafting_speed_multiplier: f64,
+    pub craft_return_chance: f64,
     pub recipes: Vec<Recipe<ArchetypeHandle>>,
 }
 impl AdvancementSum for PlantAdvancementSum {
@@ -706,7 +712,7 @@ impl AdvancementSum for PlantAdvancementSum {
         use PlantAdvancementKind::*;
 
         // time
-        let mut time_ticks_multiplier: f32 = 1.0;
+        let mut time_ticks_multiplier: f64 = 1.0;
         let mut extra_time_ticks: i32 = 0;
         // xp
         let mut xp = 0;
@@ -773,7 +779,7 @@ impl AdvancementSum for PlantAdvancementSum {
                                 makes: makes.clone().find_handles()?,
                                 needs: needs
                                     .iter()
-                                    .map(|(c, s)| Ok((*c, CONFIG.find_possession_handle(s)?)))
+                                    .map(|(c, s)| Ok((*c, CONFIG.possession_name_to_handle(s)?)))
                                     .collect::<Result<Vec<_>, ConfigError>>()?,
                                 time,
                                 destroys_plant,
@@ -801,7 +807,7 @@ impl AdvancementSum for PlantAdvancementSum {
             .collect();
 
         Self {
-            total_extra_time_ticks: ((extra_time_ticks as f32) * time_ticks_multiplier).ceil()
+            total_extra_time_ticks: ((extra_time_ticks as f64) * time_ticks_multiplier).ceil()
                 as u128,
             // xp
             xp,
@@ -844,7 +850,7 @@ pub struct Advancement<S: AdvancementSum> {
     pub description: String,
     pub achiever_title: String,
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(bound(deserialize = ""))]
 pub struct AdvancementSet<S: AdvancementSum> {
     pub base: Advancement<S>,

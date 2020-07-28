@@ -73,17 +73,37 @@ impl std::ops::Deref for Item {
 }
 
 impl Item {
-    pub fn new(ah: ArchetypeHandle, owner: LoggedOwner) -> Self {
+    pub fn from_archetype_handle(
+        ah: ArchetypeHandle,
+        logged_owner_id: Uuid,
+        acquisition: Acquisition,
+    ) -> Self {
         let a = Self::archetype(ah);
+        Self::from_archetype(a, logged_owner_id, acquisition)
+    }
+
+    pub fn from_archetype(
+        a: &'static Archetype,
+        logged_owner_id: Uuid,
+        acquisition: Acquisition,
+    ) -> Self {
         let item_id = uuid::Uuid::new_v4();
+        let ah = CONFIG
+            .possession_archetype_to_handle(a)
+            .expect("invalid archetype");
         Self {
             base: ItemBase {
                 item_id,
                 archetype_handle: ah,
-                owner_id: owner.logged_owner_id.clone(),
+                owner_id: logged_owner_id,
             },
             gotchi: Some(Gotchi::new(item_id, ah)).filter(|_| a.gotchi.is_some()),
-            ownership_log: vec![owner],
+            ownership_log: vec![LoggedOwner {
+                item_id,
+                owner_index: 0,
+                logged_owner_id,
+                acquisition,
+            }],
         }
     }
 

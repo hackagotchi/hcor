@@ -1,14 +1,15 @@
 use crate::config;
 use config::{ArchetypeHandle, PlantArchetype, CONFIG};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 /// Format for requesting than an item to be applied to a plant
 pub struct PlantApplicationRequest {
     /// the item to be applied to a plant
-    pub applicable_item_id: uuid::Uuid,
+    pub applicable_item_id: Uuid,
     /// the tile that the plant to apply this to rests on
-    pub tile_id: uuid::Uuid,
+    pub tile_id: Uuid,
     /// the steader who owns the item, plant and tile
     pub steader: crate::UserId,
 }
@@ -16,7 +17,7 @@ pub struct PlantApplicationRequest {
 /// Format for requesting than a plant be removed from its tile
 pub struct PlantRemovalRequest {
     /// The tile that the plant the user wants to remove sits on
-    pub tile_id: uuid::Uuid,
+    pub tile_id: Uuid,
     /// The hacksteader who owns the plant and tile
     pub steader: crate::UserId,
 }
@@ -24,22 +25,27 @@ pub struct PlantRemovalRequest {
 /// Format for requesting that a plant begin crafting something.
 pub struct PlantCraftRequest {
     /// The tile that the plant that should craft sits on
-    pub tile_id: uuid::Uuid,
+    pub tile_id: Uuid,
     /// The index of the recipe in the list of this plant's recipes
     pub recipe_index: usize,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
-pub struct Plant {
+pub struct PlantBase {
+    pub tile_id: Uuid,
     pub xp: i32,
-    pub until_yield: f32,
+    pub until_yield: f64,
+    pub nickname: String,
+    pub archetype_handle: ArchetypeHandle,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
+pub struct Plant {
+    pub base: PlantBase,
     pub craft: Option<Craft>,
     /// Effects from potions, warp powder, etc. that actively change the behavior of this plant.
-    #[serde(default)]
     pub effects: Vec<Effect>,
-    pub archetype_handle: ArchetypeHandle,
-    /// This field isn't saved to the database, and is just used
-    /// when `plant.increase_xp()` is called.
+    /// This field isn't saved to the database, and is just used when `plant.increase_xp()` is called.
     #[serde(skip)]
     pub queued_xp_bonus: i32,
 }
@@ -49,18 +55,21 @@ impl std::ops::Deref for Plant {
     fn deref(&self) -> &Self::Target {
         &CONFIG
             .plant_archetypes
-            .get(self.archetype_handle as usize)
+            .get(self.base.archetype_handle as usize)
             .expect("invalid archetype handle")
     }
 }
 impl Plant {
     pub fn from_seed(seed: config::SeedArchetype) -> Self {
-        let mut s = Self {
-            archetype_handle: CONFIG.find_plant_handle(&seed.grows_into).unwrap(),
+        let mut p = Self {
+            base: PlantBase {
+                archetype_handle: CONFIG.find_plant_handle(&seed.grows_into).unwrap(),
+                ..Default::default()
+            },
             ..Default::default()
         };
-        s.until_yield = s.base_yield_duration.unwrap_or(0.0);
-        s
+        p.base.until_yield = p.base_yield_duration.unwrap_or(0.0);
+        p
     }
 
     fn effect_advancements<'a>(&'a self) -> impl Iterator<Item = &'a config::PlantAdvancement> {
@@ -81,7 +90,7 @@ impl Plant {
         extra_advancements: impl Iterator<Item = &'a config::PlantAdvancement>,
     ) -> config::PlantAdvancementSum {
         self.advancements.sum(
-            self.xp,
+            self.base.xp,
             self.effect_advancements().chain(extra_advancements),
         )
     }
@@ -101,7 +110,7 @@ impl Plant {
         extra_advancements: impl Iterator<Item = &'a config::PlantAdvancement>,
     ) -> config::PlantAdvancementSum {
         self.advancements.raw_sum(
-            self.xp,
+            self.base.xp,
             self.effect_advancements().chain(extra_advancements),
         )
     }
@@ -111,7 +120,7 @@ impl Plant {
         extra_advancements: impl Iterator<Item = &'a config::PlantAdvancement>,
     ) -> impl Iterator<Item = &'a config::PlantAdvancement> {
         self.advancements
-            .unlocked(self.xp)
+            .unlocked(self.base.xp)
             .chain(self.effect_advancements())
             .chain(extra_advancements)
     }
@@ -127,11 +136,11 @@ impl Plant {
     }
 
     pub fn current_advancement(&self) -> &config::PlantAdvancement {
-        self.advancements.current(self.xp)
+        self.advancements.current(self.base.xp)
     }
 
     pub fn next_advancement(&self) -> Option<&config::PlantAdvancement> {
-        self.advancements.next(self.xp)
+        self.advancements.next(self.base.xp)
     }
 
     pub fn increase_xp(&mut self, mut amt: i32) -> Option<&'static config::PlantAdvancement> {
@@ -139,10 +148,10 @@ impl Plant {
         self.queued_xp_bonus = 0;
         CONFIG
             .plant_archetypes
-            .get(self.archetype_handle as usize)
+            .get(self.base.archetype_handle as usize)
             .expect("invalid archetype handle")
             .advancements
-            .increase_xp(&mut self.xp, amt)
+            .increase_xp(&mut self.base.xp, amt)
     }
 
     pub fn current_recipe_raw(&self) -> Option<config::Recipe<ArchetypeHandle>> {
@@ -176,14 +185,16 @@ impl Plant {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Craft {
-    pub until_finish: f32,
+    pub tile_id: Uuid,
+    pub until_finish: f64,
     #[serde(alias = "makes")]
     pub recipe_archetype_handle: ArchetypeHandle,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub struct Effect {
-    pub until_finish: Option<f32>,
+    pub tile_id: Uuid,
+    pub until_finish: Option<f64>,
     /// The archetype of the item that was consumed to apply this effect.
     pub item_archetype_handle: ArchetypeHandle,
     /// The archetype of the effect within this item that describes this effect.
