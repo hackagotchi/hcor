@@ -9,6 +9,13 @@ pub mod plant;
 pub use plant::Plant;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+/// Format for requesting that a new hackstead is made for a user
+pub struct NewHacksteadRequest {
+    /// A slack id to be associated with this user, if any.
+    pub slack_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Hackstead {
     pub profile: Profile,
     pub land: Vec<Tile>,
@@ -21,6 +28,14 @@ impl Hackstead {
             land: vec![],
             inventory: vec![],
         }
+    }
+
+    pub fn land_unlock_eligible(&self) -> bool {
+        let xp_allows = self.profile.advancements_sum().land;
+        let extra = self.profile.extra_land_plot_count;
+        let eligible = (dbg!(xp_allows) + dbg!(extra)) as usize;
+
+        self.land.len() < eligible
     }
 
     pub fn new_user(slack_id: Option<impl ToString>) -> Self {
@@ -43,8 +58,7 @@ impl Hackstead {
 
     #[cfg(feature = "client")]
     pub async fn fetch(uc: crate::UserId) -> Result<Self, crate::BackendError> {
-        let client = reqwest::Client::new();
-        Ok(client
+        Ok(reqwest::Client::new()
             .get("http://127.0.0.1:8000/hackstead/")
             .json(&uc)
             .send()

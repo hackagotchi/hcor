@@ -50,6 +50,18 @@ impl fmt::Display for Acquisition {
     }
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+/// Format for requesting that a new item be created and given to a user.
+pub struct ItemTransferRequest {
+    /// The steader the items should be transferred to.
+    pub receiver_id: Uuid,
+    /// The steader from whom the items should be transferred.
+    pub sender_id: Uuid,
+    /// The ids of the items to be transferred. Any items referenced which do not belong to the
+    /// sender are ignored.
+    pub item_ids: Vec<Uuid>,
+}
+
 #[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct ItemBase {
     pub archetype_handle: ArchetypeHandle,

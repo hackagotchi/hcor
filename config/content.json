@@ -5,7 +5,7 @@
       "base": {
         "kind": {
           "Land": {
-            "pieces": 0
+            "pieces": 1
           }
         },
         "xp": 0,
@@ -4260,11 +4260,11 @@
     {
       "name": "Land Deed",
       "description": "Entitles the holder to a new plot of land, if they have the experience to handle it, of course.",
+      "unlocks_land": {
+        "requires_xp": true
+      },
       "kind": {
         "Keepsake": {
-          "unlocks_land": {
-            "requires_xp": true
-          },
           "plant_effects": [],
           "item_application": null
         }
@@ -4272,12 +4272,12 @@
     },
     {
       "name": "Land Grant",
+      "unlocks_land": {
+        "requires_xp": false
+      },
       "description": "A much rarer, much more valuable land deed that can grant you land even if you don't have enough experience.",
       "kind": {
         "Keepsake": {
-          "unlocks_land": {
-            "requires_xp": false
-          },
           "plant_effects": [],
           "item_application": null
         }
