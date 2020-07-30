@@ -73,6 +73,14 @@ pub struct ItemSpawnRequest {
     pub amount: usize,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+/// Format for requesting that an item be hatched.
+pub struct ItemHatchRequest {
+    /// Id of an item to be hatched. If the archetype of the item is not hatchable, your request
+    /// will be ignored.
+    pub hatchable_item_id: Uuid,
+}
+
 #[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct ItemBase {
     pub archetype_handle: ArchetypeHandle,
@@ -90,20 +98,53 @@ pub struct Item {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{ClientResult, IdentifiesItem, CLIENT, SERVER_URL};
+    use crate::client::{
+        ClientError, ClientResult, IdentifiesItem, IdentifiesUser, CLIENT, SERVER_URL, extract_error_or_parse,
+    };
     use crate::hackstead::{Tile, TileCreationRequest};
 
     impl Item {
         pub async fn redeem_for_tile(&self) -> ClientResult<Tile> {
-            Ok(CLIENT
-                .post(&format!("{}/{}", *SERVER_URL, "tile/new"))
-                .json(&TileCreationRequest {
-                    tile_redeemable_item_id: self.item_id(),
-                })
-                .send()
-                .await?
-                .json()
-                .await?)
+            extract_error_or_parse(
+                CLIENT
+                    .post(&format!("{}/{}", *SERVER_URL, "tile/new"))
+                    .json(&TileCreationRequest {
+                        tile_redeemable_item_id: self.item_id(),
+                    })
+                    .send()
+                    .await?,
+            )
+            .await
+        }
+
+        pub async fn hatch(&self) -> ClientResult<Vec<Item>> {
+            extract_error_or_parse(
+                CLIENT
+                    .post(&format!("{}/{}", *SERVER_URL, "item/hatch"))
+                    .json(&ItemHatchRequest {
+                        hatchable_item_id: self.item_id(),
+                    })
+                    .send()
+                    .await?,
+            )
+            .await
+        }
+
+        pub async fn give_to(&self, to: impl IdentifiesUser) -> ClientResult<Item> {
+            extract_error_or_parse::<Vec<Item>>(
+                CLIENT
+                    .post(&format!("{}/{}", *SERVER_URL, "item/transfer"))
+                    .json(&ItemTransferRequest {
+                        sender_id: self.base.owner_id.user_id(),
+                        receiver_id: to.user_id(),
+                        item_ids: vec![self.base.item_id],
+                    })
+                    .send()
+                    .await?,
+            )
+            .await?
+            .pop()
+            .ok_or(ClientError::ExpectedOneSpawnReturnedNone)
         }
     }
 }

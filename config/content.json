@@ -4099,7 +4099,6 @@
               }
             }
           ],
-          "hatch_table": null,
           "welcome_gift": false
         }
       }
@@ -4129,7 +4128,6 @@
               }
             }
           ],
-          "hatch_table": null,
           "welcome_gift": false
         }
       }
@@ -4159,7 +4157,6 @@
               }
             }
           ],
-          "hatch_table": null,
           "welcome_gift": false
         }
       }
@@ -4460,242 +4457,242 @@
     {
       "name": "Cyl Egg",
       "description": "Veins of pure arcane energy course throughout the egg, and holding it quickly makes your hands shaky and numb.",
+  "hatch_table": [
+    [
+      [
+	0.011,
+	[
+	  1.0,
+	  1.05
+	]
+      ],
+      "Hackpheus"
+    ],
+    [
+      [
+	0.011,
+	[
+	  1.0,
+	  1.05
+	]
+      ],
+      "Chefpheus"
+    ],
+    [
+      [
+	0.7,
+	[
+	  1.4,
+	  2.42
+	]
+      ],
+      "Rift Powder"
+    ],
+    [
+      [
+	0.18,
+	[
+	  1.6,
+	  2.74
+	]
+      ],
+      "Rift Powder"
+    ],
+    [
+      [
+	1.0,
+	[
+	  3.25,
+	  5.65
+	]
+      ],
+      "Warp Powder"
+    ],
+    [
+      [
+	0.44,
+	[
+	  4.75,
+	  6.7
+	]
+      ],
+      "Warp Powder"
+    ],
+    [
+      [
+	0.03,
+	[
+	  1.25,
+	  2.66
+	]
+      ],
+      "Wormhole Powder"
+    ],
+    [
+      [
+	0.018,
+	[
+	  1.0,
+	  1.05
+	]
+      ],
+      "Vine Keyboard"
+    ],
+    [
+      [
+	0.018,
+	[
+	  1.0,
+	  1.05
+	]
+      ],
+      "Rolling Pin"
+    ],
+    [
+      [
+	0.013,
+	[
+	  1.02,
+	  1.08
+	]
+      ],
+      "Land Deed"
+    ],
+    [
+      [
+	0.005,
+	[
+	  1.0,
+	  1.02
+	]
+      ],
+      "Land Grant"
+    ],
+    [
+      [
+	0.168,
+	[
+	  1.05,
+	  2.01
+	]
+      ],
+      "Tinkerpart"
+    ],
+    [
+      [
+	0.145,
+	[
+	  1.03,
+	  1.6
+	]
+      ],
+      "Volatile Vial"
+    ],
+    [
+      [
+	1.0,
+	[
+	  2.45,
+	  4.18
+	]
+      ],
+      "Coffea Cyl Seed"
+    ],
+    [
+      [
+	0.3,
+	[
+	  1.8,
+	  3.45
+	]
+      ],
+      "Coffea Cyl Seed"
+    ],
+    [
+      [
+	0.01,
+	[
+	  1.0,
+	  1.1
+	]
+      ],
+      "Tinkerspore"
+    ],
+    [
+      [
+	0.015,
+	[
+	  1.0,
+	  1.05
+	]
+      ],
+      "Aloe Avanta Seed"
+    ],
+    [
+      [
+	0.3,
+	[
+	  1.25,
+	  2.25
+	]
+      ],
+      "Spirited Buzzwing Bagling"
+    ],
+    [
+      [
+	0.11,
+	[
+	  1.65,
+	  3.35
+	]
+      ],
+      "Spirited Buzzwing Bagling"
+    ],
+    [
+      [
+	0.3,
+	[
+	  1.25,
+	  2.25
+	]
+      ],
+      "Doughy Buzzwing Bagling"
+    ],
+    [
+      [
+	0.11,
+	[
+	  1.65,
+	  3.35
+	]
+      ],
+      "Doughy Buzzwing Bagling"
+    ],
+    [
+      [
+	0.01,
+	[
+	  1.0,
+	  1.12
+	]
+      ],
+      "Cyl Egg"
+    ],
+    [
+      [
+	0.008,
+	[
+	  1.0,
+	  1.25
+	]
+      ],
+      "Cyl Egg"
+    ]
+  ],
       "kind": {
         "Gotchi": {
           "base_happiness": 0,
           "plant_effects": [],
-          "hatch_table": [
-            [
-              [
-                0.011,
-                [
-                  1.0,
-                  1.05
-                ]
-              ],
-              "Hackpheus"
-            ],
-            [
-              [
-                0.011,
-                [
-                  1.0,
-                  1.05
-                ]
-              ],
-              "Chefpheus"
-            ],
-            [
-              [
-                0.7,
-                [
-                  1.4,
-                  2.42
-                ]
-              ],
-              "Rift Powder"
-            ],
-            [
-              [
-                0.18,
-                [
-                  1.6,
-                  2.74
-                ]
-              ],
-              "Rift Powder"
-            ],
-            [
-              [
-                1.0,
-                [
-                  3.25,
-                  5.65
-                ]
-              ],
-              "Warp Powder"
-            ],
-            [
-              [
-                0.44,
-                [
-                  4.75,
-                  6.7
-                ]
-              ],
-              "Warp Powder"
-            ],
-            [
-              [
-                0.03,
-                [
-                  1.25,
-                  2.66
-                ]
-              ],
-              "Wormhole Powder"
-            ],
-            [
-              [
-                0.018,
-                [
-                  1.0,
-                  1.05
-                ]
-              ],
-              "Vine Keyboard"
-            ],
-            [
-              [
-                0.018,
-                [
-                  1.0,
-                  1.05
-                ]
-              ],
-              "Rolling Pin"
-            ],
-            [
-              [
-                0.013,
-                [
-                  1.02,
-                  1.08
-                ]
-              ],
-              "Land Deed"
-            ],
-            [
-              [
-                0.005,
-                [
-                  1.0,
-                  1.02
-                ]
-              ],
-              "Land Grant"
-            ],
-            [
-              [
-                0.168,
-                [
-                  1.05,
-                  2.01
-                ]
-              ],
-              "Tinkerpart"
-            ],
-            [
-              [
-                0.145,
-                [
-                  1.03,
-                  1.6
-                ]
-              ],
-              "Volatile Vial"
-            ],
-            [
-              [
-                1.0,
-                [
-                  2.45,
-                  4.18
-                ]
-              ],
-              "Coffea Cyl Seed"
-            ],
-            [
-              [
-                0.3,
-                [
-                  1.8,
-                  3.45
-                ]
-              ],
-              "Coffea Cyl Seed"
-            ],
-            [
-              [
-                0.01,
-                [
-                  1.0,
-                  1.1
-                ]
-              ],
-              "Tinkerspore"
-            ],
-            [
-              [
-                0.015,
-                [
-                  1.0,
-                  1.05
-                ]
-              ],
-              "Aloe Avanta Seed"
-            ],
-            [
-              [
-                0.3,
-                [
-                  1.25,
-                  2.25
-                ]
-              ],
-              "Spirited Buzzwing Bagling"
-            ],
-            [
-              [
-                0.11,
-                [
-                  1.65,
-                  3.35
-                ]
-              ],
-              "Spirited Buzzwing Bagling"
-            ],
-            [
-              [
-                0.3,
-                [
-                  1.25,
-                  2.25
-                ]
-              ],
-              "Doughy Buzzwing Bagling"
-            ],
-            [
-              [
-                0.11,
-                [
-                  1.65,
-                  3.35
-                ]
-              ],
-              "Doughy Buzzwing Bagling"
-            ],
-            [
-              [
-                0.01,
-                [
-                  1.0,
-                  1.12
-                ]
-              ],
-              "Cyl Egg"
-            ],
-            [
-              [
-                0.008,
-                [
-                  1.0,
-                  1.25
-                ]
-              ],
-              "Cyl Egg"
-            ]
-          ],
           "welcome_gift": false
         }
       }
@@ -4703,242 +4700,242 @@
     {
       "name": "Hacker Egg",
       "description": "If you put your ear up to this egg, you can hear the sounds of a keyboard clacking. And profanity. Lots and lots of profanity...",
+  "hatch_table": [
+    [
+      [
+	0.011,
+	[
+	  1.0,
+	  1.05
+	]
+      ],
+      "Chefpheus"
+    ],
+    [
+      [
+	0.011,
+	[
+	  1.0,
+	  1.05
+	]
+      ],
+      "Gempheus"
+    ],
+    [
+      [
+	0.7,
+	[
+	  1.4,
+	  2.42
+	]
+      ],
+      "Rift Powder"
+    ],
+    [
+      [
+	0.18,
+	[
+	  1.6,
+	  2.74
+	]
+      ],
+      "Rift Powder"
+    ],
+    [
+      [
+	1.0,
+	[
+	  3.25,
+	  5.65
+	]
+      ],
+      "Warp Powder"
+    ],
+    [
+      [
+	0.44,
+	[
+	  4.75,
+	  6.7
+	]
+      ],
+      "Warp Powder"
+    ],
+    [
+      [
+	0.03,
+	[
+	  1.25,
+	  2.66
+	]
+      ],
+      "Wormhole Powder"
+    ],
+    [
+      [
+	0.018,
+	[
+	  1.0,
+	  1.05
+	]
+      ],
+      "Rolling Pin"
+    ],
+    [
+      [
+	0.018,
+	[
+	  1.0,
+	  1.05
+	]
+      ],
+      "Cyl Wand"
+    ],
+    [
+      [
+	0.013,
+	[
+	  1.02,
+	  1.08
+	]
+      ],
+      "Land Deed"
+    ],
+    [
+      [
+	0.005,
+	[
+	  1.0,
+	  1.02
+	]
+      ],
+      "Land Grant"
+    ],
+    [
+      [
+	0.168,
+	[
+	  1.05,
+	  2.01
+	]
+      ],
+      "Tinkerpart"
+    ],
+    [
+      [
+	0.145,
+	[
+	  1.03,
+	  1.6
+	]
+      ],
+      "Volatile Vial"
+    ],
+    [
+      [
+	1.0,
+	[
+	  2.45,
+	  4.18
+	]
+      ],
+      "Hacker Vibes Vine Seed"
+    ],
+    [
+      [
+	0.3,
+	[
+	  1.8,
+	  3.45
+	]
+      ],
+      "Hacker Vibes Vine Seed"
+    ],
+    [
+      [
+	0.01,
+	[
+	  1.0,
+	  1.1
+	]
+      ],
+      "Tinkerspore"
+    ],
+    [
+      [
+	0.015,
+	[
+	  1.0,
+	  1.05
+	]
+      ],
+      "Aloe Avanta Seed"
+    ],
+    [
+      [
+	0.3,
+	[
+	  1.25,
+	  2.25
+	]
+      ],
+      "Doughy Buzzwing Bagling"
+    ],
+    [
+      [
+	0.11,
+	[
+	  1.65,
+	  3.35
+	]
+      ],
+      "Doughy Buzzwing Bagling"
+    ],
+    [
+      [
+	0.3,
+	[
+	  1.25,
+	  2.25
+	]
+      ],
+      "Crystalline Buzzwing Bagling"
+    ],
+    [
+      [
+	0.11,
+	[
+	  1.65,
+	  3.35
+	]
+      ],
+      "Crystalline Buzzwing Bagling"
+    ],
+    [
+      [
+	0.01,
+	[
+	  1.0,
+	  1.12
+	]
+      ],
+      "Hacker Egg"
+    ],
+    [
+      [
+	0.008,
+	[
+	  1.0,
+	  1.25
+	]
+      ],
+      "Hacker Egg"
+    ]
+  ],
       "kind": {
         "Gotchi": {
           "base_happiness": 0,
           "plant_effects": [],
-          "hatch_table": [
-            [
-              [
-                0.011,
-                [
-                  1.0,
-                  1.05
-                ]
-              ],
-              "Chefpheus"
-            ],
-            [
-              [
-                0.011,
-                [
-                  1.0,
-                  1.05
-                ]
-              ],
-              "Gempheus"
-            ],
-            [
-              [
-                0.7,
-                [
-                  1.4,
-                  2.42
-                ]
-              ],
-              "Rift Powder"
-            ],
-            [
-              [
-                0.18,
-                [
-                  1.6,
-                  2.74
-                ]
-              ],
-              "Rift Powder"
-            ],
-            [
-              [
-                1.0,
-                [
-                  3.25,
-                  5.65
-                ]
-              ],
-              "Warp Powder"
-            ],
-            [
-              [
-                0.44,
-                [
-                  4.75,
-                  6.7
-                ]
-              ],
-              "Warp Powder"
-            ],
-            [
-              [
-                0.03,
-                [
-                  1.25,
-                  2.66
-                ]
-              ],
-              "Wormhole Powder"
-            ],
-            [
-              [
-                0.018,
-                [
-                  1.0,
-                  1.05
-                ]
-              ],
-              "Rolling Pin"
-            ],
-            [
-              [
-                0.018,
-                [
-                  1.0,
-                  1.05
-                ]
-              ],
-              "Cyl Wand"
-            ],
-            [
-              [
-                0.013,
-                [
-                  1.02,
-                  1.08
-                ]
-              ],
-              "Land Deed"
-            ],
-            [
-              [
-                0.005,
-                [
-                  1.0,
-                  1.02
-                ]
-              ],
-              "Land Grant"
-            ],
-            [
-              [
-                0.168,
-                [
-                  1.05,
-                  2.01
-                ]
-              ],
-              "Tinkerpart"
-            ],
-            [
-              [
-                0.145,
-                [
-                  1.03,
-                  1.6
-                ]
-              ],
-              "Volatile Vial"
-            ],
-            [
-              [
-                1.0,
-                [
-                  2.45,
-                  4.18
-                ]
-              ],
-              "Hacker Vibes Vine Seed"
-            ],
-            [
-              [
-                0.3,
-                [
-                  1.8,
-                  3.45
-                ]
-              ],
-              "Hacker Vibes Vine Seed"
-            ],
-            [
-              [
-                0.01,
-                [
-                  1.0,
-                  1.1
-                ]
-              ],
-              "Tinkerspore"
-            ],
-            [
-              [
-                0.015,
-                [
-                  1.0,
-                  1.05
-                ]
-              ],
-              "Aloe Avanta Seed"
-            ],
-            [
-              [
-                0.3,
-                [
-                  1.25,
-                  2.25
-                ]
-              ],
-              "Doughy Buzzwing Bagling"
-            ],
-            [
-              [
-                0.11,
-                [
-                  1.65,
-                  3.35
-                ]
-              ],
-              "Doughy Buzzwing Bagling"
-            ],
-            [
-              [
-                0.3,
-                [
-                  1.25,
-                  2.25
-                ]
-              ],
-              "Crystalline Buzzwing Bagling"
-            ],
-            [
-              [
-                0.11,
-                [
-                  1.65,
-                  3.35
-                ]
-              ],
-              "Crystalline Buzzwing Bagling"
-            ],
-            [
-              [
-                0.01,
-                [
-                  1.0,
-                  1.12
-                ]
-              ],
-              "Hacker Egg"
-            ],
-            [
-              [
-                0.008,
-                [
-                  1.0,
-                  1.25
-                ]
-              ],
-              "Hacker Egg"
-            ]
-          ],
           "welcome_gift": false
         }
       }
@@ -4946,10 +4943,6 @@
     {
       "name": "Bread Egg",
       "description": "If you knock gently on this egg, it sounds like the crisp outer shell of hardtack. Petition to change its name to 'Breagg.' No? ... okay fine.",
-      "kind": {
-        "Gotchi": {
-          "base_happiness": 0,
-          "plant_effects": [],
           "hatch_table": [
             [
               [
@@ -5182,6 +5175,10 @@
               "Bread Egg"
             ]
           ],
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
           "welcome_gift": false
         }
       }
@@ -5999,10 +5996,6 @@
     {
       "name": "Nest Egg",
       "description": "A special egg made to help new Hacksteaders get started. Hatching it guarantees some Powders to speed up plant growth, as well as quite a few crafting materials. Happy Hacksteading!",
-      "kind": {
-        "Gotchi": {
-          "base_happiness": 0,
-          "plant_effects": [],
           "hatch_table": [
             [
               [
@@ -6085,6 +6078,10 @@
               "Nest Egg"
             ]
           ],
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
           "welcome_gift": true
         }
       }
@@ -6092,10 +6089,6 @@
     {
       "name": "Bagling Egg",
       "description": "This Egg is the manifestation of loot contained in a Bagling!",
-      "kind": {
-        "Gotchi": {
-          "base_happiness": 0,
-          "plant_effects": [],
           "hatch_table": [
             [
               [
@@ -6178,6 +6171,10 @@
               "Doughy Buzzwing Bagling"
             ]
           ],
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
           "welcome_gift": false
         }
       }
@@ -6185,10 +6182,6 @@
     {
       "name": "Boxling Egg",
       "description": "Bagling loot is somehow stored inside this Egg with the power of mysterious arcana.",
-      "kind": {
-        "Gotchi": {
-          "base_happiness": 0,
-          "plant_effects": [],
           "hatch_table": [
             [
               [
@@ -6341,6 +6334,10 @@
               "Doughy Buzzwing Boxling"
             ]
           ],
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
           "welcome_gift": false
         }
       }
@@ -6348,10 +6345,6 @@
     {
       "name": "Boxlet Egg",
       "description": "With an occasional hum and flutter, this Egg will hatch into all the loot from Boxlets.",
-      "kind": {
-        "Gotchi": {
-          "base_happiness": 0,
-          "plant_effects": [],
           "hatch_table": [
             [
               [
@@ -6594,6 +6587,10 @@
               "Doughy Buzzwing Boxlet"
             ]
           ],
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
           "welcome_gift": false
         }
       }
@@ -6601,10 +6598,6 @@
     {
       "name": "Megabox Egg",
       "description": "Megabox loot is magically transferred into this bright and cheery Egg!",
-      "kind": {
-        "Gotchi": {
-          "base_happiness": 0,
-          "plant_effects": [],
           "hatch_table": [
             [
               [
@@ -6937,6 +6930,10 @@
               "Bread Egg"
             ]
           ],
+      "kind": {
+        "Gotchi": {
+          "base_happiness": 0,
+          "plant_effects": [],
           "welcome_gift": false
         }
       }

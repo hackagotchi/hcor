@@ -56,17 +56,20 @@ impl Hackstead {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{ClientResult, IdentifiesItem, IdentifiesUser, CLIENT, SERVER_URL};
+    use crate::client::{
+        extract_error_or_parse, ClientResult, IdentifiesItem, IdentifiesUser, CLIENT, SERVER_URL,
+    };
 
     impl Hackstead {
         pub async fn fetch(iu: impl IdentifiesUser) -> ClientResult<Self> {
-            Ok(CLIENT
-                .get(&format!("{}/{}", *SERVER_URL, "hackstead/"))
-                .json(&iu.user_id())
-                .send()
-                .await?
-                .json()
-                .await?)
+            extract_error_or_parse(
+                CLIENT
+                    .get(&format!("{}/{}", *SERVER_URL, "hackstead/"))
+                    .json(&iu.user_id())
+                    .send()
+                    .await?,
+            )
+            .await
         }
 
         pub async fn register() -> ClientResult<Self> {
@@ -78,23 +81,25 @@ mod client {
         }
 
         async fn register_raw(slack_id: Option<String>) -> ClientResult<Self> {
-            Ok(CLIENT
-                .post(&format!("{}/{}", *SERVER_URL, "hackstead/new"))
-                .json(&NewHacksteadRequest { slack_id })
-                .send()
-                .await?
-                .json()
-                .await?)
+            extract_error_or_parse(
+                CLIENT
+                    .post(&format!("{}/{}", *SERVER_URL, "hackstead/new"))
+                    .json(&NewHacksteadRequest { slack_id })
+                    .send()
+                    .await?
+            )
+            .await
         }
 
         pub async fn slaughter(&self) -> ClientResult<Self> {
-            Ok(CLIENT
-                .post(&format!("{}/{}", *SERVER_URL, "hackstead/remove"))
-                .json(&self.user_id())
-                .send()
-                .await?
-                .json()
-                .await?)
+            extract_error_or_parse(
+                CLIENT
+                    .post(&format!("{}/{}", *SERVER_URL, "hackstead/remove"))
+                    .json(&self.user_id())
+                    .send()
+                    .await?
+            )
+            .await
         }
 
         pub fn has_item(&self, ii: impl IdentifiesItem) -> bool {
@@ -102,7 +107,7 @@ mod client {
             self.inventory.iter().any(|i| i.base.item_id == item_id)
         }
 
-        pub async fn give_to<'a, I>(
+        pub async fn give_items<'a, I>(
             &self,
             to: impl IdentifiesUser,
             items: &'a [I],
@@ -110,17 +115,18 @@ mod client {
         where
             &'a I: IdentifiesItem,
         {
-            Ok(CLIENT
-                .post(&format!("{}/{}", *SERVER_URL, "item/transfer"))
-                .json(&crate::item::ItemTransferRequest {
-                    sender_id: self.user_id(),
-                    receiver_id: to.user_id(),
-                    item_ids: items.iter().map(|i| i.item_id()).collect(),
-                })
-                .send()
-                .await?
-                .json()
-                .await?)
+            extract_error_or_parse(
+                CLIENT
+                    .post(&format!("{}/{}", *SERVER_URL, "item/transfer"))
+                    .json(&crate::item::ItemTransferRequest {
+                        sender_id: self.user_id(),
+                        receiver_id: to.user_id(),
+                        item_ids: items.iter().map(|i| i.item_id()).collect(),
+                    })
+                    .send()
+                    .await?,
+            )
+            .await
         }
 
         pub async fn spawn_items(
@@ -128,29 +134,31 @@ mod client {
             item_archetype_handle: crate::config::ArchetypeHandle,
             amount: usize,
         ) -> ClientResult<Vec<crate::Item>> {
-            Ok(CLIENT
-                .post(&format!("{}/{}", *SERVER_URL, "item/spawn"))
-                .json(&crate::item::ItemSpawnRequest {
-                    receiver_id: self.user_id(),
-                    item_archetype_handle,
-                    amount,
-                })
-                .send()
-                .await?
-                .json()
-                .await?)
+            extract_error_or_parse(
+                CLIENT
+                    .post(&format!("{}/{}", *SERVER_URL, "item/spawn"))
+                    .json(&crate::item::ItemSpawnRequest {
+                        receiver_id: self.user_id(),
+                        item_archetype_handle,
+                        amount,
+                    })
+                    .send()
+                    .await?,
+            )
+            .await
         }
 
         pub async fn unlock_tile_with(&self, item: impl IdentifiesItem) -> ClientResult<Tile> {
-            Ok(CLIENT
-                .post(&format!("{}/{}", *SERVER_URL, "tile/new"))
-                .json(&TileCreationRequest {
-                    tile_redeemable_item_id: item.item_id(),
-                })
-                .send()
-                .await?
-                .json()
-                .await?)
+            extract_error_or_parse(
+                CLIENT
+                    .post(&format!("{}/{}", *SERVER_URL, "tile/new"))
+                    .json(&TileCreationRequest {
+                        tile_redeemable_item_id: item.item_id(),
+                    })
+                    .send()
+                    .await?,
+            )
+            .await
         }
     }
 }

@@ -296,8 +296,6 @@ pub struct SelectivePlantAdvancement {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct GotchiArchetype {
     pub base_happiness: i32,
-    #[serde(default)]
-    pub hatch_table: Option<LootTable>,
 }
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct SeedArchetype {
@@ -337,6 +335,8 @@ pub struct Archetype {
     #[serde(default)]
     pub plant_effects: Vec<SelectivePlantAdvancement>,
     pub item_application: Option<ItemApplication>,
+    #[serde(default)]
+    pub hatch_table: Option<LootTable>,
 }
 
 #[cfg(feature = "client")]
@@ -1005,16 +1005,14 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                 ));
             }
         }
-        if let Some(ga) = &a.gotchi {
-            if let Some(table) = &ga.hatch_table {
-                for (_, spawn) in table.iter() {
-                    if config.find_possession(spawn).is_err() {
-                        return Err(format!(
-                            "gotchi archetype {:?} claims it hatches into unknown possession archetype {:?}",
-                            a.name,
-                            spawn,
-                        ));
-                    }
+        if let Some(table) = &a.hatch_table {
+            for (_, spawn) in table.iter() {
+                if config.find_possession(spawn).is_err() {
+                    return Err(format!(
+                        "gotchi archetype {:?} claims it hatches into unknown possession archetype {:?}",
+                        a.name,
+                        spawn,
+                    ));
                 }
             }
         }
