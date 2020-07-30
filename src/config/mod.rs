@@ -5,15 +5,23 @@ use std::hash::{Hash, Hasher};
 #[cfg(test)]
 mod test;
 
+pub type ConfigResult<T> = Result<T, ConfigError>;
 #[derive(Debug, Clone)]
 pub enum ConfigError {
     UnknownArchetypeName(String),
+    UnknownArchetype(Archetype),
+    UnknownArchetypeHandle(i32),
 }
+impl std::error::Error for ConfigError {}
 impl fmt::Display for ConfigError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use ConfigError::*;
         match self {
-            UnknownArchetypeName(name) => write!(f, "no archetype by the name of {:?}", name),
+            UnknownArchetypeName(name) => {
+                write!(f, "no archetype in config by the name of {:?}", name)
+            }
+            UnknownArchetype(a) => write!(f, "no archetype in config {:#?}", a),
+            UnknownArchetypeHandle(ah) => write!(f, "no archetype in config with handle {}", ah),
         }
     }
 }
@@ -99,6 +107,12 @@ pub fn spawn_with_percentile<Row: SpawnTableRow>(
 }
 
 impl Config {
+    pub fn land_unlocking_item_archetypes(&self) -> impl Iterator<Item = (&Archetype, LandUnlock)> {
+        self.possession_archetypes
+            .iter()
+            .filter_map(|a| Some((a, a.unlocks_land.clone()?)))
+    }
+
     pub fn get_item_application_plant_advancement(
         &self,
         item_archetype_handle: ArchetypeHandle,
@@ -133,7 +147,7 @@ impl Config {
         self.plant_archetypes
             .iter()
             .find(|x| name.as_ref() == x.name)
-            .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
+            .ok_or_else(|| ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
     }
 
     pub fn find_plant_handle<S: AsRef<str>>(
@@ -165,11 +179,12 @@ impl Config {
             .map(|x| x as ArchetypeHandle)
     }
 
-    pub fn possession_archetype_to_handle(&self, a: &Archetype) -> Option<ArchetypeHandle> {
+    pub fn possession_archetype_to_handle(&self, a: &Archetype) -> ConfigResult<ArchetypeHandle> {
         self.possession_archetypes
             .iter()
             .position(|x| x == a)
             .map(|x| x as ArchetypeHandle)
+            .ok_or_else(|| ConfigError::UnknownArchetype(a.clone()))
     }
 }
 
@@ -322,6 +337,41 @@ pub struct Archetype {
     #[serde(default)]
     pub plant_effects: Vec<SelectivePlantAdvancement>,
     pub item_application: Option<ItemApplication>,
+}
+
+#[cfg(feature = "client")]
+mod client {
+    use super::*;
+    use crate::client::{ClientError, ClientResult, IdentifiesUser, CLIENT, SERVER_URL};
+
+    impl Archetype {
+        pub async fn spawn_some_for(
+            &self,
+            iu: impl IdentifiesUser,
+            amount: usize,
+        ) -> ClientResult<Vec<crate::Item>> {
+            Ok(CLIENT
+                .post(&format!("{}/{}", *SERVER_URL, "item/spawn"))
+                .json(&crate::item::ItemSpawnRequest {
+                    receiver_id: iu.user_id(),
+                    item_archetype_handle: CONFIG
+                        .possession_archetype_to_handle(self)
+                        .expect("archetype not found in config"),
+                    amount,
+                })
+                .send()
+                .await?
+                .json()
+                .await?)
+        }
+
+        pub async fn spawn_for(&self, iu: impl IdentifiesUser) -> ClientResult<crate::Item> {
+            self.spawn_some_for(iu, 1)
+                .await?
+                .pop()
+                .ok_or(ClientError::ExpectedOneSpawnReturnedNone)
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

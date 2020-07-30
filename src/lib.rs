@@ -1,14 +1,15 @@
 #![feature(try_trait)]
 //#![warn(missing_docs)]
 
-mod errors;
 #[cfg(feature = "client")]
-pub use errors::BackendError;
+mod client;
+#[cfg(feature = "client")]
+pub use client::{ClientError, ClientResult, IdentifiesItem, IdentifiesSteader, IdentifiesUser};
 
 /// All of the game design switches and levers are handled here, with a focus on how they interact
 /// with the rest of the data in the game.
 pub mod config;
-pub use config::CONFIG;
+pub use config::{ConfigError, ConfigResult, CONFIG};
 
 /// Some items boost the growth of plants; others accelerate their growth or give you more land.
 /// This module facilitates handling all of them.

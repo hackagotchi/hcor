@@ -1,5 +1,5 @@
 use crate::{config, CONFIG};
-use config::{Archetype, ArchetypeHandle};
+use config::{Archetype, ArchetypeHandle, ConfigError, ConfigResult};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use uuid::Uuid;
@@ -54,12 +54,23 @@ impl fmt::Display for Acquisition {
 /// Format for requesting that a new item be created and given to a user.
 pub struct ItemTransferRequest {
     /// The steader the items should be transferred to.
-    pub receiver_id: Uuid,
+    pub receiver_id: crate::UserId,
     /// The steader from whom the items should be transferred.
-    pub sender_id: Uuid,
+    pub sender_id: crate::UserId,
     /// The ids of the items to be transferred. Any items referenced which do not belong to the
     /// sender are ignored.
     pub item_ids: Vec<Uuid>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+/// Format for requesting that a new item be created and given to a user.
+pub struct ItemSpawnRequest {
+    /// The steaders the items should be spawned for.
+    pub receiver_id: crate::UserId,
+    /// A handle to variety of item to be spawned for the user, as specified by the config.
+    pub item_archetype_handle: crate::config::ArchetypeHandle,
+    /// The number of items the user should receive.
+    pub amount: usize,
 }
 
 #[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
@@ -76,11 +87,32 @@ pub struct Item {
     pub ownership_log: Vec<LoggedOwner>,
 }
 
+#[cfg(feature = "client")]
+mod client {
+    use super::*;
+    use crate::client::{ClientResult, IdentifiesItem, CLIENT, SERVER_URL};
+    use crate::hackstead::{Tile, TileCreationRequest};
+
+    impl Item {
+        pub async fn redeem_for_tile(&self) -> ClientResult<Tile> {
+            Ok(CLIENT
+                .post(&format!("{}/{}", *SERVER_URL, "tile/new"))
+                .json(&TileCreationRequest {
+                    tile_redeemable_item_id: self.item_id(),
+                })
+                .send()
+                .await?
+                .json()
+                .await?)
+        }
+    }
+}
+
 impl std::ops::Deref for Item {
     type Target = Archetype;
 
     fn deref(&self) -> &Self::Target {
-        Self::archetype(self.base.archetype_handle)
+        Self::archetype(self.base.archetype_handle).expect("invalid archetype handle")
     }
 }
 
@@ -89,8 +121,8 @@ impl Item {
         ah: ArchetypeHandle,
         logged_owner_id: Uuid,
         acquisition: Acquisition,
-    ) -> Self {
-        let a = Self::archetype(ah);
+    ) -> ConfigResult<Self> {
+        let a = Self::archetype(ah)?;
         Self::from_archetype(a, logged_owner_id, acquisition)
     }
 
@@ -98,12 +130,10 @@ impl Item {
         a: &'static Archetype,
         logged_owner_id: Uuid,
         acquisition: Acquisition,
-    ) -> Self {
+    ) -> ConfigResult<Self> {
         let item_id = uuid::Uuid::new_v4();
-        let ah = CONFIG
-            .possession_archetype_to_handle(a)
-            .expect("invalid archetype");
-        Self {
+        let ah = CONFIG.possession_archetype_to_handle(a)?;
+        Ok(Self {
             base: ItemBase {
                 item_id,
                 archetype_handle: ah,
@@ -116,7 +146,7 @@ impl Item {
                 logged_owner_id,
                 acquisition,
             }],
-        }
+        })
     }
 
     pub fn nickname(&self) -> &str {
@@ -126,10 +156,10 @@ impl Item {
         }
     }
 
-    fn archetype(ah: ArchetypeHandle) -> &'static Archetype {
+    fn archetype(ah: ArchetypeHandle) -> ConfigResult<&'static Archetype> {
         CONFIG
             .possession_archetypes
             .get(ah as usize)
-            .expect("invalid archetype handle")
+            .ok_or_else(|| ConfigError::UnknownArchetypeHandle(ah))
     }
 }

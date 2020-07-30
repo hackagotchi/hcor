@@ -30,14 +30,6 @@ impl Hackstead {
         }
     }
 
-    pub fn land_unlock_eligible(&self) -> bool {
-        let xp_allows = self.profile.advancements_sum().land;
-        let extra = self.profile.extra_land_plot_count;
-        let eligible = (xp_allows + extra) as usize;
-
-        self.land.len() < eligible
-    }
-
     pub fn new_user(slack_id: Option<impl ToString>) -> Self {
         let profile = Profile::new(slack_id.map(|s| s.to_string()));
         Hackstead {
@@ -45,36 +37,130 @@ impl Hackstead {
                 .possession_archetypes
                 .iter()
                 .filter(|a| a.welcome_gift)
-                .map(|a| Item::from_archetype(
-                    a,
-                    profile.steader_id,
-                    item::Acquisition::spawned()
-                ))
-                .collect(),
+                .map(|a| Item::from_archetype(a, profile.steader_id, item::Acquisition::spawned()))
+                .collect::<Result<Vec<_>, _>>()
+                .expect("fresh possession archetypes somehow invalid"),
             land: vec![Tile::new(profile.steader_id)],
             profile,
         }
     }
 
-    #[cfg(feature = "client")]
-    pub async fn fetch(uc: crate::UserId) -> Result<Self, crate::BackendError> {
-        Ok(reqwest::Client::new()
-            .get("http://127.0.0.1:8000/hackstead/")
-            .json(&uc)
-            .send()
-            .await?
-            .json()
-            .await?)
+    pub fn land_unlock_eligible(&self) -> bool {
+        let xp_allows = self.profile.advancements_sum().land;
+        let extra = self.profile.extra_land_plot_count;
+        let eligible = (xp_allows + extra) as usize;
+
+        self.land.len() < eligible
+    }
+}
+#[cfg(feature = "client")]
+mod client {
+    use super::*;
+    use crate::client::{ClientResult, IdentifiesItem, IdentifiesUser, CLIENT, SERVER_URL};
+
+    impl Hackstead {
+        pub async fn fetch(iu: impl IdentifiesUser) -> ClientResult<Self> {
+            Ok(CLIENT
+                .get(&format!("{}/{}", *SERVER_URL, "hackstead/"))
+                .json(&iu.user_id())
+                .send()
+                .await?
+                .json()
+                .await?)
+        }
+
+        pub async fn register() -> ClientResult<Self> {
+            Self::register_raw(None).await
+        }
+
+        pub async fn register_with_slack(slack: impl ToString) -> ClientResult<Self> {
+            Self::register_raw(Some(slack.to_string())).await
+        }
+
+        async fn register_raw(slack_id: Option<String>) -> ClientResult<Self> {
+            Ok(CLIENT
+                .post(&format!("{}/{}", *SERVER_URL, "hackstead/new"))
+                .json(&NewHacksteadRequest { slack_id })
+                .send()
+                .await?
+                .json()
+                .await?)
+        }
+
+        pub async fn slaughter(&self) -> ClientResult<Self> {
+            Ok(CLIENT
+                .post(&format!("{}/{}", *SERVER_URL, "hackstead/remove"))
+                .json(&self.user_id())
+                .send()
+                .await?
+                .json()
+                .await?)
+        }
+
+        pub fn has_item(&self, ii: impl IdentifiesItem) -> bool {
+            let item_id = ii.item_id();
+            self.inventory.iter().any(|i| i.base.item_id == item_id)
+        }
+
+        pub async fn give_to<'a, I>(
+            &self,
+            to: impl IdentifiesUser,
+            items: &'a [I],
+        ) -> ClientResult<Vec<crate::Item>>
+        where
+            &'a I: IdentifiesItem,
+        {
+            Ok(CLIENT
+                .post(&format!("{}/{}", *SERVER_URL, "item/transfer"))
+                .json(&crate::item::ItemTransferRequest {
+                    sender_id: self.user_id(),
+                    receiver_id: to.user_id(),
+                    item_ids: items.iter().map(|i| i.item_id()).collect(),
+                })
+                .send()
+                .await?
+                .json()
+                .await?)
+        }
+
+        pub async fn spawn_items(
+            &self,
+            item_archetype_handle: crate::config::ArchetypeHandle,
+            amount: usize,
+        ) -> ClientResult<Vec<crate::Item>> {
+            Ok(CLIENT
+                .post(&format!("{}/{}", *SERVER_URL, "item/spawn"))
+                .json(&crate::item::ItemSpawnRequest {
+                    receiver_id: self.user_id(),
+                    item_archetype_handle,
+                    amount,
+                })
+                .send()
+                .await?
+                .json()
+                .await?)
+        }
+
+        pub async fn unlock_tile_with(&self, item: impl IdentifiesItem) -> ClientResult<Tile> {
+            Ok(CLIENT
+                .post(&format!("{}/{}", *SERVER_URL, "tile/new"))
+                .json(&TileCreationRequest {
+                    tile_redeemable_item_id: item.item_id(),
+                })
+                .send()
+                .await?
+                .json()
+                .await?)
+        }
     }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 /// Format for requesting that a user's item is consumed in exchange for a new tile of land.
+/// The steader to give the land to is inferred to be the owner of the item.
 pub struct TileCreationRequest {
     /// id for an item that is capable of being removed in exchange for another tile of land.
-    pub tile_consumable_item_id: Uuid,
-    /// contact info for the steader who owns this item
-    pub steader: crate::UserId,
+    pub tile_redeemable_item_id: Uuid,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
