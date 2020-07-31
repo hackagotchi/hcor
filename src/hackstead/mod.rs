@@ -4,7 +4,10 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 pub mod tile;
-pub use tile::{Tile, plant::{self, Plant}};
+pub use tile::{
+    plant::{self, Plant},
+    Tile,
+};
 
 /// Some items boost the growth of plants; others accelerate their growth or give you more land.
 /// This module facilitates handling all of them.
@@ -95,7 +98,7 @@ mod client {
                     .post(&format!("{}/{}", *SERVER_URL, "hackstead/new"))
                     .json(&NewHacksteadRequest { slack_id })
                     .send()
-                    .await?
+                    .await?,
             )
             .await
         }
@@ -106,7 +109,7 @@ mod client {
                     .post(&format!("{}/{}", *SERVER_URL, "hackstead/remove"))
                     .json(&self.user_id())
                     .send()
-                    .await?
+                    .await?,
             )
             .await
         }

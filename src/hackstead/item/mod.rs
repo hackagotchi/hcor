@@ -99,7 +99,8 @@ pub struct Item {
 mod client {
     use super::*;
     use crate::client::{
-        ClientError, ClientResult, IdentifiesItem, IdentifiesUser, CLIENT, SERVER_URL, extract_error_or_parse,
+        extract_error_or_parse, ClientError, ClientResult, IdentifiesItem, IdentifiesUser, CLIENT,
+        SERVER_URL,
     };
     use crate::hackstead::tile::{Tile, TileCreationRequest};
 

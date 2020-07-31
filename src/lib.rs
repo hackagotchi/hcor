@@ -8,7 +8,7 @@ pub use client::{ClientError, ClientResult, IdentifiesItem, IdentifiesSteader, I
 #[cfg(feature = "client")]
 /// This is exposed to aid those extending hcor's wrappers around the API.
 pub mod client_internal {
-    pub use super::client::{extract_error_or_parse, SERVER_URL, CLIENT};
+    pub use super::client::{extract_error_or_parse, CLIENT, SERVER_URL};
 }
 
 /// All of the game design switches and levers are handled here, with a focus on how they interact
@@ -18,7 +18,7 @@ pub use config::{ConfigError, ConfigResult, CONFIG};
 
 /// What are those Hackagotchi farms made of, anyway?
 pub mod hackstead;
-pub use hackstead::{Hackstead, Tile, tile, Plant, plant, Item, item};
+pub use hackstead::{item, plant, tile, Hackstead, Item, Plant, Tile};
 
 /// Store user emails/slack ids with a compile time check that we'll have at least one of those
 /// two.

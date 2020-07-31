@@ -66,7 +66,10 @@ impl std::ops::Deref for Plant {
 impl Plant {
     pub fn from_seed(tile_id: Uuid, seed: &config::SeedArchetype) -> crate::ConfigResult<Self> {
         let archetype_handle = CONFIG.find_plant_handle(&seed.grows_into)?;
-        let arch = CONFIG.plant_archetypes.get(archetype_handle as usize).unwrap();
+        let arch = CONFIG
+            .plant_archetypes
+            .get(archetype_handle as usize)
+            .unwrap();
 
         Ok(Self {
             base: PlantBase {
@@ -114,9 +117,7 @@ impl std::ops::Deref for Effect {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{
-        extract_error_or_parse, ClientResult, CLIENT, SERVER_URL,
-    };
+    use crate::client::{extract_error_or_parse, ClientResult, CLIENT, SERVER_URL};
 
     impl Plant {
         pub async fn slaughter(&self) -> ClientResult<Plant> {
@@ -124,7 +125,7 @@ mod client {
                 CLIENT
                     .post(&format!("{}/{}", *SERVER_URL, "plant/remove"))
                     .json(&PlantRemovalRequest {
-                          tile_id: self.base.tile_id,
+                        tile_id: self.base.tile_id,
                     })
                     .send()
                     .await?,

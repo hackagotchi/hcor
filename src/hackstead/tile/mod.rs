@@ -2,7 +2,7 @@ pub mod plant;
 pub use plant::Plant;
 
 use chrono::{DateTime, Utc};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -40,9 +40,7 @@ impl Tile {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{
-        extract_error_or_parse, ClientResult, IdentifiesItem, CLIENT, SERVER_URL,
-    };
+    use crate::client::{extract_error_or_parse, ClientResult, IdentifiesItem, CLIENT, SERVER_URL};
     use plant::Plant;
 
     impl Tile {
@@ -51,8 +49,8 @@ mod client {
                 CLIENT
                     .post(&format!("{}/{}", *SERVER_URL, "plant/new"))
                     .json(&plant::PlantCreationRequest {
-                          seed_item_id: seed.item_id(),
-                          tile_id: self.base.tile_id,
+                        seed_item_id: seed.item_id(),
+                        tile_id: self.base.tile_id,
                     })
                     .send()
                     .await?,
