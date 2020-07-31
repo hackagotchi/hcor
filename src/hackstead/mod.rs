@@ -1,12 +1,15 @@
-use crate::{config, item};
+use crate::config::{self, CONFIG};
 use chrono::{DateTime, Utc};
-use config::CONFIG;
-use item::Item;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-pub mod plant;
-pub use plant::Plant;
+pub mod tile;
+pub use tile::{Tile, plant::{self, Plant}};
+
+/// Some items boost the growth of plants; others accelerate their growth or give you more land.
+/// This module facilitates handling all of them.
+pub mod item;
+pub use item::Item;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 /// Format for requesting that a new hackstead is made for a user
@@ -45,12 +48,18 @@ impl Hackstead {
         }
     }
 
+    /// Returns true if this hackstead has enough xp to redeem another tile of land.
     pub fn land_unlock_eligible(&self) -> bool {
         let xp_allows = self.profile.advancements_sum().land;
         let extra = self.profile.extra_land_plot_count;
         let eligible = (xp_allows + extra) as usize;
 
         self.land.len() < eligible
+    }
+
+    /// Returns an iterator over all tiles which are not occupied by plants.
+    pub fn open_tiles(&self) -> impl Iterator<Item = &Tile> {
+        self.land.iter().filter(|t| t.plant.is_none())
     }
 }
 #[cfg(feature = "client")]
@@ -152,45 +161,13 @@ mod client {
             extract_error_or_parse(
                 CLIENT
                     .post(&format!("{}/{}", *SERVER_URL, "tile/new"))
-                    .json(&TileCreationRequest {
+                    .json(&tile::TileCreationRequest {
                         tile_redeemable_item_id: item.item_id(),
                     })
                     .send()
                     .await?,
             )
             .await
-        }
-    }
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-/// Format for requesting that a user's item is consumed in exchange for a new tile of land.
-/// The steader to give the land to is inferred to be the owner of the item.
-pub struct TileCreationRequest {
-    /// id for an item that is capable of being removed in exchange for another tile of land.
-    pub tile_redeemable_item_id: Uuid,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct TileBase {
-    pub owner_id: Uuid,
-    pub tile_id: Uuid,
-    pub acquired: DateTime<Utc>,
-}
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct Tile {
-    pub plant: Option<Plant>,
-    pub base: TileBase,
-}
-impl Tile {
-    pub fn new(owner_id: Uuid) -> Tile {
-        Tile {
-            plant: None,
-            base: TileBase {
-                acquired: Utc::now(),
-                tile_id: Uuid::new_v4(),
-                owner_id,
-            },
         }
     }
 }

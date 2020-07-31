@@ -14,7 +14,9 @@ pub type ClientResult<T> = Result<T, ClientError>;
 pub enum ClientError {
     Deserialization(serde_json::Error),
     HttpRequest(reqwest::Error),
-    BadRequest(String),
+    BadRequest(reqwest::StatusCode, String),
+    ServerError(reqwest::StatusCode, String),
+    UnknownServerResponse,
     ExpectedOneSpawnReturnedNone,
 }
 impl std::error::Error for ClientError {}
@@ -25,7 +27,9 @@ impl fmt::Display for ClientError {
         match self {
             Deserialization(e) => write!(f, "couldn't parse what server returned: {}", e),
             HttpRequest(e) => write!(f, "couldn't communicate with server: {}", e),
-            BadRequest(e) => write!(f, "server returned error: {}", e),
+            BadRequest(status, e) => write!(f, "server returned Status {}, error: {}", status, e),
+            ServerError(status, e) => write!(f, "server returned Status {}, error: {}", status, e),
+            UnknownServerResponse => write!(f, "server returned error client doesn't understand."),
             ExpectedOneSpawnReturnedNone => write!(
                 f,
                 "attempted to spawn a single item, but the server returned no items"
@@ -47,10 +51,11 @@ impl From<reqwest::Error> for ClientError {
 pub async fn extract_error_or_parse<T: serde::de::DeserializeOwned>(
     res: reqwest::Response,
 ) -> ClientResult<T> {
-    if res.status().is_success() {
-        Ok(res.json().await?)
-    } else {
-        Err(ClientError::BadRequest(res.text().await?))
+    match res.status() {
+        s if s.is_success() => Ok(res.json().await?),
+        s if s.is_client_error() => Err(ClientError::BadRequest(s, res.text().await?)),
+        s if s.is_server_error() => Err(ClientError::ServerError(s, res.text().await?)),
+        _ => Err(ClientError::UnknownServerResponse),
     }
 }
 

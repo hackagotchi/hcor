@@ -101,7 +101,7 @@ mod client {
     use crate::client::{
         ClientError, ClientResult, IdentifiesItem, IdentifiesUser, CLIENT, SERVER_URL, extract_error_or_parse,
     };
-    use crate::hackstead::{Tile, TileCreationRequest};
+    use crate::hackstead::tile::{Tile, TileCreationRequest};
 
     impl Item {
         pub async fn redeem_for_tile(&self) -> ClientResult<Tile> {

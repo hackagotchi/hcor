@@ -5252,29 +5252,23 @@
     {
       "name": "Coffea Cyl Seed",
       "description": "A special species of coffee, descended from Coffea arabica and a host of other species. Instead of beans, this plant is grown for the clusters of crystals which grow on its limbs, inside of which mystical forces of the universe coalesce.",
-      "kind": {
-        "Seed": {
+        "seed": {
           "grows_into": "Coffea Cyl"
         }
-      }
     },
     {
       "name": "Hacker Vibes Vine Seed",
       "description": "Just holding the sprout in your hands fills you with the desire to make something! Surely, this seed is in for some amazing things.",
-      "kind": {
-        "Seed": {
+        "seed": {
           "grows_into": "Hacker Vibes Vine"
         }
-      }
     },
     {
       "name": "Bractus Seed",
       "description": "Doughy, yet still somehow prickly. It smells slightly of yeast, and promises to grow into something in between a fresh loaf of sourdough and a certain Sonoran cactus.",
-      "kind": {
-        "Seed": {
+        "seed": {
           "grows_into": "Bractus"
         }
-      }
     },
     {
       "name": "Brognark Pendant",
@@ -5317,20 +5311,16 @@
     {
       "name": "Tinkerspore",
       "description": "This small spore is quite colorful. It often sticks itself to machinery, showing an innate attraction to strange contraptions.",
-      "kind": {
-        "Seed": {
+        "seed": {
           "grows_into": "Tinkerstool"
         }
-      }
     },
     {
       "name": "Aloe Avanta Seed",
       "description": "A strange seed that kind of smells of hand sanitizer. It emits a faint blue light that makes the earth around it glow.",
-      "kind": {
-        "Seed": {
+        "seed": {
           "grows_into": "Aloe Avanta"
         }
-      }
     },
     {
       "name": "Tinkerpart",
