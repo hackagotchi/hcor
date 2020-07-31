@@ -431,7 +431,7 @@ pub async fn yank_config() -> Result<(), YankError> {
     config::check_archetype_name_matches(&config).map_err(|e| YankError::ArchetypeNameError(e))?;
 
     std::fs::write(
-        std::path::Path::new("../hcor/config/content.json"),
+        std::path::Path::new("./config/content.json"),
         &serde_json::to_string_pretty(&config).map_err(|e| YankError::SerializeConfigError(e))?,
     )
     .map_err(|e| YankError::WriteConfigError(e))
