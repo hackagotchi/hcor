@@ -8,7 +8,7 @@ pub use client::{ClientError, ClientResult, IdentifiesItem, IdentifiesSteader, I
 #[cfg(feature = "client")]
 /// This is exposed to aid those extending hcor's wrappers around the API.
 pub mod client_internal {
-    pub use super::client::{extract_error_or_parse, CLIENT, SERVER_URL};
+    pub use super::client::{client, SERVER_URL};
 }
 
 /// All of the game design switches and levers are handled here, with a focus on how they interact

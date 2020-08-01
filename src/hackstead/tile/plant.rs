@@ -117,20 +117,34 @@ impl std::ops::Deref for Effect {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{extract_error_or_parse, ClientResult, CLIENT, SERVER_URL};
+    use crate::client::{IdentifiesItem, ClientResult, client, SERVER_URL};
 
     impl Plant {
         pub async fn slaughter(&self) -> ClientResult<Plant> {
-            extract_error_or_parse(
-                CLIENT
+            Ok(
+                client()
                     .post(&format!("{}/{}", *SERVER_URL, "plant/remove"))
-                    .json(&PlantRemovalRequest {
+                    .send_json(&PlantRemovalRequest {
                         tile_id: self.base.tile_id,
                     })
-                    .send()
+                    .await?
+                    .json()
+                    .await?
+            )
+        }
+
+        pub async fn apply_item(&self, applicable: impl IdentifiesItem) -> ClientResult<Vec<Effect>> {
+            Ok(
+                client()
+                    .post(&format!("{}/{}", *SERVER_URL, "plant/apply"))
+                    .send_json(&PlantApplicationRequest {
+                        applicable_item_id: applicable.item_id(),
+                        tile_id: self.base.tile_id,
+                    })
+                    .await?
+                    .json()
                     .await?,
             )
-            .await
         }
     }
 }

@@ -99,53 +99,51 @@ pub struct Item {
 mod client {
     use super::*;
     use crate::client::{
-        extract_error_or_parse, ClientError, ClientResult, IdentifiesItem, IdentifiesUser, CLIENT,
+        ClientError, ClientResult, IdentifiesItem, IdentifiesUser, client,
         SERVER_URL,
     };
     use crate::hackstead::tile::{Tile, TileCreationRequest};
 
     impl Item {
         pub async fn redeem_for_tile(&self) -> ClientResult<Tile> {
-            extract_error_or_parse(
-                CLIENT
+            Ok(
+                client()
                     .post(&format!("{}/{}", *SERVER_URL, "tile/new"))
-                    .json(&TileCreationRequest {
+                    .send_json(&TileCreationRequest {
                         tile_redeemable_item_id: self.item_id(),
                     })
-                    .send()
+                    .await?
+                    .json()
                     .await?,
             )
-            .await
         }
 
         pub async fn hatch(&self) -> ClientResult<Vec<Item>> {
-            extract_error_or_parse(
-                CLIENT
+            Ok(
+                client()
                     .post(&format!("{}/{}", *SERVER_URL, "item/hatch"))
-                    .json(&ItemHatchRequest {
+                    .send_json(&ItemHatchRequest {
                         hatchable_item_id: self.item_id(),
                     })
-                    .send()
+                    .await?
+                    .json()
                     .await?,
             )
-            .await
         }
 
         pub async fn give_to(&self, to: impl IdentifiesUser) -> ClientResult<Item> {
-            extract_error_or_parse::<Vec<Item>>(
-                CLIENT
-                    .post(&format!("{}/{}", *SERVER_URL, "item/transfer"))
-                    .json(&ItemTransferRequest {
-                        sender_id: self.base.owner_id.user_id(),
-                        receiver_id: to.user_id(),
-                        item_ids: vec![self.base.item_id],
-                    })
-                    .send()
-                    .await?,
-            )
-            .await?
-            .pop()
-            .ok_or(ClientError::ExpectedOneSpawnReturnedNone)
+            client()
+                .post(&format!("{}/{}", *SERVER_URL, "item/transfer"))
+                .send_json(&ItemTransferRequest {
+                    sender_id: self.base.owner_id.user_id(),
+                    receiver_id: to.user_id(),
+                    item_ids: vec![self.base.item_id],
+                })
+                .await?
+                .json::<Vec<Item>>()
+                .await?
+                .pop()
+                .ok_or(ClientError::ExpectedOneSpawnReturnedNone)
         }
     }
 }

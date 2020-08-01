@@ -117,13 +117,13 @@ impl Config {
         &self,
         item_archetype_handle: ArchetypeHandle,
         effect_archetype_handle: ArchetypeHandle,
-    ) -> Option<(&ItemApplicationEffect, &PlantAdvancement)> {
+    ) -> Option<(&PlantApplicationEffect, &PlantAdvancement)> {
         self.get_item_application_effect(item_archetype_handle, effect_archetype_handle)
             .and_then(|e| {
                 Some((
                     e,
                     match &e.kind {
-                        ItemApplicationEffectKind::PlantAdvancement(pa) => Some(pa),
+                        PlantApplicationEffectKind::PlantAdvancement(pa) => Some(pa),
                         _ => None,
                     }?,
                 ))
@@ -134,10 +134,10 @@ impl Config {
         &self,
         item_archetype_handle: ArchetypeHandle,
         effect_archetype_handle: ArchetypeHandle,
-    ) -> Option<&ItemApplicationEffect> {
+    ) -> Option<&PlantApplicationEffect> {
         self.possession_archetypes
             .get(item_archetype_handle as usize)?
-            .item_application
+            .plant_application
             .as_ref()?
             .effects
             .get(effect_archetype_handle as usize)
@@ -251,14 +251,14 @@ impl AdvancementSum for HacksteadAdvancementSum {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub enum KeepPlants<Handle> {
+pub enum PlantFilter<Handle> {
     Only(Vec<Handle>),
     Not(Vec<Handle>),
     All,
 }
-impl KeepPlants<String> {
-    pub fn lookup_handles(&self) -> Result<KeepPlants<ArchetypeHandle>, ConfigError> {
-        use KeepPlants::*;
+impl PlantFilter<String> {
+    pub fn lookup_handles(&self) -> Result<PlantFilter<ArchetypeHandle>, ConfigError> {
+        use PlantFilter::*;
 
         Ok(match self {
             Only(these) => Only(
@@ -275,9 +275,9 @@ impl KeepPlants<String> {
         })
     }
 }
-impl<Handle: PartialEq> KeepPlants<Handle> {
+impl<Handle: PartialEq> PlantFilter<Handle> {
     pub fn allows(&self, h: &Handle) -> bool {
-        use KeepPlants::*;
+        use PlantFilter::*;
 
         match self {
             Only(these) => these.contains(h),
@@ -289,7 +289,7 @@ impl<Handle: PartialEq> KeepPlants<Handle> {
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct SelectivePlantAdvancement {
-    pub keep_plants: KeepPlants<String>,
+    pub for_plants: PlantFilter<String>,
     pub advancement: PlantAdvancement,
 }
 
@@ -307,34 +307,38 @@ pub struct LandUnlock {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct ItemApplication {
+pub struct PlantApplication {
     pub short_description: String,
-    pub effects: Vec<ItemApplicationEffect>,
+    pub effects: Vec<PlantApplicationEffect>,
 }
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub enum ItemApplicationEffectKind {
+pub enum PlantApplicationEffectKind {
     PlantAdvancement(PlantAdvancement),
     TurnsPlantInto(String),
 }
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct ItemApplicationEffect {
+pub struct PlantApplicationEffect {
     pub duration: Option<f64>,
-    pub keep_plants: KeepPlants<String>,
-    pub kind: ItemApplicationEffectKind,
+    pub for_plants: PlantFilter<String>,
+    pub kind: PlantApplicationEffectKind,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Archetype {
     pub name: String,
     pub description: String,
+    #[serde(default)]
     pub gotchi: Option<GotchiArchetype>,
+    #[serde(default)]
     pub seed: Option<SeedArchetype>,
+    #[serde(default)]
     pub unlocks_land: Option<LandUnlock>,
     #[serde(default)]
     pub welcome_gift: bool,
     #[serde(default)]
-    pub plant_effects: Vec<SelectivePlantAdvancement>,
-    pub item_application: Option<ItemApplication>,
+    pub passive_plant_effects: Vec<SelectivePlantAdvancement>,
+    #[serde(default)]
+    pub plant_application: Option<PlantApplication>,
     #[serde(default)]
     pub hatch_table: Option<LootTable>,
 }
@@ -342,7 +346,7 @@ pub struct Archetype {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{ClientError, ClientResult, IdentifiesUser, CLIENT, SERVER_URL};
+    use crate::client::{ClientError, ClientResult, IdentifiesUser, client, SERVER_URL};
 
     impl Archetype {
         pub async fn spawn_some_for(
@@ -350,16 +354,15 @@ mod client {
             iu: impl IdentifiesUser,
             amount: usize,
         ) -> ClientResult<Vec<crate::Item>> {
-            Ok(CLIENT
+            Ok(client()
                 .post(&format!("{}/{}", *SERVER_URL, "item/spawn"))
-                .json(&crate::item::ItemSpawnRequest {
+                .send_json(&crate::item::ItemSpawnRequest {
                     receiver_id: iu.user_id(),
                     item_archetype_handle: CONFIG
                         .possession_archetype_to_handle(self)
                         .expect("archetype not found in config"),
                     amount,
                 })
-                .send()
                 .await?
                 .json()
                 .await?)
@@ -1016,17 +1019,17 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                 }
             }
         }
-        for SelectivePlantAdvancement { keep_plants, .. } in &a.plant_effects {
-            if let Err(e) = keep_plants.lookup_handles() {
+        for SelectivePlantAdvancement { for_plants, .. } in &a.passive_plant_effects {
+            if let Err(e) = for_plants.lookup_handles() {
                 return Err(format!(
                     "possession archetype {:?} keep plants error: {}\nkeep plants: {:?}",
-                    a.name, e, keep_plants,
+                    a.name, e, for_plants,
                 ));
             }
         }
-        if let Some(ia) = &a.item_application {
+        if let Some(ia) = &a.plant_application {
             for iaa in ia.effects.iter() {
-                if let Err(e) = iaa.keep_plants.lookup_handles() {
+                if let Err(e) = iaa.for_plants.lookup_handles() {
                     return Err(format!(
                         concat!(
                             "possession archetype {:?} ",
@@ -1034,7 +1037,7 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                             "keep plants error: {}\n",
                             "keep plants: {:?}",
                         ),
-                        a.name, ia.short_description, e, iaa.keep_plants,
+                        a.name, ia.short_description, e, iaa.for_plants,
                     ));
                 }
             }

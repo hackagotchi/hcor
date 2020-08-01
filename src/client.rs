@@ -3,8 +3,12 @@ use std::fmt;
 use uuid::Uuid;
 
 lazy_static::lazy_static! {
-    pub static ref CLIENT: reqwest::Client = reqwest::Client::new();
     pub static ref SERVER_URL: &'static str = "http://127.0.0.1:8000";
+}
+
+/// An HTTP client, configured just the way hcor likes it :D
+pub fn client() -> awc::Client {
+    awc::Client::new()
 }
 
 pub type ClientResult<T> = Result<T, ClientError>;
@@ -12,10 +16,11 @@ pub type ClientResult<T> = Result<T, ClientError>;
 /// Something went wrong while trying to fetch some information from a Hackagotchi backend.
 #[derive(Debug)]
 pub enum ClientError {
-    Deserialization(serde_json::Error),
-    HttpRequest(reqwest::Error),
-    BadRequest(reqwest::StatusCode, String),
-    ServerError(reqwest::StatusCode, String),
+    Deserialization(awc::error::JsonPayloadError),
+    RawDeserialization(awc::error::PayloadError),
+    HttpRequest(awc::error::SendRequestError),
+    BadRequest(awc::http::StatusCode, String),
+    ServerError(awc::http::StatusCode, String),
     UnknownServerResponse,
     ExpectedOneSpawnReturnedNone,
 }
@@ -26,6 +31,7 @@ impl fmt::Display for ClientError {
 
         match self {
             Deserialization(e) => write!(f, "couldn't parse what server returned: {}", e),
+            RawDeserialization(e) => write!(f, "couldn't parse what server returned: {}", e),
             HttpRequest(e) => write!(f, "couldn't communicate with server: {}", e),
             BadRequest(status, e) => write!(f, "server returned Status {}, error: {}", status, e),
             ServerError(status, e) => write!(f, "server returned Status {}, error: {}", status, e),
@@ -37,25 +43,19 @@ impl fmt::Display for ClientError {
         }
     }
 }
-impl From<serde_json::Error> for ClientError {
-    fn from(e: serde_json::Error) -> ClientError {
-        ClientError::Deserialization(e)
-    }
-}
-impl From<reqwest::Error> for ClientError {
-    fn from(e: reqwest::Error) -> ClientError {
+impl From<awc::error::SendRequestError> for ClientError {
+    fn from(e: awc::error::SendRequestError) -> ClientError {
         ClientError::HttpRequest(e)
     }
 }
-
-pub async fn extract_error_or_parse<T: serde::de::DeserializeOwned>(
-    res: reqwest::Response,
-) -> ClientResult<T> {
-    match res.status() {
-        s if s.is_success() => Ok(res.json().await?),
-        s if s.is_client_error() => Err(ClientError::BadRequest(s, res.text().await?)),
-        s if s.is_server_error() => Err(ClientError::ServerError(s, res.text().await?)),
-        _ => Err(ClientError::UnknownServerResponse),
+impl From<awc::error::JsonPayloadError> for ClientError {
+    fn from(e: awc::error::JsonPayloadError) -> ClientError {
+        ClientError::Deserialization(e)
+    }
+}
+impl From<awc::error::PayloadError> for ClientError {
+    fn from(e: awc::error::PayloadError) -> ClientError {
+        ClientError::RawDeserialization(e)
     }
 }
 
@@ -104,6 +104,42 @@ impl IdentifiesUser for &UserId {
 impl<S: IdentifiesSteader> IdentifiesUser for S {
     fn user_id(self) -> UserId {
         UserId::Uuid(self.steader_id())
+    }
+}
+
+pub trait IdentifiesTile {
+    fn tile_id(self) -> Uuid;
+}
+impl IdentifiesTile for Uuid {
+    fn tile_id(self) -> Uuid {
+        self
+    }
+}
+impl IdentifiesTile for &Uuid {
+    fn tile_id(self) -> Uuid {
+        *self
+    }
+}
+impl IdentifiesTile for &crate::Tile {
+    fn tile_id(self) -> Uuid {
+        self.base.tile_id
+    }
+}
+
+/// Plants are referred to as tile Ids, but through this interface,
+/// Plants can refer to Tiles, but Tiles can't refer to Plants since
+/// Tiles may or may not actually have plants on them.
+pub trait IdentifiesPlant {
+    fn tile_id(self) -> Uuid;
+}
+impl IdentifiesPlant for &crate::Plant {
+    fn tile_id(self) -> Uuid {
+        self.base.tile_id
+    }
+}
+impl<T: IdentifiesTile> IdentifiesPlant for T {
+    fn tile_id(self) -> Uuid {
+        self.tile_id()
     }
 }
 
