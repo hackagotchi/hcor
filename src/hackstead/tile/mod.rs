@@ -1,38 +1,26 @@
+use crate::{SteaderId, TileId};
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use serde_diff::SerdeDiff;
+
 pub mod plant;
 pub use plant::Plant;
 
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-/// Format for requesting that a user's item is consumed in exchange for a new tile of land.
-/// The steader to give the land to is inferred to be the owner of the item.
-pub struct TileCreationRequest {
-    /// id for an item that is capable of being removed in exchange for another tile of land.
-    pub tile_redeemable_item_id: Uuid,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct TileBase {
-    pub owner_id: Uuid,
-    pub tile_id: Uuid,
-    pub acquired: DateTime<Utc>,
-}
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, SerdeDiff, Serialize, Deserialize, PartialEq)]
 pub struct Tile {
     pub plant: Option<Plant>,
-    pub base: TileBase,
+    pub owner_id: SteaderId,
+    pub tile_id: TileId,
+    #[serde_diff(opaque)]
+    pub acquired: DateTime<Utc>,
 }
 impl Tile {
-    pub fn new(owner_id: Uuid) -> Tile {
+    pub fn new(owner_id: SteaderId) -> Tile {
         Tile {
             plant: None,
-            base: TileBase {
-                acquired: Utc::now(),
-                tile_id: Uuid::new_v4(),
-                owner_id,
-            },
+            acquired: Utc::now(),
+            tile_id: TileId(uuid::Uuid::new_v4()),
+            owner_id,
         }
     }
 }
@@ -40,19 +28,27 @@ impl Tile {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{request, ClientResult, IdentifiesItem};
-    use plant::Plant;
+    use crate::{
+        client::{ClientError, ClientResult},
+        wormhole::{ask, until_ask_id_map, AskedNote, PlantAsk},
+        Ask, IdentifiesItem,
+    };
 
     impl Tile {
         pub async fn plant_seed(&self, seed: impl IdentifiesItem) -> ClientResult<Plant> {
-            request(
-                "plant/summon",
-                &plant::PlantCreationRequest {
-                    seed_item_id: seed.item_id(),
-                    tile_id: self.base.tile_id,
-                },
-            )
-            .await
+            let a = Ask::Plant(PlantAsk::Summon {
+                seed_item_id: seed.item_id(),
+                tile_id: self.tile_id,
+            });
+
+            let ask_id = ask(a.clone()).await?;
+
+            until_ask_id_map(ask_id, |n| match n {
+                AskedNote::PlantSummonResult(r) => Some(r),
+                _ => None,
+            })
+            .await?
+            .map_err(|e| ClientError::bad_ask(a, "PlantSummon", e))
         }
     }
 }

@@ -1,22 +1,21 @@
-use crate::{config, CONFIG};
-use config::{Archetype, ArchetypeHandle, ConfigError, ConfigResult};
+use crate::{config, ItemId, SteaderId, CONFIG};
+use config::{Archetype, ArchetypeHandle, ConfigResult};
 use serde::{Deserialize, Serialize};
+use serde_diff::SerdeDiff;
 use std::fmt;
-use uuid::Uuid;
 
 pub mod gotchi;
 
 pub use gotchi::Gotchi;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(SerdeDiff, Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct LoggedOwner {
-    pub item_id: Uuid,
-    pub logged_owner_id: Uuid,
+    pub logged_owner_id: SteaderId,
     pub acquisition: Acquisition,
-    pub owner_index: i32,
+    pub owner_index: usize,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(SerdeDiff, Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum Acquisition {
     Trade,
     Farmed,
@@ -27,7 +26,7 @@ impl Acquisition {
     pub fn spawned() -> Self {
         Acquisition::Trade
     }
-    pub fn try_from_i32(i: i32) -> Option<Self> {
+    pub fn try_from_usize(i: usize) -> Option<Self> {
         use Acquisition::*;
 
         Some(match i {
@@ -50,47 +49,11 @@ impl fmt::Display for Acquisition {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-/// Format for requesting that a new item be created and given to a user.
-pub struct ItemTransferRequest {
-    /// The steader the items should be transferred to.
-    pub receiver_id: crate::UserId,
-    /// The steader from whom the items should be transferred.
-    pub sender_id: crate::UserId,
-    /// The ids of the items to be transferred. Any items referenced which do not belong to the
-    /// sender are ignored.
-    pub item_ids: Vec<Uuid>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-/// Format for requesting that a new item be created and given to a user.
-pub struct ItemSpawnRequest {
-    /// The steaders the items should be spawned for.
-    pub receiver_id: crate::UserId,
-    /// A handle to variety of item to be spawned for the user, as specified by the config.
-    pub item_archetype_handle: crate::config::ArchetypeHandle,
-    /// The number of items the user should receive.
-    pub amount: usize,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-/// Format for requesting that an item be hatched.
-pub struct ItemHatchRequest {
-    /// Id of an item to be hatched. If the archetype of the item is not hatchable, your request
-    /// will be ignored.
-    pub hatchable_item_id: Uuid,
-}
-
-#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
-pub struct ItemBase {
-    pub archetype_handle: ArchetypeHandle,
-    pub item_id: uuid::Uuid,
-    pub owner_id: uuid::Uuid,
-}
-
-#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
+#[derive(Deserialize, SerdeDiff, Serialize, Debug, PartialEq, Clone)]
 pub struct Item {
-    pub base: ItemBase,
+    pub item_id: ItemId,
+    pub owner_id: SteaderId,
+    pub archetype_handle: ArchetypeHandle,
     pub gotchi: Option<Gotchi>,
     pub ownership_log: Vec<LoggedOwner>,
 }
@@ -98,36 +61,61 @@ pub struct Item {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{request, request_one, ClientResult, IdentifiesItem, IdentifiesUser};
-    use crate::hackstead::tile::{Tile, TileCreationRequest};
+    use crate::{
+        client::{ClientError, ClientResult},
+        wormhole::{ask, until_ask_id_map, AskedNote, ItemAsk},
+        Ask, IdentifiesItem, IdentifiesSteader, Tile,
+    };
 
     impl Item {
         pub async fn redeem_for_tile(&self) -> ClientResult<Tile> {
-            request(
-                "tile/summon",
-                &TileCreationRequest {
-                    tile_redeemable_item_id: self.item_id(),
-                },
-            )
-            .await
+            let a = Ask::TileSummon {
+                tile_redeemable_item_id: self.item_id(),
+            };
+
+            let ask_id = ask(a.clone()).await?;
+
+            until_ask_id_map(ask_id, |n| match n {
+                AskedNote::TileSummonResult(r) => Some(r),
+                _ => None,
+            })
+            .await?
+            .map_err(|e| ClientError::bad_ask(a, "TileSummon", e))
         }
 
         pub async fn hatch(&self) -> ClientResult<Vec<Item>> {
-            request(
-                "item/hatch",
-                &ItemHatchRequest {
-                    hatchable_item_id: self.item_id(),
-                },
-            )
-            .await
+            let a = Ask::Item(ItemAsk::Hatch {
+                hatchable_item_id: self.item_id(),
+            });
+
+            let ask_id = ask(a.clone()).await?;
+
+            until_ask_id_map(ask_id, |n| match n {
+                AskedNote::ItemHatchResult(r) => Some(r),
+                _ => None,
+            })
+            .await?
+            .map_err(|e| ClientError::bad_ask(a, "ItemHatch", e))
         }
 
-        pub async fn throw_at(&self, to: impl IdentifiesUser) -> ClientResult<Item> {
-            request_one("item/throw", &ItemTransferRequest {
-                sender_id: self.base.owner_id.user_id(),
-                receiver_id: to.user_id(),
-                item_ids: vec![self.base.item_id],
-            }).await
+        pub async fn throw_at(&self, to: impl IdentifiesSteader) -> ClientResult<Item> {
+            let a = Ask::Item(ItemAsk::Throw {
+                receiver_id: to.steader_id(),
+                item_ids: vec![self.item_id],
+            });
+
+            let ask_id = ask(a.clone()).await?;
+
+            until_ask_id_map(ask_id, |n| match n {
+                AskedNote::ItemThrowResult(r) => Some(r),
+                _ => None,
+            })
+            .await?
+            .map_err(|e| ClientError::bad_ask(a.clone(), "ItemThrow", e))?
+            .pop()
+            .ok_or_else(|| {
+                ClientError::bad_ask(a, "ItemThrow", "Asked for one item, got none".to_string())
+            })
         }
     }
 }
@@ -136,36 +124,33 @@ impl std::ops::Deref for Item {
     type Target = Archetype;
 
     fn deref(&self) -> &Self::Target {
-        Self::archetype(self.base.archetype_handle).expect("invalid archetype handle")
+        CONFIG.item(self.archetype_handle).unwrap()
     }
 }
 
 impl Item {
     pub fn from_archetype_handle(
         ah: ArchetypeHandle,
-        logged_owner_id: Uuid,
+        logged_owner_id: SteaderId,
         acquisition: Acquisition,
     ) -> ConfigResult<Self> {
-        let a = Self::archetype(ah)?;
+        let a = CONFIG.item(ah)?;
         Self::from_archetype(a, logged_owner_id, acquisition)
     }
 
     pub fn from_archetype(
         a: &'static Archetype,
-        logged_owner_id: Uuid,
+        logged_owner_id: SteaderId,
         acquisition: Acquisition,
     ) -> ConfigResult<Self> {
-        let item_id = uuid::Uuid::new_v4();
+        let item_id = ItemId(uuid::Uuid::new_v4());
         let ah = CONFIG.possession_archetype_to_handle(a)?;
         Ok(Self {
-            base: ItemBase {
-                item_id,
-                archetype_handle: ah,
-                owner_id: logged_owner_id,
-            },
-            gotchi: Some(Gotchi::new(item_id, ah)).filter(|_| a.gotchi.is_some()),
+            item_id,
+            archetype_handle: ah,
+            owner_id: logged_owner_id,
+            gotchi: Some(Gotchi::new(ah)).filter(|_| a.gotchi.is_some()),
             ownership_log: vec![LoggedOwner {
-                item_id,
                 owner_index: 0,
                 logged_owner_id,
                 acquisition,
@@ -178,12 +163,5 @@ impl Item {
             Some(g) => &g.nickname,
             _ => &self.name,
         }
-    }
-
-    fn archetype(ah: ArchetypeHandle) -> ConfigResult<&'static Archetype> {
-        CONFIG
-            .possession_archetypes
-            .get(ah as usize)
-            .ok_or_else(|| ConfigError::UnknownArchetypeHandle(ah))
     }
 }

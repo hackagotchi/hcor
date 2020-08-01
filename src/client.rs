@@ -1,14 +1,13 @@
-use crate::UserId;
+use crate::wormhole::Ask;
 use serde::{de::DeserializeOwned, Serialize};
 use std::fmt;
-use uuid::Uuid;
 
 lazy_static::lazy_static! {
     pub static ref SERVER_URL: &'static str = "http://127.0.0.1:8000";
 }
 
 /// An HTTP client, configured just the way hcor likes it :D
-fn client() -> awc::Client {
+pub fn client() -> awc::Client {
     awc::Client::new()
 }
 
@@ -21,14 +20,24 @@ pub enum ClientErrorKind {
     Payload(awc::error::PayloadError),
     SendRequest(awc::error::SendRequestError),
     ReturnedError(awc::http::StatusCode, String),
+    BadAsk(&'static str, String),
+    Wormhole(crate::wormhole::WormholeError),
     UnknownServerResponse,
-    ExpectedOneGotNone,
 }
 #[derive(Debug)]
 pub struct ClientError {
     route: &'static str,
     input: String,
-    kind: ClientErrorKind
+    kind: ClientErrorKind,
+}
+impl ClientError {
+    pub fn bad_ask(input: Ask, what: &'static str, err: String) -> Self {
+        ClientError {
+            route: "wormhole",
+            input: format!("{:#?}", input),
+            kind: ClientErrorKind::BadAsk(what, err),
+        }
+    }
 }
 impl std::error::Error for ClientError {}
 impl fmt::Display for ClientError {
@@ -42,14 +51,12 @@ impl fmt::Display for ClientError {
             JsonPayload(e) => write!(f, "couldn't parse JSON the server returned: {}", e),
             Payload(e) => write!(f, "couldn't parse data server returned: {}", e),
             SendRequest(e) => write!(f, "couldn't send a request to the server: {}", e),
+            Wormhole(e) => write!(f, "error communicating with server through wormhole: {}", e),
+            BadAsk(w, e) => write!(f, "request {} sent to wormhole returned: {}", w, e),
             ReturnedError(status, e) => {
                 write!(f, "server returned Status {}, error body: {}", status, e)
             }
             UnknownServerResponse => write!(f, "server returned non-utf8 error."),
-            ExpectedOneGotNone => write!(
-                f,
-                "expected a single item, but the server returned no items"
-            ),
         }
     }
 }
@@ -68,6 +75,15 @@ impl From<awc::error::PayloadError> for ClientErrorKind {
         ClientErrorKind::Payload(e)
     }
 }
+impl From<crate::wormhole::WormholeError> for ClientError {
+    fn from(e: crate::wormhole::WormholeError) -> ClientError {
+        ClientError {
+            route: "/wormhole",
+            input: "unknown".to_string(),
+            kind: ClientErrorKind::Wormhole(e),
+        }
+    }
+}
 
 /// what comes after http://127.0.0.1:8000/
 pub async fn request<D: DeserializeOwned, S: Serialize + fmt::Debug>(
@@ -81,17 +97,14 @@ pub async fn request<D: DeserializeOwned, S: Serialize + fmt::Debug>(
     };
 
     let mut res = client()
-        .post(&format!("{}/{}", *SERVER_URL, endpoint))
+        .post(&format!("{}/api/{}", *SERVER_URL, endpoint))
         .send_json(&input)
         .await
         .map_err(|e| err(e.into()))?;
 
     let s = res.status();
     if s.is_success() {
-        res
-            .json::<D>()
-            .await
-            .map_err(|e| err(e.into()))
+        res.json::<D>().await.map_err(|e| err(e.into()))
     } else {
         let kind = match res.body().await {
             Ok(body) => {
@@ -100,142 +113,10 @@ pub async fn request<D: DeserializeOwned, S: Serialize + fmt::Debug>(
                 String::from_utf8(body.to_vec())
                     .map(|text| ReturnedError(s, text))
                     .unwrap_or(UnknownServerResponse)
-            },
+            }
             Err(e) => e.into(),
         };
 
         Err(err(kind))
-    }
-}
-
-pub async fn request_one<D: DeserializeOwned, S: Serialize + fmt::Debug>(
-    endpoint: &'static str,
-    input: &S,
-) -> ClientResult<D> {
-    request::<Vec<D>, _>(endpoint, &input)
-        .await?
-        .pop()
-        .ok_or_else(|| ClientError {
-            route: endpoint,
-            input: format!("{:#?}", input),
-            kind: ClientErrorKind::ExpectedOneGotNone
-        })
-}
-
-pub trait IdentifiesSteader {
-    fn steader_id(self) -> Uuid;
-}
-impl IdentifiesSteader for Uuid {
-    fn steader_id(self) -> Uuid {
-        self
-    }
-}
-impl IdentifiesSteader for &Uuid {
-    fn steader_id(self) -> Uuid {
-        *self
-    }
-}
-impl IdentifiesSteader for &crate::Hackstead {
-    fn steader_id(self) -> Uuid {
-        self.profile.steader_id
-    }
-}
-impl IdentifiesSteader for &mut crate::Hackstead {
-    fn steader_id(self) -> Uuid {
-        self.profile.steader_id
-    }
-}
-impl IdentifiesSteader for &crate::hackstead::Profile {
-    fn steader_id(self) -> Uuid {
-        self.steader_id
-    }
-}
-impl IdentifiesSteader for &mut crate::hackstead::Profile {
-    fn steader_id(self) -> Uuid {
-        self.steader_id
-    }
-}
-
-pub trait IdentifiesUser {
-    fn user_id(self) -> UserId;
-}
-impl IdentifiesUser for &UserId {
-    fn user_id(self) -> UserId {
-        self.clone()
-    }
-}
-impl<S: IdentifiesSteader> IdentifiesUser for S {
-    fn user_id(self) -> UserId {
-        UserId::Uuid(self.steader_id())
-    }
-}
-
-pub trait IdentifiesTile {
-    fn tile_id(self) -> Uuid;
-}
-impl IdentifiesTile for Uuid {
-    fn tile_id(self) -> Uuid {
-        self
-    }
-}
-impl IdentifiesTile for &Uuid {
-    fn tile_id(self) -> Uuid {
-        *self
-    }
-}
-impl IdentifiesTile for &crate::Tile {
-    fn tile_id(self) -> Uuid {
-        self.base.tile_id
-    }
-}
-
-/// Plants are referred to as tile Ids, but through this interface,
-/// Plants can refer to Tiles, but Tiles can't refer to Plants since
-/// Tiles may or may not actually have plants on them.
-pub trait IdentifiesPlant {
-    fn tile_id(self) -> Uuid;
-}
-impl IdentifiesPlant for &crate::Plant {
-    fn tile_id(self) -> Uuid {
-        self.base.tile_id
-    }
-}
-impl<T: IdentifiesTile> IdentifiesPlant for T {
-    fn tile_id(self) -> Uuid {
-        self.tile_id()
-    }
-}
-
-pub trait IdentifiesItem {
-    fn item_id(self) -> Uuid;
-}
-impl IdentifiesItem for Uuid {
-    fn item_id(self) -> Uuid {
-        self
-    }
-}
-impl IdentifiesItem for &Uuid {
-    fn item_id(self) -> Uuid {
-        *self
-    }
-}
-impl IdentifiesItem for &crate::Item {
-    fn item_id(self) -> Uuid {
-        self.base.item_id
-    }
-}
-impl IdentifiesItem for &mut crate::Item {
-    fn item_id(self) -> Uuid {
-        self.base.item_id
-    }
-}
-impl IdentifiesItem for &crate::item::ItemBase {
-    fn item_id(self) -> Uuid {
-        self.item_id
-    }
-}
-impl IdentifiesItem for &mut crate::item::ItemBase {
-    fn item_id(self) -> Uuid {
-        self.item_id
     }
 }
