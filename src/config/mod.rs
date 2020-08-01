@@ -353,7 +353,7 @@ mod client {
     fn item_spawn_request(
         arch: &Archetype,
         iu: impl IdentifiesUser,
-        amount: usize
+        amount: usize,
     ) -> ItemSpawnRequest {
         ItemSpawnRequest {
             receiver_id: iu.user_id(),
@@ -370,11 +370,7 @@ mod client {
             iu: impl IdentifiesUser,
             amount: usize,
         ) -> ClientResult<Vec<crate::Item>> {
-            request(
-                SPAWN_ROUTE,
-                &item_spawn_request(self, iu, amount),
-            )
-            .await
+            request(SPAWN_ROUTE, &item_spawn_request(self, iu, amount)).await
         }
 
         pub async fn spawn_for(&self, iu: impl IdentifiesUser) -> ClientResult<crate::Item> {

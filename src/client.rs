@@ -8,7 +8,7 @@ lazy_static::lazy_static! {
 }
 
 /// An HTTP client, configured just the way hcor likes it :D
-fn client() -> awc::Client {
+pub fn client() -> awc::Client {
     awc::Client::new()
 }
 
@@ -28,7 +28,7 @@ pub enum ClientErrorKind {
 pub struct ClientError {
     route: &'static str,
     input: String,
-    kind: ClientErrorKind
+    kind: ClientErrorKind,
 }
 impl std::error::Error for ClientError {}
 impl fmt::Display for ClientError {
@@ -88,10 +88,7 @@ pub async fn request<D: DeserializeOwned, S: Serialize + fmt::Debug>(
 
     let s = res.status();
     if s.is_success() {
-        res
-            .json::<D>()
-            .await
-            .map_err(|e| err(e.into()))
+        res.json::<D>().await.map_err(|e| err(e.into()))
     } else {
         let kind = match res.body().await {
             Ok(body) => {
@@ -100,7 +97,7 @@ pub async fn request<D: DeserializeOwned, S: Serialize + fmt::Debug>(
                 String::from_utf8(body.to_vec())
                     .map(|text| ReturnedError(s, text))
                     .unwrap_or(UnknownServerResponse)
-            },
+            }
             Err(e) => e.into(),
         };
 
@@ -118,7 +115,7 @@ pub async fn request_one<D: DeserializeOwned, S: Serialize + fmt::Debug>(
         .ok_or_else(|| ClientError {
             route: endpoint,
             input: format!("{:#?}", input),
-            kind: ClientErrorKind::ExpectedOneGotNone
+            kind: ClientErrorKind::ExpectedOneGotNone,
         })
 }
 

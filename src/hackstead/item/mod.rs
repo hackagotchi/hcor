@@ -123,11 +123,15 @@ mod client {
         }
 
         pub async fn throw_at(&self, to: impl IdentifiesUser) -> ClientResult<Item> {
-            request_one("item/throw", &ItemTransferRequest {
-                sender_id: self.base.owner_id.user_id(),
-                receiver_id: to.user_id(),
-                item_ids: vec![self.base.item_id],
-            }).await
+            request_one(
+                "item/throw",
+                &ItemTransferRequest {
+                    sender_id: self.base.owner_id.user_id(),
+                    receiver_id: to.user_id(),
+                    item_ids: vec![self.base.item_id],
+                },
+            )
+            .await
         }
     }
 }

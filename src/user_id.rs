@@ -38,8 +38,6 @@ impl UserId {
 mod test {
     use super::*;
     const USER_1: &'static str = "U1";
-    const USER_2: &'static str = "U2";
-    const USER_3: &'static str = "U3";
     lazy_static::lazy_static! {
         static ref UUID: Uuid = Uuid::new_v4();
     }

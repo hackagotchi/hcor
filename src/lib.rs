@@ -10,6 +10,10 @@ pub use client::{ClientError, ClientResult, IdentifiesItem, IdentifiesSteader, I
 pub mod client_internal {
     pub use super::client::request;
 }
+#[cfg(feature = "client")]
+/// The Wormhole allows quick communication with the server,
+/// used especially for receiving information about game events as soon as they occur.
+pub mod wormhole;
 
 /// All of the game design switches and levers are handled here, with a focus on how they interact
 /// with the rest of the data in the game.
