@@ -98,47 +98,42 @@ pub struct Item {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{
-        client, ClientError, ClientResult, IdentifiesItem, IdentifiesUser, SERVER_URL,
-    };
+    use crate::client::{request, ClientError, ClientResult, IdentifiesItem, IdentifiesUser};
     use crate::hackstead::tile::{Tile, TileCreationRequest};
 
     impl Item {
         pub async fn redeem_for_tile(&self) -> ClientResult<Tile> {
-            Ok(client()
-                .post(&format!("{}/{}", *SERVER_URL, "tile/new"))
-                .send_json(&TileCreationRequest {
+            request(
+                "tile/summon",
+                &TileCreationRequest {
                     tile_redeemable_item_id: self.item_id(),
-                })
-                .await?
-                .json()
-                .await?)
+                },
+            )
+            .await
         }
 
         pub async fn hatch(&self) -> ClientResult<Vec<Item>> {
-            Ok(client()
-                .post(&format!("{}/{}", *SERVER_URL, "item/hatch"))
-                .send_json(&ItemHatchRequest {
+            request(
+                "item/hatch",
+                &ItemHatchRequest {
                     hatchable_item_id: self.item_id(),
-                })
-                .await?
-                .json()
-                .await?)
+                },
+            )
+            .await
         }
 
-        pub async fn give_to(&self, to: impl IdentifiesUser) -> ClientResult<Item> {
-            client()
-                .post(&format!("{}/{}", *SERVER_URL, "item/transfer"))
-                .send_json(&ItemTransferRequest {
+        pub async fn throw_at(&self, to: impl IdentifiesUser) -> ClientResult<Item> {
+            request::<Vec<Item>, _>(
+                "item/throw",
+                &ItemTransferRequest {
                     sender_id: self.base.owner_id.user_id(),
                     receiver_id: to.user_id(),
                     item_ids: vec![self.base.item_id],
-                })
-                .await?
-                .json::<Vec<Item>>()
-                .await?
-                .pop()
-                .ok_or(ClientError::ExpectedOneSpawnReturnedNone)
+                },
+            )
+            .await?
+            .pop()
+            .ok_or(ClientError::ExpectedOneSpawnReturnedNone)
         }
     }
 }

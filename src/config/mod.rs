@@ -346,7 +346,7 @@ pub struct Archetype {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{client, ClientError, ClientResult, IdentifiesUser, SERVER_URL};
+    use crate::client::{request, ClientError, ClientResult, IdentifiesUser};
 
     impl Archetype {
         pub async fn spawn_some_for(
@@ -354,18 +354,17 @@ mod client {
             iu: impl IdentifiesUser,
             amount: usize,
         ) -> ClientResult<Vec<crate::Item>> {
-            Ok(client()
-                .post(&format!("{}/{}", *SERVER_URL, "item/spawn"))
-                .send_json(&crate::item::ItemSpawnRequest {
+            request(
+                "item/godyeet",
+                &crate::item::ItemSpawnRequest {
                     receiver_id: iu.user_id(),
                     item_archetype_handle: CONFIG
                         .possession_archetype_to_handle(self)
                         .expect("archetype not found in config"),
                     amount,
-                })
-                .await?
-                .json()
-                .await?)
+                },
+            )
+            .await
         }
 
         pub async fn spawn_for(&self, iu: impl IdentifiesUser) -> ClientResult<crate::Item> {

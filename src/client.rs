@@ -1,4 +1,5 @@
 use crate::UserId;
+use serde::{de::DeserializeOwned, Serialize};
 use std::fmt;
 use uuid::Uuid;
 
@@ -7,7 +8,7 @@ lazy_static::lazy_static! {
 }
 
 /// An HTTP client, configured just the way hcor likes it :D
-pub fn client() -> awc::Client {
+fn client() -> awc::Client {
     awc::Client::new()
 }
 
@@ -16,11 +17,10 @@ pub type ClientResult<T> = Result<T, ClientError>;
 /// Something went wrong while trying to fetch some information from a Hackagotchi backend.
 #[derive(Debug)]
 pub enum ClientError {
-    Deserialization(awc::error::JsonPayloadError),
-    RawDeserialization(awc::error::PayloadError),
-    HttpRequest(awc::error::SendRequestError),
-    BadRequest(awc::http::StatusCode, String),
-    ServerError(awc::http::StatusCode, String),
+    JsonPayload(awc::error::JsonPayloadError),
+    Payload(awc::error::PayloadError),
+    SendRequest(awc::error::SendRequestError),
+    ReturnedError(awc::http::StatusCode, String),
     UnknownServerResponse,
     ExpectedOneSpawnReturnedNone,
 }
@@ -30,12 +30,13 @@ impl fmt::Display for ClientError {
         use ClientError::*;
 
         match self {
-            Deserialization(e) => write!(f, "couldn't parse what server returned: {}", e),
-            RawDeserialization(e) => write!(f, "couldn't parse what server returned: {}", e),
-            HttpRequest(e) => write!(f, "couldn't communicate with server: {}", e),
-            BadRequest(status, e) => write!(f, "server returned Status {}, error: {}", status, e),
-            ServerError(status, e) => write!(f, "server returned Status {}, error: {}", status, e),
-            UnknownServerResponse => write!(f, "server returned error client doesn't understand."),
+            JsonPayload(e) => write!(f, "couldn't parse JSON the server returned: {}", e),
+            Payload(e) => write!(f, "couldn't parse data server returned: {}", e),
+            SendRequest(e) => write!(f, "couldn't send a request to the server: {}", e),
+            ReturnedError(status, e) => {
+                write!(f, "server returned Status {}, error body: {}", status, e)
+            }
+            UnknownServerResponse => write!(f, "server returned non-utf8 error."),
             ExpectedOneSpawnReturnedNone => write!(
                 f,
                 "attempted to spawn a single item, but the server returned no items"
@@ -45,17 +46,38 @@ impl fmt::Display for ClientError {
 }
 impl From<awc::error::SendRequestError> for ClientError {
     fn from(e: awc::error::SendRequestError) -> ClientError {
-        ClientError::HttpRequest(e)
+        ClientError::SendRequest(e)
     }
 }
 impl From<awc::error::JsonPayloadError> for ClientError {
     fn from(e: awc::error::JsonPayloadError) -> ClientError {
-        ClientError::Deserialization(e)
+        ClientError::JsonPayload(e)
     }
 }
 impl From<awc::error::PayloadError> for ClientError {
     fn from(e: awc::error::PayloadError) -> ClientError {
-        ClientError::RawDeserialization(e)
+        ClientError::Payload(e)
+    }
+}
+
+/// what comes after http://127.0.0.1:8000/
+pub async fn request<D: DeserializeOwned, S: Serialize>(
+    endpoint: &str,
+    input: &S,
+) -> ClientResult<D> {
+    let mut res = client()
+        .post(&format!("{}/{}", *SERVER_URL, endpoint))
+        .send_json(&input)
+        .await?;
+
+    let s = res.status();
+    if s.is_success() {
+        Ok(res.json::<D>().await?)
+    } else {
+        match String::from_utf8(res.body().await?.to_vec()) {
+            Ok(text) => Err(ClientError::ReturnedError(s, text)),
+            Err(_) => Err(ClientError::UnknownServerResponse),
+        }
     }
 }
 

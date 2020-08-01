@@ -40,20 +40,19 @@ impl Tile {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{client, ClientResult, IdentifiesItem, SERVER_URL};
+    use crate::client::{request, ClientResult, IdentifiesItem};
     use plant::Plant;
 
     impl Tile {
         pub async fn plant_seed(&self, seed: impl IdentifiesItem) -> ClientResult<Plant> {
-            Ok(client()
-                .post(&format!("{}/{}", *SERVER_URL, "plant/new"))
-                .send_json(&plant::PlantCreationRequest {
+            request(
+                "plant/summon",
+                &plant::PlantCreationRequest {
                     seed_item_id: seed.item_id(),
                     tile_id: self.base.tile_id,
-                })
-                .await?
-                .json()
-                .await?)
+                },
+            )
+            .await
         }
     }
 }
