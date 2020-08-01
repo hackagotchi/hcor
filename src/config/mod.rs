@@ -346,7 +346,7 @@ pub struct Archetype {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{ClientError, ClientResult, IdentifiesUser, client, SERVER_URL};
+    use crate::client::{client, ClientError, ClientResult, IdentifiesUser, SERVER_URL};
 
     impl Archetype {
         pub async fn spawn_some_for(

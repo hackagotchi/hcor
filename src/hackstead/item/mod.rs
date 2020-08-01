@@ -99,36 +99,31 @@ pub struct Item {
 mod client {
     use super::*;
     use crate::client::{
-        ClientError, ClientResult, IdentifiesItem, IdentifiesUser, client,
-        SERVER_URL,
+        client, ClientError, ClientResult, IdentifiesItem, IdentifiesUser, SERVER_URL,
     };
     use crate::hackstead::tile::{Tile, TileCreationRequest};
 
     impl Item {
         pub async fn redeem_for_tile(&self) -> ClientResult<Tile> {
-            Ok(
-                client()
-                    .post(&format!("{}/{}", *SERVER_URL, "tile/new"))
-                    .send_json(&TileCreationRequest {
-                        tile_redeemable_item_id: self.item_id(),
-                    })
-                    .await?
-                    .json()
-                    .await?,
-            )
+            Ok(client()
+                .post(&format!("{}/{}", *SERVER_URL, "tile/new"))
+                .send_json(&TileCreationRequest {
+                    tile_redeemable_item_id: self.item_id(),
+                })
+                .await?
+                .json()
+                .await?)
         }
 
         pub async fn hatch(&self) -> ClientResult<Vec<Item>> {
-            Ok(
-                client()
-                    .post(&format!("{}/{}", *SERVER_URL, "item/hatch"))
-                    .send_json(&ItemHatchRequest {
-                        hatchable_item_id: self.item_id(),
-                    })
-                    .await?
-                    .json()
-                    .await?,
-            )
+            Ok(client()
+                .post(&format!("{}/{}", *SERVER_URL, "item/hatch"))
+                .send_json(&ItemHatchRequest {
+                    hatchable_item_id: self.item_id(),
+                })
+                .await?
+                .json()
+                .await?)
         }
 
         pub async fn give_to(&self, to: impl IdentifiesUser) -> ClientResult<Item> {

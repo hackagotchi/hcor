@@ -117,34 +117,33 @@ impl std::ops::Deref for Effect {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{IdentifiesItem, ClientResult, client, SERVER_URL};
+    use crate::client::{client, ClientResult, IdentifiesItem, SERVER_URL};
 
     impl Plant {
         pub async fn slaughter(&self) -> ClientResult<Plant> {
-            Ok(
-                client()
-                    .post(&format!("{}/{}", *SERVER_URL, "plant/remove"))
-                    .send_json(&PlantRemovalRequest {
-                        tile_id: self.base.tile_id,
-                    })
-                    .await?
-                    .json()
-                    .await?
-            )
+            Ok(client()
+                .post(&format!("{}/{}", *SERVER_URL, "plant/remove"))
+                .send_json(&PlantRemovalRequest {
+                    tile_id: self.base.tile_id,
+                })
+                .await?
+                .json()
+                .await?)
         }
 
-        pub async fn apply_item(&self, applicable: impl IdentifiesItem) -> ClientResult<Vec<Effect>> {
-            Ok(
-                client()
-                    .post(&format!("{}/{}", *SERVER_URL, "plant/apply"))
-                    .send_json(&PlantApplicationRequest {
-                        applicable_item_id: applicable.item_id(),
-                        tile_id: self.base.tile_id,
-                    })
-                    .await?
-                    .json()
-                    .await?,
-            )
+        pub async fn apply_item(
+            &self,
+            applicable: impl IdentifiesItem,
+        ) -> ClientResult<Vec<Effect>> {
+            Ok(client()
+                .post(&format!("{}/{}", *SERVER_URL, "plant/apply"))
+                .send_json(&PlantApplicationRequest {
+                    applicable_item_id: applicable.item_id(),
+                    tile_id: self.base.tile_id,
+                })
+                .await?
+                .json()
+                .await?)
         }
     }
 }
