@@ -98,7 +98,7 @@ pub struct Item {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{request, ClientError, ClientResult, IdentifiesItem, IdentifiesUser};
+    use crate::client::{request, request_one, ClientResult, IdentifiesItem, IdentifiesUser};
     use crate::hackstead::tile::{Tile, TileCreationRequest};
 
     impl Item {
@@ -123,17 +123,11 @@ mod client {
         }
 
         pub async fn throw_at(&self, to: impl IdentifiesUser) -> ClientResult<Item> {
-            request::<Vec<Item>, _>(
-                "item/throw",
-                &ItemTransferRequest {
-                    sender_id: self.base.owner_id.user_id(),
-                    receiver_id: to.user_id(),
-                    item_ids: vec![self.base.item_id],
-                },
-            )
-            .await?
-            .pop()
-            .ok_or(ClientError::ExpectedOneSpawnReturnedNone)
+            request_one("item/throw", &ItemTransferRequest {
+                sender_id: self.base.owner_id.user_id(),
+                receiver_id: to.user_id(),
+                item_ids: vec![self.base.item_id],
+            }).await
         }
     }
 }

@@ -16,20 +16,29 @@ pub type ClientResult<T> = Result<T, ClientError>;
 
 /// Something went wrong while trying to fetch some information from a Hackagotchi backend.
 #[derive(Debug)]
-pub enum ClientError {
+pub enum ClientErrorKind {
     JsonPayload(awc::error::JsonPayloadError),
     Payload(awc::error::PayloadError),
     SendRequest(awc::error::SendRequestError),
     ReturnedError(awc::http::StatusCode, String),
     UnknownServerResponse,
-    ExpectedOneSpawnReturnedNone,
+    ExpectedOneGotNone,
+}
+#[derive(Debug)]
+pub struct ClientError {
+    route: &'static str,
+    input: String,
+    kind: ClientErrorKind
 }
 impl std::error::Error for ClientError {}
 impl fmt::Display for ClientError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use ClientError::*;
+        use ClientErrorKind::*;
 
-        match self {
+        write!(f, "route: \"{}\"\n", self.route)?;
+        write!(f, "input: \"{}\"\n", self.input)?;
+
+        match &self.kind {
             JsonPayload(e) => write!(f, "couldn't parse JSON the server returned: {}", e),
             Payload(e) => write!(f, "couldn't parse data server returned: {}", e),
             SendRequest(e) => write!(f, "couldn't send a request to the server: {}", e),
@@ -37,48 +46,80 @@ impl fmt::Display for ClientError {
                 write!(f, "server returned Status {}, error body: {}", status, e)
             }
             UnknownServerResponse => write!(f, "server returned non-utf8 error."),
-            ExpectedOneSpawnReturnedNone => write!(
+            ExpectedOneGotNone => write!(
                 f,
-                "attempted to spawn a single item, but the server returned no items"
+                "expected a single item, but the server returned no items"
             ),
         }
     }
 }
-impl From<awc::error::SendRequestError> for ClientError {
-    fn from(e: awc::error::SendRequestError) -> ClientError {
-        ClientError::SendRequest(e)
+impl From<awc::error::SendRequestError> for ClientErrorKind {
+    fn from(e: awc::error::SendRequestError) -> ClientErrorKind {
+        ClientErrorKind::SendRequest(e)
     }
 }
-impl From<awc::error::JsonPayloadError> for ClientError {
-    fn from(e: awc::error::JsonPayloadError) -> ClientError {
-        ClientError::JsonPayload(e)
+impl From<awc::error::JsonPayloadError> for ClientErrorKind {
+    fn from(e: awc::error::JsonPayloadError) -> ClientErrorKind {
+        ClientErrorKind::JsonPayload(e)
     }
 }
-impl From<awc::error::PayloadError> for ClientError {
-    fn from(e: awc::error::PayloadError) -> ClientError {
-        ClientError::Payload(e)
+impl From<awc::error::PayloadError> for ClientErrorKind {
+    fn from(e: awc::error::PayloadError) -> ClientErrorKind {
+        ClientErrorKind::Payload(e)
     }
 }
 
 /// what comes after http://127.0.0.1:8000/
-pub async fn request<D: DeserializeOwned, S: Serialize>(
-    endpoint: &str,
+pub async fn request<D: DeserializeOwned, S: Serialize + fmt::Debug>(
+    endpoint: &'static str,
     input: &S,
 ) -> ClientResult<D> {
+    let err = |kind: ClientErrorKind| ClientError {
+        route: endpoint,
+        input: format!("{:#?}", input),
+        kind,
+    };
+
     let mut res = client()
         .post(&format!("{}/{}", *SERVER_URL, endpoint))
         .send_json(&input)
-        .await?;
+        .await
+        .map_err(|e| err(e.into()))?;
 
     let s = res.status();
     if s.is_success() {
-        Ok(res.json::<D>().await?)
+        res
+            .json::<D>()
+            .await
+            .map_err(|e| err(e.into()))
     } else {
-        match String::from_utf8(res.body().await?.to_vec()) {
-            Ok(text) => Err(ClientError::ReturnedError(s, text)),
-            Err(_) => Err(ClientError::UnknownServerResponse),
-        }
+        let kind = match res.body().await {
+            Ok(body) => {
+                use ClientErrorKind::*;
+
+                String::from_utf8(body.to_vec())
+                    .map(|text| ReturnedError(s, text))
+                    .unwrap_or(UnknownServerResponse)
+            },
+            Err(e) => e.into(),
+        };
+
+        Err(err(kind))
     }
+}
+
+pub async fn request_one<D: DeserializeOwned, S: Serialize + fmt::Debug>(
+    endpoint: &'static str,
+    input: &S,
+) -> ClientResult<D> {
+    request::<Vec<D>, _>(endpoint, &input)
+        .await?
+        .pop()
+        .ok_or_else(|| ClientError {
+            route: endpoint,
+            input: format!("{:#?}", input),
+            kind: ClientErrorKind::ExpectedOneGotNone
+        })
 }
 
 pub trait IdentifiesSteader {

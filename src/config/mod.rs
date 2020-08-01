@@ -346,7 +346,23 @@ pub struct Archetype {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{request, ClientError, ClientResult, IdentifiesUser};
+    use crate::client::{request, request_one, ClientResult, IdentifiesUser};
+    use crate::item::ItemSpawnRequest;
+    const SPAWN_ROUTE: &'static str = "item/godyeet";
+
+    fn item_spawn_request(
+        arch: &Archetype,
+        iu: impl IdentifiesUser,
+        amount: usize
+    ) -> ItemSpawnRequest {
+        ItemSpawnRequest {
+            receiver_id: iu.user_id(),
+            item_archetype_handle: CONFIG
+                .possession_archetype_to_handle(arch)
+                .expect("archetype not found in config"),
+            amount,
+        }
+    }
 
     impl Archetype {
         pub async fn spawn_some_for(
@@ -355,23 +371,14 @@ mod client {
             amount: usize,
         ) -> ClientResult<Vec<crate::Item>> {
             request(
-                "item/godyeet",
-                &crate::item::ItemSpawnRequest {
-                    receiver_id: iu.user_id(),
-                    item_archetype_handle: CONFIG
-                        .possession_archetype_to_handle(self)
-                        .expect("archetype not found in config"),
-                    amount,
-                },
+                SPAWN_ROUTE,
+                &item_spawn_request(self, iu, amount),
             )
             .await
         }
 
         pub async fn spawn_for(&self, iu: impl IdentifiesUser) -> ClientResult<crate::Item> {
-            self.spawn_some_for(iu, 1)
-                .await?
-                .pop()
-                .ok_or(ClientError::ExpectedOneSpawnReturnedNone)
+            request_one(SPAWN_ROUTE, &item_spawn_request(self, iu, 1)).await
         }
     }
 }
