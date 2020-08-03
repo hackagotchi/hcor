@@ -75,7 +75,7 @@ impl<Handle: Clone> SpawnTableRow for (CountProbability, Handle) {
 
 /// Spawns an iterator of output dictated by various rows in a table of things to spawn.
 pub fn spawn<'rng, Row: SpawnTableRow>(
-    table: &'rng Vec<Row>,
+    table: &'rng [Row],
     rng: &'rng mut impl rand::RngCore,
 ) -> impl Iterator<Item = Row::Output> + 'rng {
     table
@@ -86,7 +86,7 @@ pub fn spawn<'rng, Row: SpawnTableRow>(
 /// Quite similar to spawn(), but it also returns a list of the
 /// leading spawn rates for the rows in the table the spawn qualified for.
 pub fn spawn_with_percentile<Row: SpawnTableRow>(
-    table: &Vec<Row>,
+    table: &[Row],
     rng: &mut impl rand::RngCore,
 ) -> (Vec<Row::Output>, f64) {
     let (handles, rows): (Vec<Vec<Row::Output>>, Vec<f64>) = table
@@ -150,7 +150,7 @@ impl Config {
         self.plant_archetypes
             .iter()
             .position(|x| name.as_ref() == x.name)
-            .ok_or(ConfigError::UnknownPossessionArchetypeName(name.as_ref().to_string()))
+            .ok_or_else(|| ConfigError::UnknownPossessionArchetypeName(name.as_ref().to_string()))
             .map(|x| x as ArchetypeHandle)
     }
 
@@ -158,7 +158,7 @@ impl Config {
         self.possession_archetypes
             .iter()
             .find(|x| name.as_ref() == x.name)
-            .ok_or(ConfigError::UnknownPossessionArchetypeName(name.as_ref().to_string()))
+            .ok_or_else(|| ConfigError::UnknownPossessionArchetypeName(name.as_ref().to_string()))
     }
 
     pub fn item(&self, item_arch: ArchetypeHandle) -> ConfigResult<&Archetype> {
@@ -189,7 +189,7 @@ impl Config {
         self.possession_archetypes
             .iter()
             .position(|x| name.as_ref() == x.name)
-            .ok_or(ConfigError::UnknownPossessionArchetypeName(name.as_ref().to_string()))
+            .ok_or_else(|| ConfigError::UnknownPossessionArchetypeName(name.as_ref().to_string()))
             .map(|x| x as ArchetypeHandle)
     }
 
@@ -289,13 +289,17 @@ impl PlantFilter<String> {
         })
     }
 }
-impl<Handle: PartialEq> PlantFilter<Handle> {
-    pub fn allows(&self, h: &Handle) -> bool {
+impl<Handle> PlantFilter<Handle> {
+    pub fn allows<T>(&self, t: &T) -> bool
+    where
+        Handle: std::borrow::Borrow<T>,
+        T: PartialEq + ?Sized
+    {
         use PlantFilter::*;
 
         match self {
-            Only(these) => these.contains(h),
-            Not(these) => !these.contains(h),
+            Only(these) => these.iter().any(|h| h.borrow() == t),
+            Not(these) => !these.iter().any(|h| h.borrow() == t),
             All => true,
         }
     }
@@ -355,7 +359,7 @@ pub struct Archetype {
 impl Archetype {
     pub fn rub_effects_for_plant<'a>(
         &'a self,
-        p: &'a String,
+        p: &'a str,
     ) -> impl Iterator<Item = &'a PlantRubEffect> {
         self.plant_rub_effects
             .iter()
@@ -364,7 +368,7 @@ impl Archetype {
 
     pub fn rub_effects_for_plant_indexed<'a>(
         &'a self,
-        p: &'a String,
+        p: &'a str,
     ) -> impl Iterator<Item = (usize, &'a PlantRubEffect)> {
         self.plant_rub_effects
             .iter()
@@ -440,7 +444,7 @@ pub enum RecipeMakes<Handle: Clone> {
     AllOf(Vec<(usize, Handle)>),
 }
 impl<Handle: Clone> RecipeMakes<Handle> {
-    fn pick_one_weighted_of<T: Clone>(from: &Vec<(f64, T)>) -> T {
+    fn pick_one_weighted_of<T: Clone>(from: &[(f64, T)]) -> T {
         use rand::Rng;
         let mut x: f64 = rand::thread_rng().gen_range(0.0, 1.0);
         from.iter()
@@ -470,10 +474,10 @@ impl<Handle: Clone> RecipeMakes<Handle> {
                     &these
                         .iter()
                         .map(|(count, h)| (*count as f64 / total, h.clone()))
-                        .collect(),
+                        .collect::<Vec<_>>(),
                 ))
             }
-            Nothing => return None,
+            Nothing => None,
         }
     }
 
@@ -483,7 +487,7 @@ impl<Handle: Clone> RecipeMakes<Handle> {
 
         match self {
             OneOf(these) => Self::pick_one_weighted_of(these).all(),
-            Just(count, h) => [(h.clone(), *count)].iter().cloned().collect(),
+            Just(count, h) => [(h.clone(), *count)].to_vec(),
             AllOf(these) => these.iter().map(|(count, h)| (h.clone(), *count)).collect(),
             Nothing => vec![],
         }
@@ -646,7 +650,7 @@ impl Recipe<&Archetype> {
             self.makes
                 .any()
                 .map(|e| format!("{} {}", crate::frontend::emojify(&e.name), e.name))
-                .unwrap_or("Nothing".to_string())
+                .unwrap_or_else(|| "Nothing".to_string())
         })
     }
     pub fn explanation(&self) -> String {
@@ -654,7 +658,7 @@ impl Recipe<&Archetype> {
             self.makes
                 .any()
                 .map(|e| e.description.clone())
-                .unwrap_or("Nothing".to_string())
+                .unwrap_or_else(|| "Nothing".to_string())
         })
     }
 }
@@ -864,7 +868,7 @@ impl AdvancementSum for PlantAdvancementSum {
                                 xp,
                             } = r;
                             Ok(Recipe {
-                                makes: makes.clone().find_handles()?,
+                                makes: makes.find_handles()?,
                                 needs: needs
                                     .iter()
                                     .map(|(c, s)| Ok((*c, CONFIG.possession_name_to_handle(s)?)))
@@ -1025,8 +1029,7 @@ impl<S: AdvancementSum> AdvancementSet<S> {
                 state > xp
             })
             .unwrap_or(self.rest.len() + 1)
-            .checked_sub(1)
-            .unwrap_or(0)
+            .saturating_sub(1)
     }
 }
 
