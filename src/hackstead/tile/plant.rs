@@ -5,9 +5,9 @@ use uuid::Uuid;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 /// Format for requesting than an item to be applied to a plant
-pub struct PlantApplicationRequest {
+pub struct PlantRubRequest {
     /// the item to be applied to a plant
-    pub applicable_item_id: Uuid,
+    pub rub_item_id: Uuid,
     /// the tile that the plant to apply this to rests on
     pub tile_id: Uuid,
 }
@@ -41,6 +41,9 @@ pub struct PlantBase {
     pub until_yield: f64,
     pub nickname: String,
     pub archetype_handle: ArchetypeHandle,
+    /// Records how many effects have been imparted onto this plant from applied items
+    /// over its lifetime (including effects that wore off long ago)
+    pub lifetime_effect_count: i32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -49,9 +52,6 @@ pub struct Plant {
     pub craft: Option<Craft>,
     /// Effects from potions, warp powder, etc. that actively change the behavior of this plant.
     pub effects: Vec<Effect>,
-    /// This field isn't saved to the database, and is just used when `plant.increase_xp()` is called.
-    #[serde(skip)]
-    pub queued_xp_bonus: i32,
 }
 impl std::ops::Deref for Plant {
     type Target = PlantArchetype;
@@ -78,11 +78,18 @@ impl Plant {
                 until_yield: arch.base_yield_duration.unwrap_or(0.0),
                 nickname: arch.name.clone(),
                 archetype_handle,
+                lifetime_effect_count: 0,
             },
             craft: None,
             effects: vec![],
-            queued_xp_bonus: 0,
         })
+    }
+
+    /// increments the lifetime_effect_count and returns an index suitable for a new effect.
+    pub fn next_effect_index(&mut self) -> i32 {
+        let e = self.base.lifetime_effect_count;
+        self.base.lifetime_effect_count += 1;
+        e
     }
 }
 
@@ -96,6 +103,8 @@ pub struct Craft {
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub struct Effect {
+    /// Records whether this is the first, second, third, etc. effect to be rubbed onto this plant.
+    pub rub_index: i32,
     pub tile_id: Uuid,
     pub until_finish: Option<f64>,
     /// The archetype of the item that was consumed to apply this effect.
@@ -104,20 +113,22 @@ pub struct Effect {
     pub effect_archetype_handle: ArchetypeHandle,
 }
 impl std::ops::Deref for Effect {
-    type Target = config::Archetype;
+    type Target = config::PlantRubEffect;
 
     fn deref(&self) -> &Self::Target {
         &CONFIG
-            .possession_archetypes
-            .get(self.item_archetype_handle as usize)
-            .expect("invalid archetype handle")
+            .plant_rub_effect(self.item_archetype_handle, self.effect_archetype_handle)
+            .expect("invalid effect archetype handle")
     }
 }
 
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{request, ClientResult, IdentifiesItem};
+    use crate::{
+        client::{request, ClientResult},
+        IdentifiesItem,
+    };
 
     impl Plant {
         pub async fn slaughter(&self) -> ClientResult<Plant> {
@@ -130,11 +141,11 @@ mod client {
             .await
         }
 
-        pub async fn rub_item(&self, applicable: impl IdentifiesItem) -> ClientResult<Vec<Effect>> {
+        pub async fn rub_with(&self, rub: impl IdentifiesItem) -> ClientResult<Vec<Effect>> {
             request(
                 "plant/rub",
-                &PlantApplicationRequest {
-                    applicable_item_id: applicable.item_id(),
+                &PlantRubRequest {
+                    rub_item_id: rub.item_id(),
                     tile_id: self.base.tile_id,
                 },
             )

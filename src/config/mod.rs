@@ -8,34 +8,39 @@ mod test;
 pub type ConfigResult<T> = Result<T, ConfigError>;
 #[derive(Debug, Clone)]
 pub enum ConfigError {
-    UnknownArchetypeName(String),
-    UnknownArchetype(Archetype),
-    UnknownArchetypeHandle(i32),
+    UnknownPossessionArchetypeName(String),
+    UnknownPossessionArchetype(Archetype),
+    UnknownPossessionArchetypeHandle(ArchetypeHandle),
+    UnknownEffectArchetypeHandle {
+        item: ArchetypeHandle,
+        effect: ArchetypeHandle,
+    },
 }
 impl std::error::Error for ConfigError {}
 impl fmt::Display for ConfigError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use ConfigError::*;
         match self {
-            UnknownArchetypeName(name) => {
+            UnknownPossessionArchetypeName(name) => {
                 write!(f, "no archetype in config by the name of {:?}", name)
             }
-            UnknownArchetype(a) => write!(f, "no archetype in config {:#?}", a),
-            UnknownArchetypeHandle(ah) => write!(f, "no archetype in config with handle {}", ah),
+            UnknownPossessionArchetype(a) => {
+                write!(f, "no possession archetype in config {:#?}", a)
+            }
+            UnknownPossessionArchetypeHandle(a) => {
+                write!(f, "no possession archetype in config with handle {}", a)
+            }
+            UnknownEffectArchetypeHandle { item, effect } => write!(
+                f,
+                "no plant rub effect archetype in config with handle {} on item {}",
+                effect, item
+            ),
         }
     }
 }
 
 pub type LootTableHandle = usize;
 pub type LootTable = Vec<(CountProbability, String)>;
-
-#[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct Config {
-    pub special_users: Vec<String>,
-    pub profile_archetype: ProfileArchetype,
-    pub plant_archetypes: Vec<PlantArchetype>,
-    pub possession_archetypes: Vec<Archetype>,
-}
 
 pub trait SpawnTableRow {
     type Output;
@@ -106,48 +111,36 @@ pub fn spawn_with_percentile<Row: SpawnTableRow>(
     })
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct Config {
+    pub special_users: Vec<String>,
+    pub profile_archetype: ProfileArchetype,
+    pub plant_archetypes: Vec<PlantArchetype>,
+    pub possession_archetypes: Vec<Archetype>,
+}
+
 impl Config {
-    pub fn land_unlocking_item_archetypes(&self) -> impl Iterator<Item = (&Archetype, LandUnlock)> {
+    pub fn welcome_gifts(&self) -> impl Iterator<Item = &Archetype> {
+        self.possession_archetypes.iter().filter(|a| a.welcome_gift)
+    }
+
+    pub fn seeds(&self) -> impl Iterator<Item = (&SeedArchetype, &Archetype)> {
         self.possession_archetypes
             .iter()
-            .filter_map(|a| Some((a, a.unlocks_land.clone()?)))
+            .filter_map(|a| Some((a.seed.as_ref()?, a)))
     }
 
-    pub fn get_item_application_plant_advancement(
-        &self,
-        item_archetype_handle: ArchetypeHandle,
-        effect_archetype_handle: ArchetypeHandle,
-    ) -> Option<(&PlantApplicationEffect, &PlantAdvancement)> {
-        self.get_item_application_effect(item_archetype_handle, effect_archetype_handle)
-            .and_then(|e| {
-                Some((
-                    e,
-                    match &e.kind {
-                        PlantApplicationEffectKind::PlantAdvancement(pa) => Some(pa),
-                        _ => None,
-                    }?,
-                ))
-            })
-    }
-
-    pub fn get_item_application_effect(
-        &self,
-        item_archetype_handle: ArchetypeHandle,
-        effect_archetype_handle: ArchetypeHandle,
-    ) -> Option<&PlantApplicationEffect> {
+    pub fn land_unlockers(&self) -> impl Iterator<Item = (&LandUnlock, &Archetype)> {
         self.possession_archetypes
-            .get(item_archetype_handle as usize)?
-            .plant_application
-            .as_ref()?
-            .effects
-            .get(effect_archetype_handle as usize)
+            .iter()
+            .filter_map(|a| Some((a.unlocks_land.as_ref()?, a)))
     }
 
     pub fn find_plant<S: AsRef<str>>(&self, name: &S) -> Result<&PlantArchetype, ConfigError> {
         self.plant_archetypes
             .iter()
             .find(|x| name.as_ref() == x.name)
-            .ok_or_else(|| ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
+            .ok_or_else(|| ConfigError::UnknownPossessionArchetypeName(name.as_ref().to_string()))
     }
 
     pub fn find_plant_handle<S: AsRef<str>>(
@@ -157,7 +150,7 @@ impl Config {
         self.plant_archetypes
             .iter()
             .position(|x| name.as_ref() == x.name)
-            .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
+            .ok_or(ConfigError::UnknownPossessionArchetypeName(name.as_ref().to_string()))
             .map(|x| x as ArchetypeHandle)
     }
 
@@ -165,7 +158,28 @@ impl Config {
         self.possession_archetypes
             .iter()
             .find(|x| name.as_ref() == x.name)
-            .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
+            .ok_or(ConfigError::UnknownPossessionArchetypeName(name.as_ref().to_string()))
+    }
+
+    pub fn item(&self, item_arch: ArchetypeHandle) -> ConfigResult<&Archetype> {
+        self.possession_archetypes
+            .get(item_arch as usize)
+            .ok_or(ConfigError::UnknownPossessionArchetypeHandle(item_arch))
+    }
+
+    pub fn plant_rub_effect(
+        &self,
+        item_arch: ArchetypeHandle,
+        effect_arch: ArchetypeHandle,
+    ) -> ConfigResult<&PlantRubEffect> {
+        self
+            .item(item_arch)?
+            .plant_rub_effects
+            .get(effect_arch as usize)
+            .ok_or(ConfigError::UnknownEffectArchetypeHandle {
+                item: item_arch,
+                effect: effect_arch,
+            })
     }
 
     pub fn possession_name_to_handle<S: AsRef<str>>(
@@ -175,7 +189,7 @@ impl Config {
         self.possession_archetypes
             .iter()
             .position(|x| name.as_ref() == x.name)
-            .ok_or(ConfigError::UnknownArchetypeName(name.as_ref().to_string()))
+            .ok_or(ConfigError::UnknownPossessionArchetypeName(name.as_ref().to_string()))
             .map(|x| x as ArchetypeHandle)
     }
 
@@ -184,7 +198,7 @@ impl Config {
             .iter()
             .position(|x| x == a)
             .map(|x| x as ArchetypeHandle)
-            .ok_or_else(|| ConfigError::UnknownArchetype(a.clone()))
+            .ok_or_else(|| ConfigError::UnknownPossessionArchetype(a.clone()))
     }
 }
 
@@ -307,20 +321,16 @@ pub struct LandUnlock {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct PlantApplication {
-    pub short_description: String,
-    pub effects: Vec<PlantApplicationEffect>,
-}
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub enum PlantApplicationEffectKind {
+pub enum PlantRubEffectKind {
     PlantAdvancement(PlantAdvancement),
     TurnsPlantInto(String),
 }
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct PlantApplicationEffect {
+pub struct PlantRubEffect {
+    pub short_description: String,
     pub duration: Option<f64>,
-    pub for_plants: PlantFilter<String>,
-    pub kind: PlantApplicationEffectKind,
+    pub plant_filter: PlantFilter<String>,
+    pub kind: PlantRubEffectKind,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -338,16 +348,39 @@ pub struct Archetype {
     #[serde(default)]
     pub passive_plant_effects: Vec<SelectivePlantAdvancement>,
     #[serde(default)]
-    pub plant_application: Option<PlantApplication>,
+    pub plant_rub_effects: Vec<PlantRubEffect>,
     #[serde(default)]
     pub hatch_table: Option<LootTable>,
+}
+impl Archetype {
+    pub fn rub_effects_for_plant<'a>(
+        &'a self,
+        p: &'a String,
+    ) -> impl Iterator<Item = &'a PlantRubEffect> {
+        self.plant_rub_effects
+            .iter()
+            .filter(move |e| e.plant_filter.allows(p))
+    }
+
+    pub fn rub_effects_for_plant_indexed<'a>(
+        &'a self,
+        p: &'a String,
+    ) -> impl Iterator<Item = (usize, &'a PlantRubEffect)> {
+        self.plant_rub_effects
+            .iter()
+            .enumerate()
+            .filter(move |(_, e)| e.plant_filter.allows(p))
+    }
 }
 
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{request, request_one, ClientResult, IdentifiesUser};
     use crate::item::ItemSpawnRequest;
+    use crate::{
+        client::{request, request_one, ClientResult},
+        IdentifiesUser,
+    };
     const SPAWN_ROUTE: &'static str = "item/godyeet";
 
     fn item_spawn_request(
@@ -1029,19 +1062,17 @@ pub fn check_archetype_name_matches(config: &Config) -> Result<(), String> {
                 ));
             }
         }
-        if let Some(ia) = &a.plant_application {
-            for iaa in ia.effects.iter() {
-                if let Err(e) = iaa.for_plants.lookup_handles() {
-                    return Err(format!(
-                        concat!(
-                            "possession archetype {:?} ",
-                            "item application adv {:?} ",
-                            "keep plants error: {}\n",
-                            "keep plants: {:?}",
-                        ),
-                        a.name, ia.short_description, e, iaa.for_plants,
-                    ));
-                }
+        for ef in a.plant_rub_effects.iter() {
+            if let Err(e) = ef.plant_filter.lookup_handles() {
+                return Err(format!(
+                    concat!(
+                        "possession archetype {:?} ",
+                        "plant rub desc {:?} ",
+                        "keep plants error: {}\n",
+                        "keep plants: {:?}",
+                    ),
+                    a.name, ef.short_description, e, ef.plant_filter,
+                ));
             }
         }
     }

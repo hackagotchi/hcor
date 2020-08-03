@@ -1,4 +1,5 @@
 use crate::config::{self, CONFIG};
+use crate::{IdentifiesItem, IdentifiesPlant, IdentifiesTile};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -40,9 +41,7 @@ impl Hackstead {
         let profile = Profile::new(slack_id.map(|s| s.to_string()));
         Hackstead {
             inventory: CONFIG
-                .possession_archetypes
-                .iter()
-                .filter(|a| a.welcome_gift)
+                .welcome_gifts()
                 .map(|a| Item::from_archetype(a, profile.steader_id, item::Acquisition::spawned()))
                 .collect::<Result<Vec<_>, _>>()
                 .expect("fresh possession archetypes somehow invalid"),
@@ -68,30 +67,47 @@ impl Hackstead {
     pub fn plants(&self) -> impl Iterator<Item = &Plant> {
         self.land.iter().filter_map(|t| t.plant.as_ref())
     }
+
+    pub fn plants_mut(&mut self) -> impl Iterator<Item = &mut Plant> {
+        self.land.iter_mut().filter_map(|t| t.plant.as_mut())
+    }
+
+    pub fn item(&self, i: impl IdentifiesItem) -> Option<&Item> {
+        let item_id = i.item_id();
+        self.inventory.iter().find(|i| i.base.item_id == item_id)
+    }
+
+    pub fn tile(&self, t: impl IdentifiesTile) -> Option<&Tile> {
+        let tile_id = t.tile_id();
+        self.land.iter().find(|t| t.base.tile_id == tile_id)
+    }
+
+    pub fn plant(&self, p: impl IdentifiesPlant) -> Option<&Plant> {
+        let tile_id = p.tile_id();
+        self.plants().find(|p| p.base.tile_id == tile_id)
+    }
+
+    pub fn has_item(&self, i: impl IdentifiesItem) -> bool {
+        self.item(i).is_some()
+    }
+
+    pub fn has_tile(&self, t: impl IdentifiesTile) -> bool {
+        self.tile(t).is_some()
+    }
+
+    pub fn has_plant(&self, p: impl IdentifiesPlant) -> bool {
+        self.plant(p).is_some()
+    }
 }
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{
-        request, ClientResult, IdentifiesItem, IdentifiesPlant, IdentifiesTile, IdentifiesUser,
+    use crate::{
+        client::{request, ClientResult},
+        IdentifiesUser,
     };
 
     impl Hackstead {
-        pub fn item(&self, i: impl IdentifiesItem) -> Option<&Item> {
-            let item_id = i.item_id();
-            self.inventory.iter().find(|i| i.base.item_id == item_id)
-        }
-
-        pub fn tile(&self, t: impl IdentifiesTile) -> Option<&Tile> {
-            let tile_id = t.tile_id();
-            self.land.iter().find(|t| t.base.tile_id == tile_id)
-        }
-
-        pub fn plant(&self, p: impl IdentifiesPlant) -> Option<&Plant> {
-            let tile_id = p.tile_id();
-            self.plants().find(|p| p.base.tile_id == tile_id)
-        }
-
         pub async fn fetch(iu: impl IdentifiesUser) -> ClientResult<Self> {
             request("hackstead/spy", &iu.user_id()).await
         }
@@ -110,18 +126,6 @@ mod client {
 
         pub async fn slaughter(&self) -> ClientResult<Self> {
             request("hackstead/slaughter", &self.user_id()).await
-        }
-
-        pub fn has_item(&self, i: impl IdentifiesItem) -> bool {
-            self.item(i).is_some()
-        }
-
-        pub fn has_tile(&self, t: impl IdentifiesTile) -> bool {
-            self.tile(t).is_some()
-        }
-
-        pub fn has_plant(&self, p: impl IdentifiesPlant) -> bool {
-            self.plant(p).is_some()
         }
 
         pub async fn throw_items<'a, I>(

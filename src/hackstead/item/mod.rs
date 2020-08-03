@@ -1,5 +1,5 @@
 use crate::{config, CONFIG};
-use config::{Archetype, ArchetypeHandle, ConfigError, ConfigResult};
+use config::{Archetype, ArchetypeHandle, ConfigResult};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use uuid::Uuid;
@@ -98,8 +98,11 @@ pub struct Item {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{request, request_one, ClientResult, IdentifiesItem, IdentifiesUser};
     use crate::hackstead::tile::{Tile, TileCreationRequest};
+    use crate::{
+        client::{request, request_one, ClientResult},
+        IdentifiesItem, IdentifiesUser,
+    };
 
     impl Item {
         pub async fn redeem_for_tile(&self) -> ClientResult<Tile> {
@@ -140,7 +143,7 @@ impl std::ops::Deref for Item {
     type Target = Archetype;
 
     fn deref(&self) -> &Self::Target {
-        Self::archetype(self.base.archetype_handle).expect("invalid archetype handle")
+        CONFIG.item(self.base.archetype_handle).unwrap()
     }
 }
 
@@ -150,7 +153,7 @@ impl Item {
         logged_owner_id: Uuid,
         acquisition: Acquisition,
     ) -> ConfigResult<Self> {
-        let a = Self::archetype(ah)?;
+        let a = CONFIG.item(ah)?;
         Self::from_archetype(a, logged_owner_id, acquisition)
     }
 
@@ -182,12 +185,5 @@ impl Item {
             Some(g) => &g.nickname,
             _ => &self.name,
         }
-    }
-
-    fn archetype(ah: ArchetypeHandle) -> ConfigResult<&'static Archetype> {
-        CONFIG
-            .possession_archetypes
-            .get(ah as usize)
-            .ok_or_else(|| ConfigError::UnknownArchetypeHandle(ah))
     }
 }

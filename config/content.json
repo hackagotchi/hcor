@@ -4164,77 +4164,71 @@
         {
             "name": "Warp Powder",
             "description": "Sparkling, glittery, glowing blue powder that emits high-pitched squeaking noises, especially when excited. It has been known to accelerate time.",
-	    "plant_application": {
-		"short_description": "Grow this plant 2 extra hours in 6 minutes!",
-		"effects": [
-		    {
-			"duration": 72.0,
-			"for_plants": "All",
-			"kind": {
-			    "PlantAdvancement": {
-				"kind": {
-				    "ExtraTimeTicks": 20
-				},
-				"xp": 0,
-				"art": "bractus_loaf",
-				"title": "Warped Away",
-				"description": "This Powder flares up on contact with your plant, creating a small bubble of accelerated time around it.",
-				"achiever_title": "Warp Whiffer"
-			    }
-			}
-		    }
-		]
-	    }
+            "plant_rub_effects": [
+                {
+                    "duration": 72.0,
+                    "short_description": "Grow this plant 2 extra hours in 6 minutes!",
+                    "plant_filter": "All",
+                    "kind": {
+                        "PlantAdvancement": {
+                            "kind": {
+                                "ExtraTimeTicks": 20
+                            },
+                            "xp": 0,
+                            "art": "bractus_loaf",
+                            "title": "Warped Away",
+                            "description": "This Powder flares up on contact with your plant, creating a small bubble of accelerated time around it.",
+                            "achiever_title": "Warp Whiffer"
+                        }
+                    }
+                }
+            ]
         },
         {
             "name": "Rift Powder",
             "description": "A volatile compound that easily tears the fabric of spacetime. Its powerful time acceleration properties were last recorded in the ancient books of the Brognarks; no one has been able to acquire any of this substance since then.",
-	    "plant_application": {
-		"short_description": "Grow this plant 20 extra hours in 5 minutes!",
-		"effects": [
-		    {
-			"duration": 60.0,
-			"for_plants": "All",
-			"kind": {
-			    "PlantAdvancement": {
-				"kind": {
-				    "ExtraTimeTicks": 240
-				},
-				"xp": 0,
-				"art": "bractus_loaf",
-				"title": "Need a Rift?",
-				"description": "Speeding up progress with Rift Powder is easy enough. Just toss it onto a plant and watch it grow!",
-				"achiever_title": "Rift Roader"
-			    }
-			}
-		    }
-		]
-	    }
+            "plant_rub_effects": [
+                {
+                    "short_description": "Grow this plant 20 extra hours in 5 minutes!",
+                    "duration": 60.0,
+                    "plant_filter": "All",
+                    "kind": {
+                        "PlantAdvancement": {
+                            "kind": {
+                                "ExtraTimeTicks": 240
+                            },
+                            "xp": 0,
+                            "art": "bractus_loaf",
+                            "title": "Need a Rift?",
+                            "description": "Speeding up progress with Rift Powder is easy enough. Just toss it onto a plant and watch it grow!",
+                            "achiever_title": "Rift Roader"
+                        }
+                    }
+                }
+            ]
         },
         {
             "name": "Wormhole Powder",
             "description": "The rarest, most pure time acceleration substance in the universe ... so rare, even the ancients only alluded to its existence ... said to be able to call forth the ancient worm of time herself ...",
-	    "plant_application": {
-		"short_description": "Grow this plant for 69 extra hours in 2 minutes!",
-		"effects": [
-		    {
-			"duration": 24.0,
-			"for_plants": "All",
-			"kind": {
-			    "PlantAdvancement": {
-				"kind": {
-				    "ExtraTimeTicks": 2070
-				},
-				"xp": 0,
-				"art": "bractus_loaf",
-				"title": "Relatively Fast",
-				"description": "I AM SPEEEEED!",
-				"achiever_title": "Wormhole Huffer"
-			    }
-			}
-		    }
-		]
-	    }
+            "plant_rub_effects": [
+                {
+                    "short_description": "Grow this plant for 69 extra hours in 2 minutes!",
+                    "duration": 24.0,
+                    "plant_filter": "All",
+                    "kind": {
+                        "PlantAdvancement": {
+                            "kind": {
+                                "ExtraTimeTicks": 2070
+                            },
+                            "xp": 0,
+                            "art": "bractus_loaf",
+                            "title": "Relatively Fast",
+                            "description": "I AM SPEEEEED!",
+                            "achiever_title": "Wormhole Huffer"
+                        }
+                    }
+                }
+            ]
         },
         {
             "name": "Land Deed",
@@ -4270,7 +4264,7 @@
                     "unlocks_land": null,
                     "passive_plant_effects": [
                         {
-                            "for_plants": {
+                            "plant_filter": {
                                 "Only": [
                                     "Coffea Cyl"
                                 ]
@@ -4439,238 +4433,238 @@
         {
             "name": "Cyl Egg",
             "description": "Veins of pure arcane energy course throughout the egg, and holding it quickly makes your hands shaky and numb.",
-    "hatch_table": [
-        [
-            [
-	0.011,
-	[
-	    1.0,
-	    1.05
-	]
+            "hatch_table": [
+                [
+                    [
+                        0.011,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Hackpheus"
+                ],
+                [
+                    [
+                        0.011,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Chefpheus"
+                ],
+                [
+                    [
+                        0.7,
+                        [
+                            1.4,
+                            2.42
+                        ]
+                    ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        0.18,
+                        [
+                            1.6,
+                            2.74
+                        ]
+                    ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            3.25,
+                            5.65
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.44,
+                        [
+                            4.75,
+                            6.7
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.03,
+                        [
+                            1.25,
+                            2.66
+                        ]
+                    ],
+                    "Wormhole Powder"
+                ],
+                [
+                    [
+                        0.018,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Vine Keyboard"
+                ],
+                [
+                    [
+                        0.018,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Rolling Pin"
+                ],
+                [
+                    [
+                        0.013,
+                        [
+                            1.02,
+                            1.08
+                        ]
+                    ],
+                    "Land Deed"
+                ],
+                [
+                    [
+                        0.005,
+                        [
+                            1.0,
+                            1.02
+                        ]
+                    ],
+                    "Land Grant"
+                ],
+                [
+                    [
+                        0.168,
+                        [
+                            1.05,
+                            2.01
+                        ]
+                    ],
+                    "Tinkerpart"
+                ],
+                [
+                    [
+                        0.145,
+                        [
+                            1.03,
+                            1.6
+                        ]
+                    ],
+                    "Volatile Vial"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            2.45,
+                            4.18
+                        ]
+                    ],
+                    "Coffea Cyl Seed"
+                ],
+                [
+                    [
+                        0.3,
+                        [
+                            1.8,
+                            3.45
+                        ]
+                    ],
+                    "Coffea Cyl Seed"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            1.1
+                        ]
+                    ],
+                    "Tinkerspore"
+                ],
+                [
+                    [
+                        0.015,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Aloe Avanta Seed"
+                ],
+                [
+                    [
+                        0.3,
+                        [
+                            1.25,
+                            2.25
+                        ]
+                    ],
+                    "Spirited Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.11,
+                        [
+                            1.65,
+                            3.35
+                        ]
+                    ],
+                    "Spirited Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.3,
+                        [
+                            1.25,
+                            2.25
+                        ]
+                    ],
+                    "Doughy Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.11,
+                        [
+                            1.65,
+                            3.35
+                        ]
+                    ],
+                    "Doughy Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            1.12
+                        ]
+                    ],
+                    "Cyl Egg"
+                ],
+                [
+                    [
+                        0.008,
+                        [
+                            1.0,
+                            1.25
+                        ]
+                    ],
+                    "Cyl Egg"
+                ]
             ],
-            "Hackpheus"
-        ],
-        [
-            [
-	0.011,
-	[
-	    1.0,
-	    1.05
-	]
-            ],
-            "Chefpheus"
-        ],
-        [
-            [
-	0.7,
-	[
-	    1.4,
-	    2.42
-	]
-            ],
-            "Rift Powder"
-        ],
-        [
-            [
-	0.18,
-	[
-	    1.6,
-	    2.74
-	]
-            ],
-            "Rift Powder"
-        ],
-        [
-            [
-	1.0,
-	[
-	    3.25,
-	    5.65
-	]
-            ],
-            "Warp Powder"
-        ],
-        [
-            [
-	0.44,
-	[
-	    4.75,
-	    6.7
-	]
-            ],
-            "Warp Powder"
-        ],
-        [
-            [
-	0.03,
-	[
-	    1.25,
-	    2.66
-	]
-            ],
-            "Wormhole Powder"
-        ],
-        [
-            [
-	0.018,
-	[
-	    1.0,
-	    1.05
-	]
-            ],
-            "Vine Keyboard"
-        ],
-        [
-            [
-	0.018,
-	[
-	    1.0,
-	    1.05
-	]
-            ],
-            "Rolling Pin"
-        ],
-        [
-            [
-	0.013,
-	[
-	    1.02,
-	    1.08
-	]
-            ],
-            "Land Deed"
-        ],
-        [
-            [
-	0.005,
-	[
-	    1.0,
-	    1.02
-	]
-            ],
-            "Land Grant"
-        ],
-        [
-            [
-	0.168,
-	[
-	    1.05,
-	    2.01
-	]
-            ],
-            "Tinkerpart"
-        ],
-        [
-            [
-	0.145,
-	[
-	    1.03,
-	    1.6
-	]
-            ],
-            "Volatile Vial"
-        ],
-        [
-            [
-	1.0,
-	[
-	    2.45,
-	    4.18
-	]
-            ],
-            "Coffea Cyl Seed"
-        ],
-        [
-            [
-	0.3,
-	[
-	    1.8,
-	    3.45
-	]
-            ],
-            "Coffea Cyl Seed"
-        ],
-        [
-            [
-	0.01,
-	[
-	    1.0,
-	    1.1
-	]
-            ],
-            "Tinkerspore"
-        ],
-        [
-            [
-	0.015,
-	[
-	    1.0,
-	    1.05
-	]
-            ],
-            "Aloe Avanta Seed"
-        ],
-        [
-            [
-	0.3,
-	[
-	    1.25,
-	    2.25
-	]
-            ],
-            "Spirited Buzzwing Bagling"
-        ],
-        [
-            [
-	0.11,
-	[
-	    1.65,
-	    3.35
-	]
-            ],
-            "Spirited Buzzwing Bagling"
-        ],
-        [
-            [
-	0.3,
-	[
-	    1.25,
-	    2.25
-	]
-            ],
-            "Doughy Buzzwing Bagling"
-        ],
-        [
-            [
-	0.11,
-	[
-	    1.65,
-	    3.35
-	]
-            ],
-            "Doughy Buzzwing Bagling"
-        ],
-        [
-            [
-	0.01,
-	[
-	    1.0,
-	    1.12
-	]
-            ],
-            "Cyl Egg"
-        ],
-        [
-            [
-	0.008,
-	[
-	    1.0,
-	    1.25
-	]
-            ],
-            "Cyl Egg"
-        ]
-    ],
             "kind": {
                 "Gotchi": {
                     "base_happiness": 0,
@@ -4682,238 +4676,238 @@
         {
             "name": "Hacker Egg",
             "description": "If you put your ear up to this egg, you can hear the sounds of a keyboard clacking. And profanity. Lots and lots of profanity...",
-    "hatch_table": [
-        [
-            [
-	0.011,
-	[
-	    1.0,
-	    1.05
-	]
+            "hatch_table": [
+                [
+                    [
+                        0.011,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Chefpheus"
+                ],
+                [
+                    [
+                        0.011,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Gempheus"
+                ],
+                [
+                    [
+                        0.7,
+                        [
+                            1.4,
+                            2.42
+                        ]
+                    ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        0.18,
+                        [
+                            1.6,
+                            2.74
+                        ]
+                    ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            3.25,
+                            5.65
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.44,
+                        [
+                            4.75,
+                            6.7
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.03,
+                        [
+                            1.25,
+                            2.66
+                        ]
+                    ],
+                    "Wormhole Powder"
+                ],
+                [
+                    [
+                        0.018,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Rolling Pin"
+                ],
+                [
+                    [
+                        0.018,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Cyl Wand"
+                ],
+                [
+                    [
+                        0.013,
+                        [
+                            1.02,
+                            1.08
+                        ]
+                    ],
+                    "Land Deed"
+                ],
+                [
+                    [
+                        0.005,
+                        [
+                            1.0,
+                            1.02
+                        ]
+                    ],
+                    "Land Grant"
+                ],
+                [
+                    [
+                        0.168,
+                        [
+                            1.05,
+                            2.01
+                        ]
+                    ],
+                    "Tinkerpart"
+                ],
+                [
+                    [
+                        0.145,
+                        [
+                            1.03,
+                            1.6
+                        ]
+                    ],
+                    "Volatile Vial"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            2.45,
+                            4.18
+                        ]
+                    ],
+                    "Hacker Vibes Vine Seed"
+                ],
+                [
+                    [
+                        0.3,
+                        [
+                            1.8,
+                            3.45
+                        ]
+                    ],
+                    "Hacker Vibes Vine Seed"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            1.1
+                        ]
+                    ],
+                    "Tinkerspore"
+                ],
+                [
+                    [
+                        0.015,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Aloe Avanta Seed"
+                ],
+                [
+                    [
+                        0.3,
+                        [
+                            1.25,
+                            2.25
+                        ]
+                    ],
+                    "Doughy Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.11,
+                        [
+                            1.65,
+                            3.35
+                        ]
+                    ],
+                    "Doughy Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.3,
+                        [
+                            1.25,
+                            2.25
+                        ]
+                    ],
+                    "Crystalline Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.11,
+                        [
+                            1.65,
+                            3.35
+                        ]
+                    ],
+                    "Crystalline Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            1.12
+                        ]
+                    ],
+                    "Hacker Egg"
+                ],
+                [
+                    [
+                        0.008,
+                        [
+                            1.0,
+                            1.25
+                        ]
+                    ],
+                    "Hacker Egg"
+                ]
             ],
-            "Chefpheus"
-        ],
-        [
-            [
-	0.011,
-	[
-	    1.0,
-	    1.05
-	]
-            ],
-            "Gempheus"
-        ],
-        [
-            [
-	0.7,
-	[
-	    1.4,
-	    2.42
-	]
-            ],
-            "Rift Powder"
-        ],
-        [
-            [
-	0.18,
-	[
-	    1.6,
-	    2.74
-	]
-            ],
-            "Rift Powder"
-        ],
-        [
-            [
-	1.0,
-	[
-	    3.25,
-	    5.65
-	]
-            ],
-            "Warp Powder"
-        ],
-        [
-            [
-	0.44,
-	[
-	    4.75,
-	    6.7
-	]
-            ],
-            "Warp Powder"
-        ],
-        [
-            [
-	0.03,
-	[
-	    1.25,
-	    2.66
-	]
-            ],
-            "Wormhole Powder"
-        ],
-        [
-            [
-	0.018,
-	[
-	    1.0,
-	    1.05
-	]
-            ],
-            "Rolling Pin"
-        ],
-        [
-            [
-	0.018,
-	[
-	    1.0,
-	    1.05
-	]
-            ],
-            "Cyl Wand"
-        ],
-        [
-            [
-	0.013,
-	[
-	    1.02,
-	    1.08
-	]
-            ],
-            "Land Deed"
-        ],
-        [
-            [
-	0.005,
-	[
-	    1.0,
-	    1.02
-	]
-            ],
-            "Land Grant"
-        ],
-        [
-            [
-	0.168,
-	[
-	    1.05,
-	    2.01
-	]
-            ],
-            "Tinkerpart"
-        ],
-        [
-            [
-	0.145,
-	[
-	    1.03,
-	    1.6
-	]
-            ],
-            "Volatile Vial"
-        ],
-        [
-            [
-	1.0,
-	[
-	    2.45,
-	    4.18
-	]
-            ],
-            "Hacker Vibes Vine Seed"
-        ],
-        [
-            [
-	0.3,
-	[
-	    1.8,
-	    3.45
-	]
-            ],
-            "Hacker Vibes Vine Seed"
-        ],
-        [
-            [
-	0.01,
-	[
-	    1.0,
-	    1.1
-	]
-            ],
-            "Tinkerspore"
-        ],
-        [
-            [
-	0.015,
-	[
-	    1.0,
-	    1.05
-	]
-            ],
-            "Aloe Avanta Seed"
-        ],
-        [
-            [
-	0.3,
-	[
-	    1.25,
-	    2.25
-	]
-            ],
-            "Doughy Buzzwing Bagling"
-        ],
-        [
-            [
-	0.11,
-	[
-	    1.65,
-	    3.35
-	]
-            ],
-            "Doughy Buzzwing Bagling"
-        ],
-        [
-            [
-	0.3,
-	[
-	    1.25,
-	    2.25
-	]
-            ],
-            "Crystalline Buzzwing Bagling"
-        ],
-        [
-            [
-	0.11,
-	[
-	    1.65,
-	    3.35
-	]
-            ],
-            "Crystalline Buzzwing Bagling"
-        ],
-        [
-            [
-	0.01,
-	[
-	    1.0,
-	    1.12
-	]
-            ],
-            "Hacker Egg"
-        ],
-        [
-            [
-	0.008,
-	[
-	    1.0,
-	    1.25
-	]
-            ],
-            "Hacker Egg"
-        ]
-    ],
             "kind": {
                 "Gotchi": {
                     "base_happiness": 0,
@@ -4925,238 +4919,238 @@
         {
             "name": "Bread Egg",
             "description": "If you knock gently on this egg, it sounds like the crisp outer shell of hardtack. Petition to change its name to 'Breagg.' No? ... okay fine.",
-                    "hatch_table": [
+            "hatch_table": [
+                [
+                    [
+                        0.011,
                         [
-                            [
-                                0.011,
-                                [
-                                    1.0,
-                                    1.05
-                                ]
-                            ],
-                            "Hackpheus"
-                        ],
-                        [
-                            [
-                                0.011,
-                                [
-                                    1.0,
-                                    1.05
-                                ]
-                            ],
-                            "Gempheus"
-                        ],
-                        [
-                            [
-                                0.7,
-                                [
-                                    1.4,
-                                    2.42
-                                ]
-                            ],
-                            "Rift Powder"
-                        ],
-                        [
-                            [
-                                0.18,
-                                [
-                                    1.6,
-                                    2.74
-                                ]
-                            ],
-                            "Rift Powder"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    3.25,
-                                    5.65
-                                ]
-                            ],
-                            "Warp Powder"
-                        ],
-                        [
-                            [
-                                0.44,
-                                [
-                                    4.75,
-                                    6.7
-                                ]
-                            ],
-                            "Warp Powder"
-                        ],
-                        [
-                            [
-                                0.03,
-                                [
-                                    1.25,
-                                    2.66
-                                ]
-                            ],
-                            "Wormhole Powder"
-                        ],
-                        [
-                            [
-                                0.018,
-                                [
-                                    1.0,
-                                    1.05
-                                ]
-                            ],
-                            "Vine Keyboard"
-                        ],
-                        [
-                            [
-                                0.018,
-                                [
-                                    1.0,
-                                    1.05
-                                ]
-                            ],
-                            "Cyl Wand"
-                        ],
-                        [
-                            [
-                                0.013,
-                                [
-                                    1.02,
-                                    1.08
-                                ]
-                            ],
-                            "Land Deed"
-                        ],
-                        [
-                            [
-                                0.005,
-                                [
-                                    1.0,
-                                    1.02
-                                ]
-                            ],
-                            "Land Grant"
-                        ],
-                        [
-                            [
-                                0.168,
-                                [
-                                    1.05,
-                                    2.01
-                                ]
-                            ],
-                            "Tinkerpart"
-                        ],
-                        [
-                            [
-                                0.145,
-                                [
-                                    1.03,
-                                    1.6
-                                ]
-                            ],
-                            "Volatile Vial"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    2.45,
-                                    4.18
-                                ]
-                            ],
-                            "Bractus Seed"
-                        ],
-                        [
-                            [
-                                0.3,
-                                [
-                                    1.8,
-                                    3.45
-                                ]
-                            ],
-                            "Bractus Seed"
-                        ],
-                        [
-                            [
-                                0.01,
-                                [
-                                    1.0,
-                                    1.1
-                                ]
-                            ],
-                            "Tinkerspore"
-                        ],
-                        [
-                            [
-                                0.015,
-                                [
-                                    1.0,
-                                    1.05
-                                ]
-                            ],
-                            "Aloe Avanta Seed"
-                        ],
-                        [
-                            [
-                                0.3,
-                                [
-                                    1.25,
-                                    2.25
-                                ]
-                            ],
-                            "Spirited Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                0.11,
-                                [
-                                    1.65,
-                                    3.35
-                                ]
-                            ],
-                            "Spirited Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                0.3,
-                                [
-                                    1.25,
-                                    2.25
-                                ]
-                            ],
-                            "Crystalline Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                0.11,
-                                [
-                                    1.65,
-                                    3.35
-                                ]
-                            ],
-                            "Crystalline Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                0.01,
-                                [
-                                    1.0,
-                                    1.12
-                                ]
-                            ],
-                            "Bread Egg"
-                        ],
-                        [
-                            [
-                                0.008,
-                                [
-                                    1.0,
-                                    1.25
-                                ]
-                            ],
-                            "Bread Egg"
+                            1.0,
+                            1.05
                         ]
                     ],
+                    "Hackpheus"
+                ],
+                [
+                    [
+                        0.011,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Gempheus"
+                ],
+                [
+                    [
+                        0.7,
+                        [
+                            1.4,
+                            2.42
+                        ]
+                    ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        0.18,
+                        [
+                            1.6,
+                            2.74
+                        ]
+                    ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            3.25,
+                            5.65
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.44,
+                        [
+                            4.75,
+                            6.7
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.03,
+                        [
+                            1.25,
+                            2.66
+                        ]
+                    ],
+                    "Wormhole Powder"
+                ],
+                [
+                    [
+                        0.018,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Vine Keyboard"
+                ],
+                [
+                    [
+                        0.018,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Cyl Wand"
+                ],
+                [
+                    [
+                        0.013,
+                        [
+                            1.02,
+                            1.08
+                        ]
+                    ],
+                    "Land Deed"
+                ],
+                [
+                    [
+                        0.005,
+                        [
+                            1.0,
+                            1.02
+                        ]
+                    ],
+                    "Land Grant"
+                ],
+                [
+                    [
+                        0.168,
+                        [
+                            1.05,
+                            2.01
+                        ]
+                    ],
+                    "Tinkerpart"
+                ],
+                [
+                    [
+                        0.145,
+                        [
+                            1.03,
+                            1.6
+                        ]
+                    ],
+                    "Volatile Vial"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            2.45,
+                            4.18
+                        ]
+                    ],
+                    "Bractus Seed"
+                ],
+                [
+                    [
+                        0.3,
+                        [
+                            1.8,
+                            3.45
+                        ]
+                    ],
+                    "Bractus Seed"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            1.1
+                        ]
+                    ],
+                    "Tinkerspore"
+                ],
+                [
+                    [
+                        0.015,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Aloe Avanta Seed"
+                ],
+                [
+                    [
+                        0.3,
+                        [
+                            1.25,
+                            2.25
+                        ]
+                    ],
+                    "Spirited Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.11,
+                        [
+                            1.65,
+                            3.35
+                        ]
+                    ],
+                    "Spirited Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.3,
+                        [
+                            1.25,
+                            2.25
+                        ]
+                    ],
+                    "Crystalline Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.11,
+                        [
+                            1.65,
+                            3.35
+                        ]
+                    ],
+                    "Crystalline Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            1.12
+                        ]
+                    ],
+                    "Bread Egg"
+                ],
+                [
+                    [
+                        0.008,
+                        [
+                            1.0,
+                            1.25
+                        ]
+                    ],
+                    "Bread Egg"
+                ]
+            ],
             "kind": {
                 "Gotchi": {
                     "base_happiness": 0,
@@ -5234,23 +5228,23 @@
         {
             "name": "Coffea Cyl Seed",
             "description": "A special species of coffee, descended from Coffea arabica and a host of other species. Instead of beans, this plant is grown for the clusters of crystals which grow on its limbs, inside of which mystical forces of the universe coalesce.",
-                "seed": {
-                    "grows_into": "Coffea Cyl"
-                }
+            "seed": {
+                "grows_into": "Coffea Cyl"
+            }
         },
         {
             "name": "Hacker Vibes Vine Seed",
             "description": "Just holding the sprout in your hands fills you with the desire to make something! Surely, this seed is in for some amazing things.",
-                "seed": {
-                    "grows_into": "Hacker Vibes Vine"
-                }
+            "seed": {
+                "grows_into": "Hacker Vibes Vine"
+            }
         },
         {
             "name": "Bractus Seed",
             "description": "Doughy, yet still somehow prickly. It smells slightly of yeast, and promises to grow into something in between a fresh loaf of sourdough and a certain Sonoran cactus.",
-                "seed": {
-                    "grows_into": "Bractus"
-                }
+            "seed": {
+                "grows_into": "Bractus"
+            }
         },
         {
             "name": "Brognark Pendant",
@@ -5293,16 +5287,16 @@
         {
             "name": "Tinkerspore",
             "description": "This small spore is quite colorful. It often sticks itself to machinery, showing an innate attraction to strange contraptions.",
-                "seed": {
-                    "grows_into": "Tinkerstool"
-                }
+            "seed": {
+                "grows_into": "Tinkerstool"
+            }
         },
         {
             "name": "Aloe Avanta Seed",
             "description": "A strange seed that kind of smells of hand sanitizer. It emits a faint blue light that makes the earth around it glow.",
-                "seed": {
-                    "grows_into": "Aloe Avanta"
-                }
+            "seed": {
+                "grows_into": "Aloe Avanta"
+            }
         },
         {
             "name": "Tinkerpart",
@@ -5968,88 +5962,88 @@
         {
             "name": "Nest Egg",
             "description": "A special egg made to help new Hacksteaders get started. Hatching it guarantees some Powders to speed up plant growth, as well as quite a few crafting materials. Happy Hacksteading!",
-                    "hatch_table": [
+            "hatch_table": [
+                [
+                    [
+                        1.0,
                         [
-                            [
-                                1.0,
-                                [
-                                    90.0,
-                                    140.0
-                                ]
-                            ],
-                            "Cyl Crystal"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    90.0,
-                                    140.0
-                                ]
-                            ],
-                            "Hacker Spirit"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    90.0,
-                                    140.0
-                                ]
-                            ],
-                            "Bread Essence"
-                        ],
-                        [
-                            [
-                                0.08,
-                                [
-                                    1.1,
-                                    1.5
-                                ]
-                            ],
-                            "Rift Powder"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    5.4,
-                                    7.6
-                                ]
-                            ],
-                            "Warp Powder"
-                        ],
-                        [
-                            [
-                                0.016,
-                                [
-                                    1.24,
-                                    2.15
-                                ]
-                            ],
-                            "Tinkerpart"
-                        ],
-                        [
-                            [
-                                0.011,
-                                [
-                                    1.1,
-                                    1.64
-                                ]
-                            ],
-                            "Volatile Vial"
-                        ],
-                        [
-                            [
-                                0.006,
-                                [
-                                    1.0,
-                                    1.05
-                                ]
-                            ],
-                            "Nest Egg"
+                            90.0,
+                            140.0
                         ]
                     ],
+                    "Cyl Crystal"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            90.0,
+                            140.0
+                        ]
+                    ],
+                    "Hacker Spirit"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            90.0,
+                            140.0
+                        ]
+                    ],
+                    "Bread Essence"
+                ],
+                [
+                    [
+                        0.08,
+                        [
+                            1.1,
+                            1.5
+                        ]
+                    ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            5.4,
+                            7.6
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.016,
+                        [
+                            1.24,
+                            2.15
+                        ]
+                    ],
+                    "Tinkerpart"
+                ],
+                [
+                    [
+                        0.011,
+                        [
+                            1.1,
+                            1.64
+                        ]
+                    ],
+                    "Volatile Vial"
+                ],
+                [
+                    [
+                        0.006,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Nest Egg"
+                ]
+            ],
             "kind": {
                 "Gotchi": {
                     "base_happiness": 0,
@@ -6061,88 +6055,88 @@
         {
             "name": "Bagling Egg",
             "description": "This Egg is the manifestation of loot contained in a Bagling!",
-                    "hatch_table": [
+            "hatch_table": [
+                [
+                    [
+                        0.03,
                         [
-                            [
-                                0.03,
-                                [
-                                    1.12,
-                                    1.34
-                                ]
-                            ],
-                            "Rift Powder"
-                        ],
-                        [
-                            [
-                                0.82,
-                                [
-                                    1.2,
-                                    2.08
-                                ]
-                            ],
-                            "Warp Powder"
-                        ],
-                        [
-                            [
-                                0.15,
-                                [
-                                    1.32,
-                                    2.25
-                                ]
-                            ],
-                            "Warp Powder"
-                        ],
-                        [
-                            [
-                                0.505,
-                                [
-                                    1.2,
-                                    2.17
-                                ]
-                            ],
-                            "Tinkerpart"
-                        ],
-                        [
-                            [
-                                0.44,
-                                [
-                                    1.11,
-                                    1.32
-                                ]
-                            ],
-                            "Volatile Vial"
-                        ],
-                        [
-                            [
-                                0.001,
-                                [
-                                    1.0,
-                                    1.01
-                                ]
-                            ],
-                            "Crystalline Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                0.001,
-                                [
-                                    1.0,
-                                    1.01
-                                ]
-                            ],
-                            "Spirited Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                0.001,
-                                [
-                                    1.0,
-                                    1.01
-                                ]
-                            ],
-                            "Doughy Buzzwing Bagling"
+                            1.12,
+                            1.34
                         ]
                     ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        0.82,
+                        [
+                            1.2,
+                            2.08
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.15,
+                        [
+                            1.32,
+                            2.25
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.505,
+                        [
+                            1.2,
+                            2.17
+                        ]
+                    ],
+                    "Tinkerpart"
+                ],
+                [
+                    [
+                        0.44,
+                        [
+                            1.11,
+                            1.32
+                        ]
+                    ],
+                    "Volatile Vial"
+                ],
+                [
+                    [
+                        0.001,
+                        [
+                            1.0,
+                            1.01
+                        ]
+                    ],
+                    "Crystalline Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.001,
+                        [
+                            1.0,
+                            1.01
+                        ]
+                    ],
+                    "Spirited Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.001,
+                        [
+                            1.0,
+                            1.01
+                        ]
+                    ],
+                    "Doughy Buzzwing Bagling"
+                ]
+            ],
             "kind": {
                 "Gotchi": {
                     "base_happiness": 0,
@@ -6154,158 +6148,158 @@
         {
             "name": "Boxling Egg",
             "description": "Bagling loot is somehow stored inside this Egg with the power of mysterious arcana.",
-                    "hatch_table": [
+            "hatch_table": [
+                [
+                    [
+                        0.375,
                         [
-                            [
-                                0.375,
-                                [
-                                    1.24,
-                                    1.58
-                                ]
-                            ],
-                            "Rift Powder"
-                        ],
-                        [
-                            [
-                                0.045,
-                                [
-                                    1.58,
-                                    2.15
-                                ]
-                            ],
-                            "Rift Powder"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    2.21,
-                                    3.72
-                                ]
-                            ],
-                            "Warp Powder"
-                        ],
-                        [
-                            [
-                                0.512,
-                                [
-                                    2.47,
-                                    4.24
-                                ]
-                            ],
-                            "Warp Powder"
-                        ],
-                        [
-                            [
-                                0.022,
-                                [
-                                    1.1,
-                                    1.28
-                                ]
-                            ],
-                            "Wormhole Powder"
-                        ],
-                        [
-                            [
-                                0.85,
-                                [
-                                    2.05,
-                                    3.2
-                                ]
-                            ],
-                            "Tinkerpart"
-                        ],
-                        [
-                            [
-                                0.055,
-                                [
-                                    1.68,
-                                    3.1
-                                ]
-                            ],
-                            "Tinkerpart"
-                        ],
-                        [
-                            [
-                                0.787,
-                                [
-                                    1.29,
-                                    1.85
-                                ]
-                            ],
-                            "Volatile Vial"
-                        ],
-                        [
-                            [
-                                0.048,
-                                [
-                                    1.43,
-                                    2.12
-                                ]
-                            ],
-                            "Volatile Vial"
-                        ],
-                        [
-                            [
-                                0.01,
-                                [
-                                    1.0,
-                                    3.03
-                                ]
-                            ],
-                            "Crystalline Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                0.01,
-                                [
-                                    1.0,
-                                    3.03
-                                ]
-                            ],
-                            "Spirited Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                0.01,
-                                [
-                                    1.0,
-                                    3.03
-                                ]
-                            ],
-                            "Doughy Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                0.001,
-                                [
-                                    1.0,
-                                    1.01
-                                ]
-                            ],
-                            "Crystalline Buzzwing Boxling"
-                        ],
-                        [
-                            [
-                                0.001,
-                                [
-                                    1.0,
-                                    1.01
-                                ]
-                            ],
-                            "Spirited Buzzwing Boxling"
-                        ],
-                        [
-                            [
-                                0.001,
-                                [
-                                    1.0,
-                                    1.01
-                                ]
-                            ],
-                            "Doughy Buzzwing Boxling"
+                            1.24,
+                            1.58
                         ]
                     ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        0.045,
+                        [
+                            1.58,
+                            2.15
+                        ]
+                    ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            2.21,
+                            3.72
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.512,
+                        [
+                            2.47,
+                            4.24
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.022,
+                        [
+                            1.1,
+                            1.28
+                        ]
+                    ],
+                    "Wormhole Powder"
+                ],
+                [
+                    [
+                        0.85,
+                        [
+                            2.05,
+                            3.2
+                        ]
+                    ],
+                    "Tinkerpart"
+                ],
+                [
+                    [
+                        0.055,
+                        [
+                            1.68,
+                            3.1
+                        ]
+                    ],
+                    "Tinkerpart"
+                ],
+                [
+                    [
+                        0.787,
+                        [
+                            1.29,
+                            1.85
+                        ]
+                    ],
+                    "Volatile Vial"
+                ],
+                [
+                    [
+                        0.048,
+                        [
+                            1.43,
+                            2.12
+                        ]
+                    ],
+                    "Volatile Vial"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            3.03
+                        ]
+                    ],
+                    "Crystalline Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            3.03
+                        ]
+                    ],
+                    "Spirited Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            3.03
+                        ]
+                    ],
+                    "Doughy Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.001,
+                        [
+                            1.0,
+                            1.01
+                        ]
+                    ],
+                    "Crystalline Buzzwing Boxling"
+                ],
+                [
+                    [
+                        0.001,
+                        [
+                            1.0,
+                            1.01
+                        ]
+                    ],
+                    "Spirited Buzzwing Boxling"
+                ],
+                [
+                    [
+                        0.001,
+                        [
+                            1.0,
+                            1.01
+                        ]
+                    ],
+                    "Doughy Buzzwing Boxling"
+                ]
+            ],
             "kind": {
                 "Gotchi": {
                     "base_happiness": 0,
@@ -6317,248 +6311,248 @@
         {
             "name": "Boxlet Egg",
             "description": "With an occasional hum and flutter, this Egg will hatch into all the loot from Boxlets.",
-                    "hatch_table": [
+            "hatch_table": [
+                [
+                    [
+                        1.0,
                         [
-                            [
-                                1.0,
-                                [
-                                    2.72,
-                                    3.75
-                                ]
-                            ],
-                            "Rift Powder"
-                        ],
-                        [
-                            [
-                                0.5,
-                                [
-                                    2.65,
-                                    3.56
-                                ]
-                            ],
-                            "Rift Powder"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    7.8,
-                                    11.68
-                                ]
-                            ],
-                            "Warp Powder"
-                        ],
-                        [
-                            [
-                                0.72,
-                                [
-                                    6.34,
-                                    9.32
-                                ]
-                            ],
-                            "Warp Powder"
-                        ],
-                        [
-                            [
-                                0.072,
-                                [
-                                    1.36,
-                                    1.77
-                                ]
-                            ],
-                            "Wormhole Powder"
-                        ],
-                        [
-                            [
-                                0.021,
-                                [
-                                    1.0,
-                                    1.05
-                                ]
-                            ],
-                            "Cyl Wand"
-                        ],
-                        [
-                            [
-                                0.021,
-                                [
-                                    1.0,
-                                    1.05
-                                ]
-                            ],
-                            "Vine Keyboard"
-                        ],
-                        [
-                            [
-                                0.021,
-                                [
-                                    1.0,
-                                    1.05
-                                ]
-                            ],
-                            "Rolling Pin"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    6.55,
-                                    9.44
-                                ]
-                            ],
-                            "Tinkerpart"
-                        ],
-                        [
-                            [
-                                0.187,
-                                [
-                                    4.82,
-                                    7.66
-                                ]
-                            ],
-                            "Tinkerpart"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    2.33,
-                                    4.42
-                                ]
-                            ],
-                            "Volatile Vial"
-                        ],
-                        [
-                            [
-                                0.152,
-                                [
-                                    2.75,
-                                    4.7
-                                ]
-                            ],
-                            "Volatile Vial"
-                        ],
-                        [
-                            [
-                                0.035,
-                                [
-                                    1.05,
-                                    1.4
-                                ]
-                            ],
-                            "Cyllicizing Coffee Concoction"
-                        ],
-                        [
-                            [
-                                0.035,
-                                [
-                                    1.05,
-                                    1.4
-                                ]
-                            ],
-                            "Vibefying Vinefying Elixir"
-                        ],
-                        [
-                            [
-                                0.035,
-                                [
-                                    1.05,
-                                    1.4
-                                ]
-                            ],
-                            "Bractification Brew"
-                        ],
-                        [
-                            [
-                                0.1,
-                                [
-                                    1.0,
-                                    6.06
-                                ]
-                            ],
-                            "Crystalline Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                0.1,
-                                [
-                                    1.0,
-                                    6.06
-                                ]
-                            ],
-                            "Spirited Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                0.1,
-                                [
-                                    1.0,
-                                    6.06
-                                ]
-                            ],
-                            "Doughy Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                0.01,
-                                [
-                                    1.0,
-                                    2.02
-                                ]
-                            ],
-                            "Crystalline Buzzwing Boxling"
-                        ],
-                        [
-                            [
-                                0.01,
-                                [
-                                    1.0,
-                                    2.02
-                                ]
-                            ],
-                            "Spirited Buzzwing Boxling"
-                        ],
-                        [
-                            [
-                                0.01,
-                                [
-                                    1.0,
-                                    2.02
-                                ]
-                            ],
-                            "Doughy Buzzwing Boxling"
-                        ],
-                        [
-                            [
-                                0.001,
-                                [
-                                    1.0,
-                                    1.01
-                                ]
-                            ],
-                            "Crystalline Buzzwing Boxlet"
-                        ],
-                        [
-                            [
-                                0.001,
-                                [
-                                    1.0,
-                                    1.01
-                                ]
-                            ],
-                            "Spirited Buzzwing Boxlet"
-                        ],
-                        [
-                            [
-                                0.001,
-                                [
-                                    1.0,
-                                    1.01
-                                ]
-                            ],
-                            "Doughy Buzzwing Boxlet"
+                            2.72,
+                            3.75
                         ]
                     ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        0.5,
+                        [
+                            2.65,
+                            3.56
+                        ]
+                    ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            7.8,
+                            11.68
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.72,
+                        [
+                            6.34,
+                            9.32
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.072,
+                        [
+                            1.36,
+                            1.77
+                        ]
+                    ],
+                    "Wormhole Powder"
+                ],
+                [
+                    [
+                        0.021,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Cyl Wand"
+                ],
+                [
+                    [
+                        0.021,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Vine Keyboard"
+                ],
+                [
+                    [
+                        0.021,
+                        [
+                            1.0,
+                            1.05
+                        ]
+                    ],
+                    "Rolling Pin"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            6.55,
+                            9.44
+                        ]
+                    ],
+                    "Tinkerpart"
+                ],
+                [
+                    [
+                        0.187,
+                        [
+                            4.82,
+                            7.66
+                        ]
+                    ],
+                    "Tinkerpart"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            2.33,
+                            4.42
+                        ]
+                    ],
+                    "Volatile Vial"
+                ],
+                [
+                    [
+                        0.152,
+                        [
+                            2.75,
+                            4.7
+                        ]
+                    ],
+                    "Volatile Vial"
+                ],
+                [
+                    [
+                        0.035,
+                        [
+                            1.05,
+                            1.4
+                        ]
+                    ],
+                    "Cyllicizing Coffee Concoction"
+                ],
+                [
+                    [
+                        0.035,
+                        [
+                            1.05,
+                            1.4
+                        ]
+                    ],
+                    "Vibefying Vinefying Elixir"
+                ],
+                [
+                    [
+                        0.035,
+                        [
+                            1.05,
+                            1.4
+                        ]
+                    ],
+                    "Bractification Brew"
+                ],
+                [
+                    [
+                        0.1,
+                        [
+                            1.0,
+                            6.06
+                        ]
+                    ],
+                    "Crystalline Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.1,
+                        [
+                            1.0,
+                            6.06
+                        ]
+                    ],
+                    "Spirited Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.1,
+                        [
+                            1.0,
+                            6.06
+                        ]
+                    ],
+                    "Doughy Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            2.02
+                        ]
+                    ],
+                    "Crystalline Buzzwing Boxling"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            2.02
+                        ]
+                    ],
+                    "Spirited Buzzwing Boxling"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            2.02
+                        ]
+                    ],
+                    "Doughy Buzzwing Boxling"
+                ],
+                [
+                    [
+                        0.001,
+                        [
+                            1.0,
+                            1.01
+                        ]
+                    ],
+                    "Crystalline Buzzwing Boxlet"
+                ],
+                [
+                    [
+                        0.001,
+                        [
+                            1.0,
+                            1.01
+                        ]
+                    ],
+                    "Spirited Buzzwing Boxlet"
+                ],
+                [
+                    [
+                        0.001,
+                        [
+                            1.0,
+                            1.01
+                        ]
+                    ],
+                    "Doughy Buzzwing Boxlet"
+                ]
+            ],
             "kind": {
                 "Gotchi": {
                     "base_happiness": 0,
@@ -6570,338 +6564,338 @@
         {
             "name": "Megabox Egg",
             "description": "Megabox loot is magically transferred into this bright and cheery Egg!",
-                    "hatch_table": [
+            "hatch_table": [
+                [
+                    [
+                        1.0,
                         [
-                            [
-                                1.0,
-                                [
-                                    6.2,
-                                    9.15
-                                ]
-                            ],
-                            "Rift Powder"
-                        ],
-                        [
-                            [
-                                0.6,
-                                [
-                                    5.17,
-                                    7.63
-                                ]
-                            ],
-                            "Rift Powder"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    20.48,
-                                    41.15
-                                ]
-                            ],
-                            "Warp Powder"
-                        ],
-                        [
-                            [
-                                0.85,
-                                [
-                                    17.27,
-                                    33.32
-                                ]
-                            ],
-                            "Warp Powder"
-                        ],
-                        [
-                            [
-                                0.12,
-                                [
-                                    2.24,
-                                    3.44
-                                ]
-                            ],
-                            "Wormhole Powder"
-                        ],
-                        [
-                            [
-                                0.166,
-                                [
-                                    1.11,
-                                    1.44
-                                ]
-                            ],
-                            "Cyl Wand"
-                        ],
-                        [
-                            [
-                                0.166,
-                                [
-                                    1.11,
-                                    1.44
-                                ]
-                            ],
-                            "Vine Keyboard"
-                        ],
-                        [
-                            [
-                                0.166,
-                                [
-                                    1.11,
-                                    1.44
-                                ]
-                            ],
-                            "Rolling Pin"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    16.43,
-                                    36.22
-                                ]
-                            ],
-                            "Tinkerpart"
-                        ],
-                        [
-                            [
-                                0.758,
-                                [
-                                    13.12,
-                                    31.84
-                                ]
-                            ],
-                            "Tinkerpart"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    7.56,
-                                    11.33
-                                ]
-                            ],
-                            "Volatile Vial"
-                        ],
-                        [
-                            [
-                                0.69,
-                                [
-                                    5.46,
-                                    9.72
-                                ]
-                            ],
-                            "Volatile Vial"
-                        ],
-                        [
-                            [
-                                0.227,
-                                [
-                                    1.24,
-                                    2.07
-                                ]
-                            ],
-                            "Cyllicizing Coffee Concoction"
-                        ],
-                        [
-                            [
-                                0.227,
-                                [
-                                    1.24,
-                                    2.07
-                                ]
-                            ],
-                            "Vibefying Vinefying Elixir"
-                        ],
-                        [
-                            [
-                                0.227,
-                                [
-                                    1.24,
-                                    2.07
-                                ]
-                            ],
-                            "Bractification Brew"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    1.0,
-                                    6.06
-                                ]
-                            ],
-                            "Crystalline Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    1.0,
-                                    6.06
-                                ]
-                            ],
-                            "Spirited Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                1.0,
-                                [
-                                    1.0,
-                                    6.06
-                                ]
-                            ],
-                            "Doughy Buzzwing Bagling"
-                        ],
-                        [
-                            [
-                                0.1,
-                                [
-                                    1.0,
-                                    2.02
-                                ]
-                            ],
-                            "Crystalline Buzzwing Boxling"
-                        ],
-                        [
-                            [
-                                0.1,
-                                [
-                                    1.0,
-                                    2.02
-                                ]
-                            ],
-                            "Spirited Buzzwing Boxling"
-                        ],
-                        [
-                            [
-                                0.1,
-                                [
-                                    1.0,
-                                    2.02
-                                ]
-                            ],
-                            "Doughy Buzzwing Boxling"
-                        ],
-                        [
-                            [
-                                0.01,
-                                [
-                                    1.0,
-                                    1.0
-                                ]
-                            ],
-                            "Crystalline Buzzwing Boxlet"
-                        ],
-                        [
-                            [
-                                0.01,
-                                [
-                                    1.0,
-                                    1.0
-                                ]
-                            ],
-                            "Spirited Buzzwing Boxlet"
-                        ],
-                        [
-                            [
-                                0.01,
-                                [
-                                    1.0,
-                                    1.0
-                                ]
-                            ],
-                            "Doughy Buzzwing Boxlet"
-                        ],
-                        [
-                            [
-                                0.001,
-                                [
-                                    1.0,
-                                    1.0
-                                ]
-                            ],
-                            "Crystalline Buzzwing Megabox"
-                        ],
-                        [
-                            [
-                                0.001,
-                                [
-                                    1.0,
-                                    1.0
-                                ]
-                            ],
-                            "Spirited Buzzwing Megabox"
-                        ],
-                        [
-                            [
-                                0.001,
-                                [
-                                    1.0,
-                                    1.0
-                                ]
-                            ],
-                            "Doughy Buzzwing Megabox"
-                        ],
-                        [
-                            [
-                                0.025,
-                                [
-                                    1.0,
-                                    1.06
-                                ]
-                            ],
-                            "Hacker Egg"
-                        ],
-                        [
-                            [
-                                0.012,
-                                [
-                                    1.01,
-                                    1.15
-                                ]
-                            ],
-                            "Hacker Egg"
-                        ],
-                        [
-                            [
-                                0.025,
-                                [
-                                    1.0,
-                                    1.06
-                                ]
-                            ],
-                            "Cyl Egg"
-                        ],
-                        [
-                            [
-                                0.012,
-                                [
-                                    1.01,
-                                    1.15
-                                ]
-                            ],
-                            "Cyl Egg"
-                        ],
-                        [
-                            [
-                                0.025,
-                                [
-                                    1.0,
-                                    1.06
-                                ]
-                            ],
-                            "Bread Egg"
-                        ],
-                        [
-                            [
-                                0.012,
-                                [
-                                    1.01,
-                                    1.15
-                                ]
-                            ],
-                            "Bread Egg"
+                            6.2,
+                            9.15
                         ]
                     ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        0.6,
+                        [
+                            5.17,
+                            7.63
+                        ]
+                    ],
+                    "Rift Powder"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            20.48,
+                            41.15
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.85,
+                        [
+                            17.27,
+                            33.32
+                        ]
+                    ],
+                    "Warp Powder"
+                ],
+                [
+                    [
+                        0.12,
+                        [
+                            2.24,
+                            3.44
+                        ]
+                    ],
+                    "Wormhole Powder"
+                ],
+                [
+                    [
+                        0.166,
+                        [
+                            1.11,
+                            1.44
+                        ]
+                    ],
+                    "Cyl Wand"
+                ],
+                [
+                    [
+                        0.166,
+                        [
+                            1.11,
+                            1.44
+                        ]
+                    ],
+                    "Vine Keyboard"
+                ],
+                [
+                    [
+                        0.166,
+                        [
+                            1.11,
+                            1.44
+                        ]
+                    ],
+                    "Rolling Pin"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            16.43,
+                            36.22
+                        ]
+                    ],
+                    "Tinkerpart"
+                ],
+                [
+                    [
+                        0.758,
+                        [
+                            13.12,
+                            31.84
+                        ]
+                    ],
+                    "Tinkerpart"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            7.56,
+                            11.33
+                        ]
+                    ],
+                    "Volatile Vial"
+                ],
+                [
+                    [
+                        0.69,
+                        [
+                            5.46,
+                            9.72
+                        ]
+                    ],
+                    "Volatile Vial"
+                ],
+                [
+                    [
+                        0.227,
+                        [
+                            1.24,
+                            2.07
+                        ]
+                    ],
+                    "Cyllicizing Coffee Concoction"
+                ],
+                [
+                    [
+                        0.227,
+                        [
+                            1.24,
+                            2.07
+                        ]
+                    ],
+                    "Vibefying Vinefying Elixir"
+                ],
+                [
+                    [
+                        0.227,
+                        [
+                            1.24,
+                            2.07
+                        ]
+                    ],
+                    "Bractification Brew"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            1.0,
+                            6.06
+                        ]
+                    ],
+                    "Crystalline Buzzwing Bagling"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            1.0,
+                            6.06
+                        ]
+                    ],
+                    "Spirited Buzzwing Bagling"
+                ],
+                [
+                    [
+                        1.0,
+                        [
+                            1.0,
+                            6.06
+                        ]
+                    ],
+                    "Doughy Buzzwing Bagling"
+                ],
+                [
+                    [
+                        0.1,
+                        [
+                            1.0,
+                            2.02
+                        ]
+                    ],
+                    "Crystalline Buzzwing Boxling"
+                ],
+                [
+                    [
+                        0.1,
+                        [
+                            1.0,
+                            2.02
+                        ]
+                    ],
+                    "Spirited Buzzwing Boxling"
+                ],
+                [
+                    [
+                        0.1,
+                        [
+                            1.0,
+                            2.02
+                        ]
+                    ],
+                    "Doughy Buzzwing Boxling"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            1.0
+                        ]
+                    ],
+                    "Crystalline Buzzwing Boxlet"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            1.0
+                        ]
+                    ],
+                    "Spirited Buzzwing Boxlet"
+                ],
+                [
+                    [
+                        0.01,
+                        [
+                            1.0,
+                            1.0
+                        ]
+                    ],
+                    "Doughy Buzzwing Boxlet"
+                ],
+                [
+                    [
+                        0.001,
+                        [
+                            1.0,
+                            1.0
+                        ]
+                    ],
+                    "Crystalline Buzzwing Megabox"
+                ],
+                [
+                    [
+                        0.001,
+                        [
+                            1.0,
+                            1.0
+                        ]
+                    ],
+                    "Spirited Buzzwing Megabox"
+                ],
+                [
+                    [
+                        0.001,
+                        [
+                            1.0,
+                            1.0
+                        ]
+                    ],
+                    "Doughy Buzzwing Megabox"
+                ],
+                [
+                    [
+                        0.025,
+                        [
+                            1.0,
+                            1.06
+                        ]
+                    ],
+                    "Hacker Egg"
+                ],
+                [
+                    [
+                        0.012,
+                        [
+                            1.01,
+                            1.15
+                        ]
+                    ],
+                    "Hacker Egg"
+                ],
+                [
+                    [
+                        0.025,
+                        [
+                            1.0,
+                            1.06
+                        ]
+                    ],
+                    "Cyl Egg"
+                ],
+                [
+                    [
+                        0.012,
+                        [
+                            1.01,
+                            1.15
+                        ]
+                    ],
+                    "Cyl Egg"
+                ],
+                [
+                    [
+                        0.025,
+                        [
+                            1.0,
+                            1.06
+                        ]
+                    ],
+                    "Bread Egg"
+                ],
+                [
+                    [
+                        0.012,
+                        [
+                            1.01,
+                            1.15
+                        ]
+                    ],
+                    "Bread Egg"
+                ]
+            ],
             "kind": {
                 "Gotchi": {
                     "base_happiness": 0,

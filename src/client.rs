@@ -1,7 +1,5 @@
-use crate::UserId;
 use serde::{de::DeserializeOwned, Serialize};
 use std::fmt;
-use uuid::Uuid;
 
 lazy_static::lazy_static! {
     pub static ref SERVER_URL: &'static str = "http://127.0.0.1:8000";
@@ -21,6 +19,7 @@ pub enum ClientErrorKind {
     Payload(awc::error::PayloadError),
     SendRequest(awc::error::SendRequestError),
     ReturnedError(awc::http::StatusCode, String),
+    Wormhole(crate::wormhole::WormholeError),
     UnknownServerResponse,
     ExpectedOneGotNone,
 }
@@ -42,6 +41,7 @@ impl fmt::Display for ClientError {
             JsonPayload(e) => write!(f, "couldn't parse JSON the server returned: {}", e),
             Payload(e) => write!(f, "couldn't parse data server returned: {}", e),
             SendRequest(e) => write!(f, "couldn't send a request to the server: {}", e),
+            Wormhole(e) => write!(f, "error communicating with server through wormhole: {}", e),
             ReturnedError(status, e) => {
                 write!(f, "server returned Status {}, error body: {}", status, e)
             }
@@ -66,6 +66,15 @@ impl From<awc::error::JsonPayloadError> for ClientErrorKind {
 impl From<awc::error::PayloadError> for ClientErrorKind {
     fn from(e: awc::error::PayloadError) -> ClientErrorKind {
         ClientErrorKind::Payload(e)
+    }
+}
+impl From<crate::wormhole::WormholeError> for ClientError {
+    fn from(e: crate::wormhole::WormholeError) -> ClientError {
+        ClientError {
+            route: "/wormhole",
+            input: "unknown".to_string(),
+            kind: ClientErrorKind::Wormhole(e),
+        }
     }
 }
 
@@ -117,122 +126,4 @@ pub async fn request_one<D: DeserializeOwned, S: Serialize + fmt::Debug>(
             input: format!("{:#?}", input),
             kind: ClientErrorKind::ExpectedOneGotNone,
         })
-}
-
-pub trait IdentifiesSteader {
-    fn steader_id(self) -> Uuid;
-}
-impl IdentifiesSteader for Uuid {
-    fn steader_id(self) -> Uuid {
-        self
-    }
-}
-impl IdentifiesSteader for &Uuid {
-    fn steader_id(self) -> Uuid {
-        *self
-    }
-}
-impl IdentifiesSteader for &crate::Hackstead {
-    fn steader_id(self) -> Uuid {
-        self.profile.steader_id
-    }
-}
-impl IdentifiesSteader for &mut crate::Hackstead {
-    fn steader_id(self) -> Uuid {
-        self.profile.steader_id
-    }
-}
-impl IdentifiesSteader for &crate::hackstead::Profile {
-    fn steader_id(self) -> Uuid {
-        self.steader_id
-    }
-}
-impl IdentifiesSteader for &mut crate::hackstead::Profile {
-    fn steader_id(self) -> Uuid {
-        self.steader_id
-    }
-}
-
-pub trait IdentifiesUser {
-    fn user_id(self) -> UserId;
-}
-impl IdentifiesUser for &UserId {
-    fn user_id(self) -> UserId {
-        self.clone()
-    }
-}
-impl<S: IdentifiesSteader> IdentifiesUser for S {
-    fn user_id(self) -> UserId {
-        UserId::Uuid(self.steader_id())
-    }
-}
-
-pub trait IdentifiesTile {
-    fn tile_id(self) -> Uuid;
-}
-impl IdentifiesTile for Uuid {
-    fn tile_id(self) -> Uuid {
-        self
-    }
-}
-impl IdentifiesTile for &Uuid {
-    fn tile_id(self) -> Uuid {
-        *self
-    }
-}
-impl IdentifiesTile for &crate::Tile {
-    fn tile_id(self) -> Uuid {
-        self.base.tile_id
-    }
-}
-
-/// Plants are referred to as tile Ids, but through this interface,
-/// Plants can refer to Tiles, but Tiles can't refer to Plants since
-/// Tiles may or may not actually have plants on them.
-pub trait IdentifiesPlant {
-    fn tile_id(self) -> Uuid;
-}
-impl IdentifiesPlant for &crate::Plant {
-    fn tile_id(self) -> Uuid {
-        self.base.tile_id
-    }
-}
-impl<T: IdentifiesTile> IdentifiesPlant for T {
-    fn tile_id(self) -> Uuid {
-        self.tile_id()
-    }
-}
-
-pub trait IdentifiesItem {
-    fn item_id(self) -> Uuid;
-}
-impl IdentifiesItem for Uuid {
-    fn item_id(self) -> Uuid {
-        self
-    }
-}
-impl IdentifiesItem for &Uuid {
-    fn item_id(self) -> Uuid {
-        *self
-    }
-}
-impl IdentifiesItem for &crate::Item {
-    fn item_id(self) -> Uuid {
-        self.base.item_id
-    }
-}
-impl IdentifiesItem for &mut crate::Item {
-    fn item_id(self) -> Uuid {
-        self.base.item_id
-    }
-}
-impl IdentifiesItem for &crate::item::ItemBase {
-    fn item_id(self) -> Uuid {
-        self.item_id
-    }
-}
-impl IdentifiesItem for &mut crate::item::ItemBase {
-    fn item_id(self) -> Uuid {
-        self.item_id
-    }
 }

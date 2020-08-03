@@ -40,7 +40,10 @@ impl Tile {
 #[cfg(feature = "client")]
 mod client {
     use super::*;
-    use crate::client::{request, ClientResult, IdentifiesItem};
+    use crate::{
+        client::{request, ClientResult},
+        IdentifiesItem,
+    };
     use plant::Plant;
 
     impl Tile {

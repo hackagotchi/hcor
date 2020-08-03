@@ -8,10 +8,11 @@ pub struct Gotchi {
     pub nickname: String,
 }
 impl Gotchi {
-    pub fn new(item_id: uuid::Uuid, archetype_handle: ArchetypeHandle) -> Self {
+    pub fn new(item_id: uuid::Uuid, ah: ArchetypeHandle) -> Self {
         Self {
             item_id,
-            nickname: CONFIG.possession_archetypes[archetype_handle as usize]
+            nickname: CONFIG.item(ah)
+                .unwrap()
                 .name
                 .clone(),
         }
