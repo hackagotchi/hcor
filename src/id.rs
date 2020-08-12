@@ -1,6 +1,6 @@
+use crate::plant::EffectId;
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
-use crate::plant::EffectId;
 use std::fmt;
 use uuid::Uuid;
 
@@ -70,7 +70,11 @@ impl std::error::Error for NoSuchPlantOnTile {}
 impl fmt::Display for NoSuchPlantOnTile {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let Self(sr, t) = self;
-        write!(f, "steader {} has tile {}, but it's not occupied by a plant.", sr, t)
+        write!(
+            f,
+            "steader {} has tile {}, but it's not occupied by a plant.",
+            sr, t
+        )
     }
 }
 
@@ -84,8 +88,8 @@ impl fmt::Display for NoSuchEffectOnPlant {
             f,
             "steader {} has a tile {} with a plant on it, \
                but that plant is missing the effect {}.",
-           sr, t, e
-       )
+            sr, t, e
+        )
     }
 }
 

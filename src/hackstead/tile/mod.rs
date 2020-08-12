@@ -30,7 +30,7 @@ mod client {
     use super::*;
     use crate::{
         client::{ClientError, ClientResult},
-        wormhole::{ask, AskedNote, until_ask_id_map, PlantAsk},
+        wormhole::{ask, until_ask_id_map, AskedNote, PlantAsk},
         Ask, IdentifiesItem,
     };
 

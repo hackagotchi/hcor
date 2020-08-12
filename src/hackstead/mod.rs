@@ -1,4 +1,8 @@
-use crate::{config::{self, CONFIG}, IdentifiesItem, IdentifiesPlant, IdentifiesTile, IdentifiesSteader, SteaderId, id::{NoSuchPlantOnTile, NoSuchItem, NoSuchTile, NoSuchResult}};
+use crate::{
+    config::{self, CONFIG},
+    id::{NoSuchItem, NoSuchPlantOnTile, NoSuchResult, NoSuchTile},
+    IdentifiesItem, IdentifiesPlant, IdentifiesSteader, IdentifiesTile, SteaderId,
+};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
@@ -75,31 +79,39 @@ impl Hackstead {
 
     pub fn item(&self, i: impl IdentifiesItem) -> NoSuchResult<&Item> {
         let item_id = i.item_id();
-        Ok(self.inventory.iter().find(|i| i.item_id == item_id).ok_or_else(|| {
-            NoSuchItem(self.steader_id(), item_id)
-        })?)
+        Ok(self
+            .inventory
+            .iter()
+            .find(|i| i.item_id == item_id)
+            .ok_or_else(|| NoSuchItem(self.steader_id(), item_id))?)
     }
 
     pub fn take_item(&mut self, i: impl IdentifiesItem) -> NoSuchResult<Item> {
         let (steader_id, item_id) = (self.steader_id(), i.item_id());
-        let p = self.inventory.iter().position(|i| i.item_id == item_id).ok_or_else(|| {
-            NoSuchItem(steader_id, item_id)
-        })?;
+        let p = self
+            .inventory
+            .iter()
+            .position(|i| i.item_id == item_id)
+            .ok_or_else(|| NoSuchItem(steader_id, item_id))?;
         Ok(self.inventory.swap_remove(p))
     }
 
     pub fn tile(&self, t: impl IdentifiesTile) -> NoSuchResult<&Tile> {
         let (steader_id, tile_id) = (self.steader_id(), t.tile_id());
-        Ok(self.land.iter().find(|t| t.tile_id == tile_id).ok_or_else(|| {
-            NoSuchTile(steader_id, tile_id)
-        })?)
+        Ok(self
+            .land
+            .iter()
+            .find(|t| t.tile_id == tile_id)
+            .ok_or_else(|| NoSuchTile(steader_id, tile_id))?)
     }
 
     pub fn tile_mut(&mut self, t: impl IdentifiesTile) -> NoSuchResult<&mut Tile> {
         let (steader_id, tile_id) = (self.steader_id(), t.tile_id());
-        Ok(self.land.iter_mut().find(|t| t.tile_id == tile_id).ok_or_else(|| {
-            NoSuchTile(steader_id, tile_id)
-        })?)
+        Ok(self
+            .land
+            .iter_mut()
+            .find(|t| t.tile_id == tile_id)
+            .ok_or_else(|| NoSuchTile(steader_id, tile_id))?)
     }
 
     /// Safely accepts IdentifiesTile instead of IdentifiesPlant because this function will
@@ -129,7 +141,10 @@ impl Hackstead {
     pub fn take_plant(&mut self, t: impl IdentifiesTile) -> NoSuchResult<Plant> {
         let (steader_id, tile_id) = (self.steader_id(), t.tile_id());
         let tile = self.tile_mut(tile_id)?;
-        Ok(tile.plant.take().ok_or_else(|| NoSuchPlantOnTile(steader_id, tile_id))?)
+        Ok(tile
+            .plant
+            .take()
+            .ok_or_else(|| NoSuchPlantOnTile(steader_id, tile_id))?)
     }
 
     pub fn has_item(&self, i: impl IdentifiesItem) -> bool {
@@ -149,7 +164,7 @@ mod client {
     use super::*;
     use crate::{
         client::{request, ClientError, ClientResult},
-        wormhole::{self, ask, AskedNote, until_ask_id_map, ItemAsk},
+        wormhole::{self, ask, until_ask_id_map, AskedNote, ItemAsk},
         Ask, IdentifiesSteader, IdentifiesUser, Item, Tile,
     };
 
@@ -219,10 +234,7 @@ mod client {
             .map_err(|e| ClientError::bad_ask(a, "ItemSpawn", e))
         }
 
-        pub async fn knowledge_snort(
-            &self,
-            xp: usize,
-        ) -> ClientResult<usize> {
+        pub async fn knowledge_snort(&self, xp: usize) -> ClientResult<usize> {
             let a = Ask::KnowledgeSnort { xp };
             let ask_id = ask(a.clone()).await?;
 

@@ -2,7 +2,9 @@ use std::collections::VecDeque;
 use std::fmt;
 use std::time::Instant;
 
-use actix::{Addr, io::SinkWrite, Actor, AsyncContext, Context, Handler, ResponseFuture, StreamHandler};
+use actix::{
+    io::SinkWrite, Actor, Addr, AsyncContext, Context, Handler, ResponseFuture, StreamHandler,
+};
 use actix_codec::Framed;
 use awc::{
     error::{WsClientError, WsProtocolError},
@@ -17,26 +19,25 @@ use futures::{
 use log::*;
 
 use super::{
-    Ask, AskMessage, EstablishWormholeRequest, Note, AskedNote, HEARTBEAT_INTERVAL,
-    SERVER_TIMEOUT,
+    Ask, AskMessage, AskedNote, EstablishWormholeRequest, Note, HEARTBEAT_INTERVAL, SERVER_TIMEOUT,
 };
 use crate::{IdentifiesUser, UserId};
 
 type ConnAddr = Addr<ServerConnection>;
 
-#[cfg(feature="simultaneous_systems")]
+#[cfg(feature = "simultaneous_systems")]
 use dashmap::DashMap;
 
-#[cfg(feature="simultaneous_systems")]
+#[cfg(feature = "simultaneous_systems")]
 lazy_static::lazy_static! {
     static ref CONNS: DashMap<usize, ConnAddr> = DashMap::new();
 }
-#[cfg(not(feature="simultaneous_systems"))]
+#[cfg(not(feature = "simultaneous_systems"))]
 lazy_static::lazy_static! {
     static ref CONN: ConnAddr = ServerConnection::start_default();
 }
 
-#[cfg(feature="simultaneous_systems")]
+#[cfg(feature = "simultaneous_systems")]
 fn get_conn() -> ConnAddr {
     CONNS
         .get(&actix::System::current().id())
@@ -45,15 +46,18 @@ fn get_conn() -> ConnAddr {
         .clone()
 }
 
-#[cfg(not(feature="simultaneous_systems"))]
+#[cfg(not(feature = "simultaneous_systems"))]
 fn get_conn() -> &'static ConnAddr {
     *CONN
 }
 
 pub async fn connect(iu: impl IdentifiesUser) -> WormholeResult<()> {
-    #[cfg(feature="simultaneous_systems")]
+    #[cfg(feature = "simultaneous_systems")]
     {
-        CONNS.insert(actix::System::current().id(), ServerConnection::start_default());
+        CONNS.insert(
+            actix::System::current().id(),
+            ServerConnection::start_default(),
+        );
         debug!("connections count +1, now: {}", CONNS.len());
     }
 
@@ -70,7 +74,7 @@ pub async fn ask(ask: Ask) -> WormholeResult<usize> {
     get_conn().send(SendAsk(ask)).await?
 }
 
-#[cfg(feature="simultaneous_systems")]
+#[cfg(feature = "simultaneous_systems")]
 pub async fn disconnect() -> WormholeResult<()> {
     let (_, addr) = CONNS
         .remove(&actix::System::current().id())
@@ -78,7 +82,7 @@ pub async fn disconnect() -> WormholeResult<()> {
     addr.send(Disconnect).await?
 }
 
-#[cfg(not(feature="simultaneous_systems"))]
+#[cfg(not(feature = "simultaneous_systems"))]
 pub async fn disconnect() -> WormholeResult<()> {
     get_conn().send(Disconnect).await?
 }
@@ -117,9 +121,7 @@ pub async fn register_note_handler<
 ///
 /// Notes which the function returns false for are simply ignored. If you want them to be consumed
 /// such that handlers registered later than this one will not receive the note, see `until_greedy`.
-pub async fn until<F: FnMut(&Note) -> bool + Send + 'static>(
-    mut f: F,
-) -> WormholeResult<Note> {
+pub async fn until<F: FnMut(&Note) -> bool + Send + 'static>(mut f: F) -> WormholeResult<Note> {
     register_note_handler(move |n| {
         if f(n) {
             Ok(n.clone())
@@ -138,9 +140,7 @@ pub async fn until_ask_id<F: FnMut(&AskedNote) -> bool + Send + 'static>(
     mut f: F,
 ) -> WormholeResult<AskedNote> {
     register_note_handler(move |n| match n {
-        Note::Asked { ask_id: id, note } if ask_id == *id && f(&note) => {
-            Ok(note.clone())
-        }
+        Note::Asked { ask_id: id, note } if ask_id == *id && f(&note) => Ok(note.clone()),
         _ => Err(ContinueBehavior::Pass),
     })
     .await
@@ -290,7 +290,10 @@ impl fmt::Display for WormholeError {
             WebSocket(e) => write!(f, "error communicating with server through wormhole: {}", e),
             Serde(e) => write!(f, "error parsing or formatting from or for wormhole: {}", e),
             Utf8(e) => write!(f, "error parsing utf8 bytes from wormhole: {}", e),
-            AlreadyDisconnected => write!(f, "disconnect has been called again following disconnecting"),
+            AlreadyDisconnected => write!(
+                f,
+                "disconnect has been called again following disconnecting"
+            ),
             ConnectionLost => write!(f, "wormhole lost connection with server"),
             NeverConnected => write!(f, "wormhole connection never established"),
             NoteHandlerCanceled => {
@@ -478,7 +481,7 @@ impl Handler<Disconnect> for ServerConnection {
                 })))?;
                 self.state = State::ConnectionLost;
             }
-            _ => {},
+            _ => {}
         }
 
         Ok(())
@@ -528,8 +531,11 @@ impl Handler<Connect> for ServerConnection {
 
         match &self.state {
             Connected(_, _) | WebsocketsConnected => {
-                warn!("ignoring connection request as current state is {:#?}", self.state);
-                return Box::pin(async move { Ok(()) })
+                warn!(
+                    "ignoring connection request as current state is {:#?}",
+                    self.state
+                );
+                return Box::pin(async move { Ok(()) });
             }
             s => debug!("connecting to wormhole, current state: {:#?}", s),
         };

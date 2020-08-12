@@ -1,4 +1,8 @@
-use crate::{config, TileId, SteaderId, id::{NoSuchResult, NoSuchEffectOnPlant}, IdentifiesSteader, IdentifiesTile};
+use crate::{
+    config,
+    id::{NoSuchEffectOnPlant, NoSuchResult},
+    IdentifiesSteader, IdentifiesTile, SteaderId, TileId,
+};
 use config::{ArchetypeHandle, PlantArchetype, CONFIG};
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
@@ -32,7 +36,7 @@ impl Plant {
     pub fn from_seed(
         iu: impl IdentifiesSteader,
         it: impl IdentifiesTile,
-        seed: &config::SeedArchetype
+        seed: &config::SeedArchetype,
     ) -> crate::ConfigResult<Self> {
         let archetype_handle = CONFIG.find_plant_handle(&seed.grows_into)?;
         let arch = CONFIG
@@ -53,21 +57,38 @@ impl Plant {
     }
 
     pub fn effect(&self, effect_id: EffectId) -> NoSuchResult<&Effect> {
-        let &Self { owner_id, tile_id, ref effects, .. } = self;
-        Ok(effects.iter().find(|e| e.effect_id == effect_id).ok_or_else(|| {
-            NoSuchEffectOnPlant(owner_id, tile_id, effect_id)
-        })?)
+        let &Self {
+            owner_id,
+            tile_id,
+            ref effects,
+            ..
+        } = self;
+        Ok(effects
+            .iter()
+            .find(|e| e.effect_id == effect_id)
+            .ok_or_else(|| NoSuchEffectOnPlant(owner_id, tile_id, effect_id))?)
     }
 
     pub fn effect_mut(&mut self, effect_id: EffectId) -> NoSuchResult<&mut Effect> {
-        let &mut Self { owner_id, tile_id, ref mut effects, .. } = self;
-        Ok(effects.iter_mut().find(|e| e.effect_id == effect_id).ok_or_else(|| {
-            NoSuchEffectOnPlant(owner_id, tile_id, effect_id)
-        })?)
+        let &mut Self {
+            owner_id,
+            tile_id,
+            ref mut effects,
+            ..
+        } = self;
+        Ok(effects
+            .iter_mut()
+            .find(|e| e.effect_id == effect_id)
+            .ok_or_else(|| NoSuchEffectOnPlant(owner_id, tile_id, effect_id))?)
     }
 
     pub fn take_effect(&mut self, effect_id: EffectId) -> NoSuchResult<Effect> {
-        let &mut Self { owner_id, tile_id, ref mut effects, .. } = self;
+        let &mut Self {
+            owner_id,
+            tile_id,
+            ref mut effects,
+            ..
+        } = self;
         Ok(effects
             .iter()
             .position(|e| e.effect_id == effect_id)
@@ -155,8 +176,8 @@ mod client {
     use super::*;
     use crate::{
         client::{ClientError, ClientResult},
-        wormhole::{ask, AskedNote, until_ask_id_map, PlantAsk},
-        Ask, IdentifiesItem, 
+        wormhole::{ask, until_ask_id_map, AskedNote, PlantAsk},
+        Ask, IdentifiesItem,
     };
 
     impl Plant {

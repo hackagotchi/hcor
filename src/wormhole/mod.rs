@@ -6,8 +6,9 @@ use std::time::Duration;
 mod client;
 #[cfg(feature = "client")]
 pub use client::{
-    ask, connect, disconnect, register_note_handler, try_note, until, until_map, until_greedy, until_ask_id, until_ask_id_map,
-    until_ask_id_map_greedy, WormholeError, WormholeResult,
+    ask, connect, disconnect, register_note_handler, try_note, until, until_ask_id,
+    until_ask_id_map, until_ask_id_map_greedy, until_greedy, until_map, WormholeError,
+    WormholeResult,
 };
 
 /// How often heartbeat pings are sent
@@ -111,7 +112,7 @@ pub enum Note {
     Asked {
         note: AskedNote,
         ask_id: usize,
-    }
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -154,9 +155,7 @@ pub enum Ask {
     KnowledgeSnort { xp: usize },
     Plant(PlantAsk),
     Item(ItemAsk),
-    TileSummon {
-        tile_redeemable_item_id: ItemId,
-    },
+    TileSummon { tile_redeemable_item_id: ItemId },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
