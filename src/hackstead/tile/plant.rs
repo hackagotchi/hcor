@@ -1,54 +1,19 @@
-use crate::config;
+use crate::{config, TileId, SteaderId, id::{NoSuchResult, NoSuchEffectOnPlant}, IdentifiesSteader, IdentifiesTile};
 use config::{ArchetypeHandle, PlantArchetype, CONFIG};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use serde_diff::SerdeDiff;
+use std::fmt;
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-/// Format for requesting than an item to be applied to a plant
-pub struct PlantRubRequest {
-    /// the item to be applied to a plant
-    pub rub_item_id: Uuid,
-    /// the tile that the plant to apply this to rests on
-    pub tile_id: Uuid,
-}
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-/// Format for requesting that a plant begin crafting something.
-pub struct PlantCraftRequest {
-    /// The tile that the plant that should craft sits on
-    pub tile_id: Uuid,
-    /// The index of the recipe in the list of this plant's recipes
-    pub recipe_index: ArchetypeHandle,
-}
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-/// Format for requesting that a seed be consumed to create a new plant on an empty tile.
-pub struct PlantCreationRequest {
-    /// The (unoccupied) tile that the new plant should sit on
-    pub tile_id: Uuid,
-    /// The seed to consume to create the new plant from
-    pub seed_item_id: Uuid,
-}
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-/// Format for requesting than a plant be removed from its tile
-pub struct PlantRemovalRequest {
-    /// The tile that the plant the user wants to remove sits on
-    pub tile_id: Uuid,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct PlantBase {
-    pub tile_id: Uuid,
-    pub xp: i32,
-    pub until_yield: f64,
+#[derive(Clone, Debug, SerdeDiff, Serialize, Deserialize, PartialEq)]
+pub struct Plant {
+    pub owner_id: SteaderId,
+    pub tile_id: TileId,
+    pub xp: usize,
     pub nickname: String,
     pub archetype_handle: ArchetypeHandle,
-    /// Records how many effects have been imparted onto this plant from applied items
+    /// Records how many items have been applied to this plant
     /// over its lifetime (including effects that wore off long ago)
-    pub lifetime_effect_count: i32,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct Plant {
-    pub base: PlantBase,
+    pub lifetime_rubs: usize,
     pub craft: Option<Craft>,
     /// Effects from potions, warp powder, etc. that actively change the behavior of this plant.
     pub effects: Vec<Effect>,
@@ -59,12 +24,16 @@ impl std::ops::Deref for Plant {
     fn deref(&self) -> &Self::Target {
         &CONFIG
             .plant_archetypes
-            .get(self.base.archetype_handle as usize)
+            .get(self.archetype_handle as usize)
             .expect("invalid archetype handle")
     }
 }
 impl Plant {
-    pub fn from_seed(tile_id: Uuid, seed: &config::SeedArchetype) -> crate::ConfigResult<Self> {
+    pub fn from_seed(
+        iu: impl IdentifiesSteader,
+        it: impl IdentifiesTile,
+        seed: &config::SeedArchetype
+    ) -> crate::ConfigResult<Self> {
         let archetype_handle = CONFIG.find_plant_handle(&seed.grows_into)?;
         let arch = CONFIG
             .plant_archetypes
@@ -72,41 +41,100 @@ impl Plant {
             .unwrap();
 
         Ok(Self {
-            base: PlantBase {
-                tile_id,
-                xp: 0,
-                until_yield: arch.base_yield_duration.unwrap_or(0.0),
-                nickname: arch.name.clone(),
-                archetype_handle,
-                lifetime_effect_count: 0,
-            },
+            owner_id: iu.steader_id(),
+            tile_id: it.tile_id(),
+            xp: 0,
+            nickname: arch.name.clone(),
+            archetype_handle,
+            lifetime_rubs: 0,
             craft: None,
             effects: vec![],
         })
     }
 
-    /// increments the lifetime_effect_count and returns an index suitable for a new effect.
-    pub fn next_effect_index(&mut self) -> i32 {
-        let e = self.base.lifetime_effect_count;
-        self.base.lifetime_effect_count += 1;
-        e
+    pub fn effect(&self, effect_id: EffectId) -> NoSuchResult<&Effect> {
+        let &Self { owner_id, tile_id, ref effects, .. } = self;
+        Ok(effects.iter().find(|e| e.effect_id == effect_id).ok_or_else(|| {
+            NoSuchEffectOnPlant(owner_id, tile_id, effect_id)
+        })?)
+    }
+
+    pub fn effect_mut(&mut self, effect_id: EffectId) -> NoSuchResult<&mut Effect> {
+        let &mut Self { owner_id, tile_id, ref mut effects, .. } = self;
+        Ok(effects.iter_mut().find(|e| e.effect_id == effect_id).ok_or_else(|| {
+            NoSuchEffectOnPlant(owner_id, tile_id, effect_id)
+        })?)
+    }
+
+    pub fn take_effect(&mut self, effect_id: EffectId) -> NoSuchResult<Effect> {
+        let &mut Self { owner_id, tile_id, ref mut effects, .. } = self;
+        Ok(effects
+            .iter()
+            .position(|e| e.effect_id == effect_id)
+            .map(|i| self.effects.swap_remove(i))
+            .ok_or_else(|| NoSuchEffectOnPlant(owner_id, tile_id, effect_id))?)
     }
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+pub mod timer {
+    use super::*;
+
+    #[derive(Debug, Clone, Copy, SerdeDiff, Serialize, Deserialize, PartialEq)]
+    pub enum TimerKind {
+        Yield,
+        Craft { recipe_index: usize },
+        Rub { effect_id: EffectId },
+    }
+
+    #[derive(Debug, Clone, Copy, SerdeDiff, Serialize, Deserialize, PartialEq)]
+    pub enum Lifecycle {
+        // when this timer finishes, it restarts again.
+        Perennial { duration: f32 },
+        // this timer runs once, then, kaputt.
+        Annual,
+    }
+
+    impl Lifecycle {
+        pub fn is_perennial(&self) -> bool {
+            matches!(self, Lifecycle::Perennial { .. } )
+        }
+
+        pub fn is_annual(&self) -> bool {
+            matches!(self, Lifecycle::Annual)
+        }
+    }
+
+    #[derive(Debug, Clone, Copy, SerdeDiff, Serialize, Deserialize, PartialEq)]
+    pub struct Timer {
+        pub until_finish: f32,
+        pub lifecycle: Lifecycle,
+        pub tile_id: TileId,
+        pub kind: TimerKind,
+    }
+}
+pub use timer::{Timer, TimerKind};
+
+#[derive(Debug, Clone, Copy, SerdeDiff, Serialize, Deserialize, PartialEq)]
 pub struct Craft {
-    pub tile_id: Uuid,
-    pub until_finish: f64,
     #[serde(alias = "makes")]
     pub recipe_archetype_handle: ArchetypeHandle,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[derive(SerdeDiff, Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[serde(transparent)]
+#[serde_diff(opaque)]
+pub struct EffectId(pub uuid::Uuid);
+
+impl fmt::Display for EffectId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+#[derive(Debug, Clone, Copy, SerdeDiff, Serialize, Deserialize, PartialEq)]
 pub struct Effect {
     /// Records whether this is the first, second, third, etc. effect to be rubbed onto this plant.
-    pub rub_index: i32,
-    pub tile_id: Uuid,
-    pub until_finish: Option<f64>,
+    pub effect_id: EffectId,
     /// The archetype of the item that was consumed to apply this effect.
     pub item_archetype_handle: ArchetypeHandle,
     /// The archetype of the effect within this item that describes this effect.
@@ -126,30 +154,41 @@ impl std::ops::Deref for Effect {
 mod client {
     use super::*;
     use crate::{
-        client::{request, ClientResult},
-        IdentifiesItem,
+        client::{ClientError, ClientResult},
+        wormhole::{ask, AskedNote, until_ask_id_map, PlantAsk},
+        Ask, IdentifiesItem, 
     };
 
     impl Plant {
         pub async fn slaughter(&self) -> ClientResult<Plant> {
-            request(
-                "plant/slaughter",
-                &PlantRemovalRequest {
-                    tile_id: self.base.tile_id,
-                },
-            )
-            .await
+            let a = Ask::Plant(PlantAsk::Slaughter {
+                tile_id: self.tile_id,
+            });
+
+            let ask_id = ask(a.clone()).await?;
+
+            until_ask_id_map(ask_id, |n| match n {
+                AskedNote::PlantSlaughterResult(r) => Some(r),
+                _ => None,
+            })
+            .await?
+            .map_err(|e| ClientError::bad_ask(a, "PlantSlaughter", e))
         }
 
         pub async fn rub_with(&self, rub: impl IdentifiesItem) -> ClientResult<Vec<Effect>> {
-            request(
-                "plant/rub",
-                &PlantRubRequest {
-                    rub_item_id: rub.item_id(),
-                    tile_id: self.base.tile_id,
-                },
-            )
-            .await
+            let a = Ask::Plant(PlantAsk::Rub {
+                rub_item_id: rub.item_id(),
+                tile_id: self.tile_id,
+            });
+
+            let ask_id = ask(a.clone()).await?;
+
+            until_ask_id_map(ask_id, |n| match n {
+                AskedNote::PlantRubStartResult(r) => Some(r),
+                _ => None,
+            })
+            .await?
+            .map_err(|e| ClientError::bad_ask(a, "PlantRub", e))
         }
     }
 }

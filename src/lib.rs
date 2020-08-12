@@ -1,6 +1,9 @@
 #![feature(try_trait)]
 //#![warn(missing_docs)]
 
+/// re-export this dependency to make it easier to sync versions
+pub use serde_diff;
+
 #[cfg(feature = "client")]
 mod client;
 #[cfg(feature = "client")]
@@ -13,17 +16,25 @@ pub mod client_internal {
 /// The Wormhole allows quick communication with the server,
 /// used especially for receiving information about game events as soon as they occur.
 pub mod wormhole;
-pub use wormhole::Note;
 #[cfg(feature = "client")]
-pub use wormhole::Wormhole;
+pub use wormhole::WormholeResult;
+pub use wormhole::{Ask, Note};
 
-/// How many times per second the server should update.
-///
-/// TODO: these should probably go in the config
-pub const UPDATES_PER_SECOND: u64 = 20;
-/// An instance of Duration representing the same thing as UPDATES_PER_SECOND.
-pub const UPDATE_INTERVAL: std::time::Duration =
-    std::time::Duration::from_millis(1000 / UPDATES_PER_SECOND);
+lazy_static::lazy_static! {
+    /// How many times per second the server should update.
+    pub static ref UPDATES_PER_SECOND: u64 = {
+        std::env::var("UPDATES_PER_SECOND")
+            .map_err(|e| e.to_string())
+            .and_then(|x| x.parse::<u64>().map_err(|e| e.to_string()))
+            .unwrap_or_else(|e| {
+                log::warn!("UPDATES_PER_SECOND err, defaulting to 20. err: {}", e);
+                20
+            })
+    };
+    /// An instance of Duration representing the same thing as UPDATES_PER_SECOND.
+    pub static ref UPDATE_INTERVAL: std::time::Duration =
+        std::time::Duration::from_nanos(1e9 as u64 / *UPDATES_PER_SECOND);
+}
 
 /// All of the game design switches and levers are handled here, with a focus on how they interact
 /// with the rest of the data in the game.
@@ -37,7 +48,8 @@ pub use hackstead::{item, plant, tile, Hackstead, Item, Plant, Tile};
 /// Identification convienience traits and our very own `UserId` enum.
 pub mod id;
 pub use id::{
-    IdentifiesItem, IdentifiesPlant, IdentifiesSteader, IdentifiesTile, IdentifiesUser, UserId,
+    IdentifiesItem, IdentifiesPlant, IdentifiesSteader, IdentifiesTile, IdentifiesUser, ItemId,
+    SteaderId, TileId, UserId,
 };
 
 /// Contains code common across frontends.

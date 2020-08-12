@@ -1,3 +1,4 @@
+use crate::wormhole::Ask;
 use serde::{de::DeserializeOwned, Serialize};
 use std::fmt;
 
@@ -19,15 +20,24 @@ pub enum ClientErrorKind {
     Payload(awc::error::PayloadError),
     SendRequest(awc::error::SendRequestError),
     ReturnedError(awc::http::StatusCode, String),
+    BadAsk(&'static str, String),
     Wormhole(crate::wormhole::WormholeError),
     UnknownServerResponse,
-    ExpectedOneGotNone,
 }
 #[derive(Debug)]
 pub struct ClientError {
     route: &'static str,
     input: String,
     kind: ClientErrorKind,
+}
+impl ClientError {
+    pub fn bad_ask(input: Ask, what: &'static str, err: String) -> Self {
+        ClientError {
+            route: "wormhole",
+            input: format!("{:#?}", input),
+            kind: ClientErrorKind::BadAsk(what, err),
+        }
+    }
 }
 impl std::error::Error for ClientError {}
 impl fmt::Display for ClientError {
@@ -42,14 +52,11 @@ impl fmt::Display for ClientError {
             Payload(e) => write!(f, "couldn't parse data server returned: {}", e),
             SendRequest(e) => write!(f, "couldn't send a request to the server: {}", e),
             Wormhole(e) => write!(f, "error communicating with server through wormhole: {}", e),
+            BadAsk(w, e) => write!(f, "request {} sent to wormhole returned: {}", w, e),
             ReturnedError(status, e) => {
                 write!(f, "server returned Status {}, error body: {}", status, e)
             }
             UnknownServerResponse => write!(f, "server returned non-utf8 error."),
-            ExpectedOneGotNone => write!(
-                f,
-                "expected a single item, but the server returned no items"
-            ),
         }
     }
 }
@@ -112,18 +119,4 @@ pub async fn request<D: DeserializeOwned, S: Serialize + fmt::Debug>(
 
         Err(err(kind))
     }
-}
-
-pub async fn request_one<D: DeserializeOwned, S: Serialize + fmt::Debug>(
-    endpoint: &'static str,
-    input: &S,
-) -> ClientResult<D> {
-    request::<Vec<D>, _>(endpoint, &input)
-        .await?
-        .pop()
-        .ok_or_else(|| ClientError {
-            route: endpoint,
-            input: format!("{:#?}", input),
-            kind: ClientErrorKind::ExpectedOneGotNone,
-        })
 }

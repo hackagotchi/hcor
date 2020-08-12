@@ -1,26 +1,147 @@
 use serde::{Deserialize, Serialize};
+use serde_diff::SerdeDiff;
+use crate::plant::EffectId;
+use std::fmt;
 use uuid::Uuid;
+
+#[derive(Debug)]
+pub enum NoSuch {
+    Plant(NoSuchPlantOnTile),
+    Item(NoSuchItem),
+    Tile(NoSuchTile),
+    Effect(NoSuchEffectOnPlant),
+}
+pub type NoSuchResult<T> = Result<T, NoSuch>;
+impl std::error::Error for NoSuch {}
+impl fmt::Display for NoSuch {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            NoSuch::Plant(nspot) => write!(f, "{}", nspot),
+            NoSuch::Item(nsi) => write!(f, "{}", nsi),
+            NoSuch::Tile(nst) => write!(f, "{}", nst),
+            NoSuch::Effect(nseop) => write!(f, "{}", nseop),
+        }
+    }
+}
+impl From<NoSuchItem> for NoSuch {
+    fn from(nsi: NoSuchItem) -> Self {
+        NoSuch::Item(nsi)
+    }
+}
+impl From<NoSuchTile> for NoSuch {
+    fn from(nst: NoSuchTile) -> Self {
+        NoSuch::Tile(nst)
+    }
+}
+impl From<NoSuchPlantOnTile> for NoSuch {
+    fn from(nspot: NoSuchPlantOnTile) -> Self {
+        NoSuch::Plant(nspot)
+    }
+}
+impl From<NoSuchEffectOnPlant> for NoSuch {
+    fn from(nseon: NoSuchEffectOnPlant) -> Self {
+        NoSuch::Effect(nseon)
+    }
+}
+
+#[derive(Debug)]
+pub struct NoSuchItem(pub SteaderId, pub ItemId);
+impl std::error::Error for NoSuchItem {}
+impl fmt::Display for NoSuchItem {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let Self(sr, i) = self;
+        write!(f, "steader {} has no such item {}", sr, i)
+    }
+}
+
+#[derive(Debug)]
+pub struct NoSuchTile(pub SteaderId, pub TileId);
+impl std::error::Error for NoSuchTile {}
+impl fmt::Display for NoSuchTile {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let Self(sr, t) = self;
+        write!(f, "steader {} has no such tile {}", sr, t)
+    }
+}
+
+#[derive(Debug)]
+pub struct NoSuchPlantOnTile(pub SteaderId, pub TileId);
+impl std::error::Error for NoSuchPlantOnTile {}
+impl fmt::Display for NoSuchPlantOnTile {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let Self(sr, t) = self;
+        write!(f, "steader {} has tile {}, but it's not occupied by a plant.", sr, t)
+    }
+}
+
+#[derive(Debug)]
+pub struct NoSuchEffectOnPlant(pub SteaderId, pub TileId, pub EffectId);
+impl std::error::Error for NoSuchEffectOnPlant {}
+impl fmt::Display for NoSuchEffectOnPlant {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let Self(sr, t, e) = self;
+        write!(
+            f,
+            "steader {} has a tile {} with a plant on it, \
+               but that plant is missing the effect {}.",
+           sr, t, e
+       )
+    }
+}
+
+#[derive(SerdeDiff, Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[serde(transparent)]
+#[serde_diff(opaque)]
+pub struct TileId(pub Uuid);
+
+impl fmt::Display for TileId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+#[derive(SerdeDiff, Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[serde(transparent)]
+#[serde_diff(opaque)]
+pub struct SteaderId(pub Uuid);
+
+impl fmt::Display for SteaderId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+#[derive(SerdeDiff, Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[serde(transparent)]
+#[serde_diff(opaque)]
+pub struct ItemId(pub Uuid);
+
+impl fmt::Display for ItemId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 /// Identifies a user. They can be identified by their Slack id, or by an uuid that we coined,
 /// with a compile time check that they supply one or both.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+#[derive(SerdeDiff, Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub enum UserId {
     /// A user known only by an id we coined for them.
-    Uuid(Uuid),
+    Uuid(SteaderId),
     /// A user known only by their slack id.
     Slack(String),
     /// A user known by both their slack id and their uuid.
-    Both { uuid: Uuid, slack: String },
+    Both { uuid: SteaderId, slack: String },
 }
 impl UserId {
     /// Returns an ID that we coined for a user, if available.
-    pub fn uuid(&self) -> Option<Uuid> {
+    pub fn uuid(&self) -> Option<SteaderId> {
         match self {
             UserId::Uuid(uuid) | UserId::Both { uuid, .. } => Some(*uuid),
             _ => None,
         }
     }
-    pub fn uuid_or_else(&self, f: impl FnOnce(&str) -> Uuid) -> Uuid {
+    pub fn uuid_or_else(&self, f: impl FnOnce(&str) -> SteaderId) -> SteaderId {
         match self {
             UserId::Uuid(uuid) | UserId::Both { uuid, .. } => *uuid,
             UserId::Slack(slack) => f(slack),
@@ -40,7 +161,7 @@ mod test {
     use super::*;
     const USER_1: &'static str = "U1";
     lazy_static::lazy_static! {
-        static ref UUID: Uuid = Uuid::new_v4();
+        static ref UUID: SteaderId = SteaderId(Uuid::new_v4());
     }
 
     #[test]
@@ -86,35 +207,35 @@ mod test {
 }
 
 pub trait IdentifiesSteader {
-    fn steader_id(self) -> Uuid;
+    fn steader_id(self) -> SteaderId;
 }
-impl IdentifiesSteader for Uuid {
-    fn steader_id(self) -> Uuid {
+impl IdentifiesSteader for SteaderId {
+    fn steader_id(self) -> SteaderId {
         self
     }
 }
-impl IdentifiesSteader for &Uuid {
-    fn steader_id(self) -> Uuid {
+impl IdentifiesSteader for &SteaderId {
+    fn steader_id(self) -> SteaderId {
         *self
     }
 }
 impl IdentifiesSteader for &crate::Hackstead {
-    fn steader_id(self) -> Uuid {
+    fn steader_id(self) -> SteaderId {
         self.profile.steader_id
     }
 }
 impl IdentifiesSteader for &mut crate::Hackstead {
-    fn steader_id(self) -> Uuid {
+    fn steader_id(self) -> SteaderId {
         self.profile.steader_id
     }
 }
 impl IdentifiesSteader for &crate::hackstead::Profile {
-    fn steader_id(self) -> Uuid {
+    fn steader_id(self) -> SteaderId {
         self.steader_id
     }
 }
 impl IdentifiesSteader for &mut crate::hackstead::Profile {
-    fn steader_id(self) -> Uuid {
+    fn steader_id(self) -> SteaderId {
         self.steader_id
     }
 }
@@ -134,15 +255,25 @@ impl<S: IdentifiesSteader> IdentifiesUser for S {
 }
 
 pub trait IdentifiesTile {
-    fn tile_id(self) -> Uuid;
+    fn tile_id(self) -> TileId;
 }
 impl IdentifiesTile for &crate::Tile {
-    fn tile_id(self) -> Uuid {
-        self.base.tile_id
+    fn tile_id(self) -> TileId {
+        self.tile_id
+    }
+}
+impl IdentifiesTile for TileId {
+    fn tile_id(self) -> TileId {
+        self
+    }
+}
+impl IdentifiesTile for &TileId {
+    fn tile_id(self) -> TileId {
+        *self
     }
 }
 impl<T: IdentifiesPlant> IdentifiesTile for T {
-    fn tile_id(self) -> Uuid {
+    fn tile_id(self) -> TileId {
         self.tile_id()
     }
 }
@@ -151,54 +282,34 @@ impl<T: IdentifiesPlant> IdentifiesTile for T {
 /// Plants can refer to Tiles, but Tiles can't refer to Plants since
 /// Tiles may or may not actually have plants on them.
 pub trait IdentifiesPlant {
-    fn tile_id(self) -> Uuid;
-}
-impl IdentifiesTile for Uuid {
-    fn tile_id(self) -> Uuid {
-        self
-    }
-}
-impl IdentifiesTile for &Uuid {
-    fn tile_id(self) -> Uuid {
-        *self
-    }
+    fn tile_id(self) -> TileId;
 }
 impl IdentifiesPlant for &crate::Plant {
-    fn tile_id(self) -> Uuid {
-        self.base.tile_id
+    fn tile_id(self) -> TileId {
+        self.tile_id
     }
 }
 
 pub trait IdentifiesItem {
-    fn item_id(self) -> Uuid;
+    fn item_id(self) -> ItemId;
 }
-impl IdentifiesItem for Uuid {
-    fn item_id(self) -> Uuid {
+impl IdentifiesItem for ItemId {
+    fn item_id(self) -> ItemId {
         self
     }
 }
-impl IdentifiesItem for &Uuid {
-    fn item_id(self) -> Uuid {
+impl IdentifiesItem for &ItemId {
+    fn item_id(self) -> ItemId {
         *self
     }
 }
 impl IdentifiesItem for &crate::Item {
-    fn item_id(self) -> Uuid {
-        self.base.item_id
-    }
-}
-impl IdentifiesItem for &mut crate::Item {
-    fn item_id(self) -> Uuid {
-        self.base.item_id
-    }
-}
-impl IdentifiesItem for &crate::item::ItemBase {
-    fn item_id(self) -> Uuid {
+    fn item_id(self) -> ItemId {
         self.item_id
     }
 }
-impl IdentifiesItem for &mut crate::item::ItemBase {
-    fn item_id(self) -> Uuid {
+impl IdentifiesItem for &mut crate::Item {
+    fn item_id(self) -> ItemId {
         self.item_id
     }
 }
