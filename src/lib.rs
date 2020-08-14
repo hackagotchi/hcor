@@ -1,4 +1,3 @@
-#![feature(try_trait)]
 //#![warn(missing_docs)]
 
 /// re-export this dependency to make it easier to sync versions
