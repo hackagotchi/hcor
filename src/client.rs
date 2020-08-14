@@ -97,7 +97,7 @@ pub async fn request<D: DeserializeOwned, S: Serialize + fmt::Debug>(
     };
 
     let mut res = client()
-        .post(&format!("{}/{}", *SERVER_URL, endpoint))
+        .post(&format!("{}/api/{}", *SERVER_URL, endpoint))
         .send_json(&input)
         .await
         .map_err(|e| err(e.into()))?;

@@ -19,7 +19,7 @@ use futures::{
 use log::*;
 
 use super::{
-    Ask, AskMessage, AskedNote, EstablishWormholeRequest, Note, HEARTBEAT_INTERVAL, SERVER_TIMEOUT,
+    Ask, AskMessage, AskedNote, Note, HEARTBEAT_INTERVAL, SERVER_TIMEOUT,
 };
 use crate::{IdentifiesUser, UserId};
 
@@ -269,6 +269,7 @@ pub enum WormholeError {
     WebSocket(WsProtocolError),
     Connection(String),
     Serde(serde_json::Error),
+    Bincode(bincode::Error),
     Utf8(std::str::Utf8Error),
     ConnectionLost,
     NeverConnected,
@@ -289,6 +290,7 @@ impl fmt::Display for WormholeError {
             Connection(e) => write!(f, "couldn't connect to wormhole: {}", e),
             WebSocket(e) => write!(f, "error communicating with server through wormhole: {}", e),
             Serde(e) => write!(f, "error parsing or formatting from or for wormhole: {}", e),
+            Bincode(e) => write!(f, "error parsing or formatting binary data from or for wormhole: {}", e),
             Utf8(e) => write!(f, "error parsing utf8 bytes from wormhole: {}", e),
             AlreadyDisconnected => write!(
                 f,
@@ -332,6 +334,11 @@ impl From<WsClientError> for WormholeError {
 impl From<serde_json::Error> for WormholeError {
     fn from(e: serde_json::Error) -> WormholeError {
         WormholeError::Serde(e)
+    }
+}
+impl From<bincode::Error> for WormholeError {
+    fn from(e: bincode::Error) -> WormholeError {
+        WormholeError::Bincode(e)
     }
 }
 
@@ -504,7 +511,7 @@ impl Handler<SendAsk> for ServerConnection {
                 let msg = AskMessage { ask, ask_id };
                 trace!("sending ask message: {:#?}", msg);
 
-                s.write(Message::Text(serde_json::to_string(&msg)?))?;
+                s.write(Message::Binary(bincode::serialize(&msg)?.into()))?;
 
                 trace!("ask sent");
                 self.asks_sent += 1;
@@ -542,18 +549,18 @@ impl Handler<Connect> for ServerConnection {
 
         let (tx, rx) = oneshot::channel::<WormholeResult<()>>();
         self.user = Some(user_id.clone());
-        let req = &EstablishWormholeRequest { user_id };
 
         ctx.spawn(
             client()
-                .ws(format!("{}/{}", *SERVER_URL, "wormhole"))
+                .ws(format!("{}/api/{}", *SERVER_URL, "wormhole"))
                 .header(
-                    "EstablishWormholeRequest",
-                    match serde_json::to_string(req) {
+                    "WormholeUser",
+                    match serde_json::to_string(&user_id) {
                         Err(e) => return Box::pin(async move { Err(e.into()) }),
                         Ok(j) => j,
                     },
                 )
+                .header("WormholeOrifice", "\"Bincode\"")
                 .connect()
                 .into_actor(self)
                 .then(|res, act, ctx| {
@@ -587,10 +594,8 @@ impl Handler<Connect> for ServerConnection {
 impl StreamHandler<Result<Frame, WsProtocolError>> for ServerConnection {
     fn handle(&mut self, msg: Result<Frame, WsProtocolError>, _: &mut Context<Self>) {
         self.notes.push_back(match msg {
-            Ok(Frame::Text(s)) => {
-                let note: WormholeResult<Note> = std::str::from_utf8(&s)
-                    .map_err(|e| WormholeError::Utf8(e))
-                    .and_then(|s| serde_json::from_str(&s).map_err(|e| e.into()));
+            Ok(Frame::Binary(b)) => {
+                let note: WormholeResult<Note> = bincode::deserialize(&b).map_err(|e| e.into());
 
                 if let Ok(ref note) = note {
                     // Handlers that want to consume this note can simply consume it,

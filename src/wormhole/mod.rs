@@ -18,17 +18,9 @@ pub const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
 /// How long before lack of server response causes a timeout
 pub const SERVER_TIMEOUT: Duration = Duration::from_secs(25);
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-/// Format for requesting that a wormhole connection be established
-pub struct EstablishWormholeRequest {
-    /// The uuid of the user to be associated with this wormhole connection;
-    /// only events relevant to this user will be transferred through.
-    pub user_id: crate::UserId,
-}
-
 type StrResult<T> = Result<T, String>;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 /// AskedNotes are immediate responses to things explicitly requested by the client using an
 /// AskMessage.
 pub enum AskedNote {
@@ -75,7 +67,7 @@ impl AskedNote {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 /// Rude Notes aren't responses to any particular Ask from the client,
 /// they sort of barge in unnanounced.
 pub enum RudeNote {
@@ -101,21 +93,27 @@ pub enum RudeNote {
 
 /// Like a notification, but cuter; a tidbit of information that the server
 /// thinks you might have a special interest in.
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 pub enum Note {
     Rude(RudeNote),
-    /// The bytes of a serde_diff::Diff describing changes to your hackstead.
-    /// Embedding these in other structs to serialize them is unfortunately impossible due to the
-    /// way serde_diff is currently designed, so we miss out on compile time checks that this
-    /// Vec<u8> is, indeed, a real Diff.
-    Edit(Vec<u8>),
+    Edit(EditNote),
     Asked {
         note: AskedNote,
         ask_id: usize,
     },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+/// The bytes of a [`Diff`](serde_dif::Diff) describing changes to your hackstead.
+/// Embedding these in other structs to serialize them is unfortunately impossible due to the
+/// way serde_diff is currently designed, so we miss out on compile time checks that these
+/// Vec<u8>s or Strings are, indeed, real [`Diff`s](serde_dif::Diff).
+#[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
+pub enum EditNote {
+    Bincode(Vec<u8>),
+    Json(String),
+}
+
+#[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 pub enum ItemAsk {
     Spawn {
         item_archetype_handle: usize,
@@ -130,7 +128,7 @@ pub enum ItemAsk {
     },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 pub enum PlantAsk {
     Summon {
         tile_id: TileId,
@@ -150,7 +148,7 @@ pub enum PlantAsk {
 }
 
 /// Something the client wants the server to do
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 pub enum Ask {
     KnowledgeSnort { xp: usize },
     Plant(PlantAsk),
@@ -158,8 +156,20 @@ pub enum Ask {
     TileSummon { tile_redeemable_item_id: ItemId },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 pub struct AskMessage {
     pub ask: Ask,
     pub ask_id: usize,
+}
+
+/// Ask the server to do something in an ill-advised way, particularly where the user you are
+/// acting on the behalf of cannot be inferred.
+#[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
+pub struct Beg {
+    /// Requires a [`SteaderId`](hcor::id::SteaderId) instead of a [`UserId`](hcor::UserId) to make
+    /// this marginally easier to implement server-side; why go out of my way to make doing the
+    /// wrong thing easier?
+    pub steader_id: SteaderId,
+    /// The request to perform.
+    pub ask: Ask,
 }

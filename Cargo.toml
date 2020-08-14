@@ -10,15 +10,16 @@ edition = "2018"
 name = "hcor"
 
 [features]
-hackstead_message_derive = [ "actix" ]
+message_derive = [ "actix" ]
 simultaneous_systems = [ "client", "dashmap" ]
-client = ["awc", "actix", "bytes", "actix-codec", "tokio"]
+client = [ "awc", "actix", "bytes", "actix-codec", "tokio", "bincode" ]
 
 [dependencies]
-# serialize
+# (de)serialize
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde-diff = { git = "https://github.com/crzysdrs/serde-diff.git" }
+bincode = { vesrion = "1.3.1", optional = true }
 
 # misc. util
 uuid = { version = "0.8", features = ["v4", "serde"] }

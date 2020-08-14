@@ -19,7 +19,7 @@ pub mod item;
 pub use item::Item;
 
 #[derive(Clone, Debug, SerdeDiff, Serialize, Deserialize, PartialEq)]
-#[cfg_attr(feature = "hackstead_message_derive", derive(actix::MessageResponse))]
+#[cfg_attr(feature = "message_derive", derive(actix::MessageResponse))]
 pub struct Hackstead {
     pub profile: Profile,
     pub land: Vec<Tile>,
@@ -266,6 +266,7 @@ mod client {
 /// Format for requesting that a new hackstead is made for a user
 pub struct NewHacksteadRequest {
     /// A slack id to be associated with this user, if any.
+    #[serde(default)]
     pub slack_id: Option<String>,
 }
 
