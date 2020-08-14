@@ -25,6 +25,8 @@ pub struct Hackstead {
     pub land: Vec<Tile>,
     pub inventory: Vec<Item>,
     pub timers: Vec<plant::Timer>,
+    #[serde(skip)]
+    pub local_version: usize,
 }
 impl Hackstead {
     pub fn empty(slack_id: Option<impl ToString>) -> Self {
@@ -33,21 +35,19 @@ impl Hackstead {
             land: vec![],
             inventory: vec![],
             timers: vec![],
+            local_version: 0,
         }
     }
 
     pub fn new_user(slack_id: Option<impl ToString>) -> Self {
-        let profile = Profile::new(slack_id.map(|s| s.to_string()));
-        Hackstead {
-            inventory: CONFIG
-                .welcome_gifts()
-                .map(|a| Item::from_archetype(a, profile.steader_id, item::Acquisition::spawned()))
-                .collect::<Result<Vec<_>, _>>()
-                .expect("fresh possession archetypes somehow invalid"),
-            land: vec![Tile::new(profile.steader_id)],
-            timers: vec![],
-            profile,
-        }
+        let mut hs = Hackstead::empty(slack_id);
+        hs.inventory = CONFIG
+            .welcome_gifts()
+            .map(|a| Item::from_archetype(a, hs.profile.steader_id, item::Acquisition::spawned()))
+            .collect::<Result<Vec<_>, _>>()
+            .expect("fresh possession archetypes somehow invalid");
+        hs.land.push(Tile::new(hs.profile.steader_id));
+        hs
     }
 
     /// Returns true if this hackstead has enough xp to redeem another tile of land.

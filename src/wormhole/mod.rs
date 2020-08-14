@@ -23,21 +23,55 @@ type StrResult<T> = Result<T, String>;
 #[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 /// AskedNotes are immediate responses to things explicitly requested by the client using an
 /// AskMessage.
+///
+/// Almost all of these Results have string error messages.
 pub enum AskedNote {
+    /// This event is actually infallible,
+    ///
+    /// Returns the new total xp of the user's stead.
     KnowledgeSnortResult(StrResult<usize>),
+    /// Can fail if this tile is already occupied, among a host of other reasons
+    ///
+    /// Returns the fresh new plant, if successful.
     PlantSummonResult(StrResult<Plant>),
+    /// Can fail if the plant doesn't exist, among a host of other reasons.
+    ///
+    /// Returns the now-deceased planti, if successful.
     PlantSlaughterResult(StrResult<Plant>),
-    /// Expect a CraftFinish later.
+    /// Expect a RudeNote::CraftFinish later.
+    ///
+    /// Can fail if the plant is already crafting something, among a host of other reasons.
+    ///
+    /// Returns the Craft struct added to the plant, if successful.
     PlantCraftStartResult(StrResult<plant::Craft>),
-    /// Expect a RubFinish later, if the item you applied can wear off.
+    /// Expect a RudeNote::RubEffectFinish later, if the item you applied can wear off.
+    ///
+    /// Can fail if the provided item has no rub effects or has no rub effects when applied to this
+    /// plant, among a host of other reasons.
+    ///
+    /// Returns the effect struct, complete with ID and ticks until finish.
     PlantRubStartResult(StrResult<Vec<plant::Effect>>),
+    /// Summoning a tile can fail if the item used isn't configured to do so.
+    ///
+    /// Returns the fresh tile, if successful.
     TileSummonResult(StrResult<Tile>),
+    /// This can fail if an invalid archetype is provided, or if the user is not authorized to
+    /// spawn items.
+    ///
+    /// Returns the list of new items, if successful.
     ItemSpawnResult(StrResult<Vec<Item>>),
+    /// This can fail if the items don't belong to the giver.
+    ///
+    /// Returns the list of new items, complete with updated owner logs.
     ItemThrowResult(StrResult<Vec<Item>>),
+    /// This can fail if the provided item isn't hatchable, among a host of other reasons.
+    ///
+    /// Returns a list of the new items, if successful.
     ItemHatchResult(StrResult<Vec<Item>>),
 }
 
 impl AskedNote {
+    /// Returns an AskedNote's error message, if any
     pub fn err(&self) -> Option<&str> {
         use AskedNote::*;
         // I know this is cursed af, but I wanted to match exhaustively so that the compiler
@@ -71,6 +105,7 @@ impl AskedNote {
 /// Rude Notes aren't responses to any particular Ask from the client,
 /// they sort of barge in unnanounced.
 pub enum RudeNote {
+    /// Identifies the giver and contains a list of items, complete with updated ownership logs.
     ItemThrowReceipt {
         from: SteaderId,
         items: Vec<Item>,
@@ -99,6 +134,10 @@ pub enum Note {
     Edit(EditNote),
     Asked {
         note: AskedNote,
+        /// The id is only stored on the server to be sent back with the AskedNote, and is
+        /// otherwise completely ignored. In other terms, the id is completely arbitrary and exists
+        /// only to make it easier for clients to see which of their Asks a particular AskedNote is
+        /// responding to.
         ask_id: usize,
     },
 }
@@ -115,6 +154,7 @@ pub enum EditNote {
 
 #[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 pub enum ItemAsk {
+    /// This Ask should only be performed by privileged users.
     Spawn {
         item_archetype_handle: usize,
         amount: usize,
@@ -150,6 +190,7 @@ pub enum PlantAsk {
 /// Something the client wants the server to do
 #[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 pub enum Ask {
+    /// This Ask should only be performed by privileged users.
     KnowledgeSnort { xp: usize },
     Plant(PlantAsk),
     Item(ItemAsk),
@@ -159,6 +200,10 @@ pub enum Ask {
 #[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 pub struct AskMessage {
     pub ask: Ask,
+    /// The id is only stored on the server to be sent back with the AskedNote, and is
+    /// otherwise completely ignored. In other terms, the id is completely arbitrary and exists
+    /// only to make it easier for clients to see which of their Asks a particular AskedNote is
+    /// responding to.
     pub ask_id: usize,
 }
 
