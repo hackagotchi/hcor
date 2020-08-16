@@ -1,4 +1,4 @@
-use crate::{config, plant, IdentifiesSteader, ItemId, SteaderId};
+use crate::{config, plant, IdentifiesSteader, ItemId, SteaderId, id::{NoSuch, NoSuchGotchiOnItem, NoSuchResult}};
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 use std::fmt;
@@ -52,8 +52,13 @@ impl fmt::Display for Acquisition {
 pub struct Item {
     pub item_id: ItemId,
     pub owner_id: SteaderId,
+<<<<<<< HEAD
     pub conf: Conf,
     pub gotchi: Option<Gotchi>,
+=======
+    pub archetype_handle: ArchetypeHandle,
+    gotchi: Option<Gotchi>,
+>>>>>>> f24160a... feat: Allow renaming gotchi and plants
     pub ownership_log: Vec<LoggedOwner>,
 }
 
@@ -235,6 +240,10 @@ impl Item {
             item_id,
             gotchi: Some(Gotchi::new(conf)).filter(|_| conf.gotchi.is_some()),
             owner_id: logged_owner_id,
+<<<<<<< HEAD
+=======
+            gotchi: Some(Gotchi::new(ah, item_id)).filter(|_| a.gotchi.is_some()),
+>>>>>>> f24160a... feat: Allow renaming gotchi and plants
             ownership_log: vec![LoggedOwner {
                 owner_index: 0,
                 logged_owner_id,
@@ -249,5 +258,20 @@ impl Item {
             Some(g) => &g.nickname,
             _ => &self.conf.name,
         }
+    }
+
+    pub fn gotchi(&self) -> NoSuchResult<&Gotchi> {
+        Ok(self
+            .gotchi
+            .as_ref()
+            .ok_or_else(|| NoSuch::Gotchi(NoSuchGotchiOnItem(self.owner_id, self.item_id)))?)
+    }
+
+    pub fn gotchi_mut(&mut self) -> NoSuchResult<&mut Gotchi> {
+        let (owner_id, item_id) = (self.owner_id, self.item_id);
+        Ok(self
+            .gotchi
+            .as_mut()
+            .ok_or_else(|| NoSuch::Gotchi(NoSuchGotchiOnItem(owner_id, item_id)))?)
     }
 }

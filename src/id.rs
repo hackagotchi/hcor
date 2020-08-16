@@ -9,7 +9,12 @@ pub enum NoSuch {
     Plant(NoSuchPlantOnTile),
     Item(NoSuchItem),
     Tile(NoSuchTile),
+<<<<<<< HEAD
     Effect(NoSuchRubEffectOnPlant),
+=======
+    Effect(NoSuchEffectOnPlant),
+    Gotchi(NoSuchGotchiOnItem),
+>>>>>>> f24160a... feat: Allow renaming gotchi and plants
 }
 pub type NoSuchResult<T> = Result<T, NoSuch>;
 impl std::error::Error for NoSuch {}
@@ -20,6 +25,7 @@ impl fmt::Display for NoSuch {
             NoSuch::Item(nsi) => write!(f, "{}", nsi),
             NoSuch::Tile(nst) => write!(f, "{}", nst),
             NoSuch::Effect(nseop) => write!(f, "{}", nseop),
+            NoSuch::Gotchi(nsgoi) => write!(f, "{}", nsgoi),
         }
     }
 }
@@ -41,6 +47,11 @@ impl From<NoSuchPlantOnTile> for NoSuch {
 impl From<NoSuchRubEffectOnPlant> for NoSuch {
     fn from(nseon: NoSuchRubEffectOnPlant) -> Self {
         NoSuch::Effect(nseon)
+    }
+}
+impl From<NoSuchGotchiOnItem> for NoSuch {
+    fn from(nsgoi: NoSuchGotchiOnItem) -> Self {
+        NoSuch::Gotchi(nsgoi)
     }
 }
 
@@ -90,6 +101,16 @@ impl fmt::Display for NoSuchRubEffectOnPlant {
                but that plant is missing the effect {}.",
             sr, t, e
         )
+    }
+}
+
+#[derive(Debug)]
+pub struct NoSuchGotchiOnItem(pub SteaderId, pub ItemId);
+impl std::error::Error for NoSuchGotchiOnItem {}
+impl fmt::Display for NoSuchGotchiOnItem {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let Self(sr, i) = self;
+        write!(f, "steader {} has an item {} with no gotchi", sr, i)
     }
 }
 
