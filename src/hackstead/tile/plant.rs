@@ -211,5 +211,21 @@ mod client {
             .await?
             .map_err(|e| ClientError::bad_ask(a, "PlantRub", e))
         }
+        pub async fn rename(&self, new_name: String) -> ClientResult<String> {
+            let a = Ask::Plant(PlantAsk::Nickname {
+                item_id: self.item_id,
+                new_name: new_name,
+            });
+
+            let ask_id = ask(a.clone()).await?;
+
+            until_ask_id_map(ask_id, |n| match n {
+                AskedNote::PlantRenameResult(r) => Some(r),
+                _ => None,
+            })
+            .await?
+            .map_err(|e| ClientError::bad_ask(a, "PlantNickname", e))
+        }
+ 
     }
 }

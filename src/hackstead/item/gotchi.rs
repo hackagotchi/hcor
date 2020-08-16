@@ -13,4 +13,7 @@ impl Gotchi {
             nickname: CONFIG.item(ah).unwrap().name.clone(),
         }
     }
+    pub fn rename(&mut self, new_name: String) {
+     self.nickname = new_name.clone();
+    }
 }
