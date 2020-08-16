@@ -118,10 +118,7 @@ impl AskedNote {
 /// they sort of barge in unnanounced.
 pub enum RudeNote {
     /// Identifies the giver and contains a list of items, complete with updated ownership logs.
-    ItemThrowReceipt {
-        from: SteaderId,
-        items: Vec<Item>,
-    },
+    ItemThrowReceipt { from: SteaderId, items: Vec<Item> },
     YieldFinish {
         items: Vec<Item>,
         xp: i32,
@@ -179,8 +176,8 @@ pub enum ItemAsk {
         hatchable_item_id: ItemId,
     },
     GotchiRename {
-      item_id: ItemId,
-      new_name: String,
+        item_id: ItemId,
+        new_name: String,
     },
 }
 
@@ -202,8 +199,8 @@ pub enum PlantAsk {
         rub_item_id: ItemId,
     },
     Nickname {
-      tile_id: TileId,
-      new_name: String,
+        tile_id: TileId,
+        new_name: String,
     },
 }
 
@@ -211,10 +208,14 @@ pub enum PlantAsk {
 #[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 pub enum Ask {
     /// This Ask should only be performed by privileged users.
-    KnowledgeSnort { xp: usize },
+    KnowledgeSnort {
+        xp: usize,
+    },
     Plant(PlantAsk),
     Item(ItemAsk),
-    TileSummon { tile_redeemable_item_id: ItemId },
+    TileSummon {
+        tile_redeemable_item_id: ItemId,
+    },
 }
 
 #[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]

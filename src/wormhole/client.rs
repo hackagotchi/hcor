@@ -18,9 +18,7 @@ use futures::{
 };
 use log::*;
 
-use super::{
-    Ask, AskMessage, AskedNote, Note, HEARTBEAT_INTERVAL, SERVER_TIMEOUT,
-};
+use super::{Ask, AskMessage, AskedNote, Note, HEARTBEAT_INTERVAL, SERVER_TIMEOUT};
 use crate::{IdentifiesUser, UserId};
 
 type ConnAddr = Addr<ServerConnection>;
@@ -290,7 +288,11 @@ impl fmt::Display for WormholeError {
             Connection(e) => write!(f, "couldn't connect to wormhole: {}", e),
             WebSocket(e) => write!(f, "error communicating with server through wormhole: {}", e),
             Serde(e) => write!(f, "error parsing or formatting from or for wormhole: {}", e),
-            Bincode(e) => write!(f, "error parsing or formatting binary data from or for wormhole: {}", e),
+            Bincode(e) => write!(
+                f,
+                "error parsing or formatting binary data from or for wormhole: {}",
+                e
+            ),
             Utf8(e) => write!(f, "error parsing utf8 bytes from wormhole: {}", e),
             AlreadyDisconnected => write!(
                 f,
