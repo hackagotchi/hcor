@@ -3,6 +3,12 @@
 /// re-export this dependency to make it easier to sync versions
 pub use serde_diff;
 
+// All of the game design switches and levers are handled here, with a focus on how they interact
+// with the rest of the data in the game.
+pub mod config;
+//pub use config::{ConfigError, ConfigResult, CONFIG};
+
+/*
 #[cfg(feature = "client")]
 mod client;
 #[cfg(feature = "client")]
@@ -35,11 +41,6 @@ lazy_static::lazy_static! {
         std::time::Duration::from_nanos(1e9 as u64 / *UPDATES_PER_SECOND);
 }
 
-/// All of the game design switches and levers are handled here, with a focus on how they interact
-/// with the rest of the data in the game.
-pub mod config;
-pub use config::{ConfigError, ConfigResult, CONFIG};
-
 /// What are those Hackagotchi farms made of, anyway?
 pub mod hackstead;
 pub use hackstead::{item, plant, tile, Hackstead, Item, Plant, Tile};
@@ -58,4 +59,4 @@ pub mod frontend {
     pub fn emojify<S: ToString>(txt: S) -> String {
         format!(":{}:", txt.to_string().replace(" ", "_"))
     }
-}
+}*/
