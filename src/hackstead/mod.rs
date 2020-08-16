@@ -87,13 +87,13 @@ impl Hackstead {
     }
 
     pub fn item_mut(&mut self, i: impl IdentifiesItem) -> NoSuchResult<&mut Item> {
-      let item_id = i.item_id();
-      let steader_id = self.steader_id();
-      Ok(self
-          .inventory
-          .iter_mut()
-          .find(|i| i.item_id == item_id)
-          .ok_or_else(|| NoSuchItem(steader_id, item_id))?)
+        let item_id = i.item_id();
+        let steader_id = self.steader_id();
+        Ok(self
+            .inventory
+            .iter_mut()
+            .find(|i| i.item_id == item_id)
+            .ok_or_else(|| NoSuchItem(steader_id, item_id))?)
     }
 
     pub fn take_item(&mut self, i: impl IdentifiesItem) -> NoSuchResult<Item> {
