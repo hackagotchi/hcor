@@ -68,6 +68,14 @@ pub enum AskedNote {
     ///
     /// Returns a list of the new items, if successful.
     ItemHatchResult(StrResult<Vec<Item>>),
+    /// The result of renaming a gotchi
+    ///
+    /// Returns the new name
+    GotchiRenameResult(StrResult<String>),
+    /// Result of renaming a plant
+    ///
+    /// Returns the new name
+    PlantRenameResult(StrResult<String>),
 }
 
 impl AskedNote {
@@ -97,6 +105,10 @@ impl AskedNote {
             ItemThrowResult(Ok(_)) => None,
             ItemHatchResult(Err(e)) => Some(e),
             ItemHatchResult(Ok(_)) => None,
+            GotchiRenameResult(Err(e)) => Some(e),
+            GotchiRenameResult(Ok(_)) => None,
+            PlantRenameResult(Err(e)) => Some(e),
+            PlantRenameResult(Ok(_)) => None,
         }
     }
 }
@@ -166,6 +178,10 @@ pub enum ItemAsk {
     Hatch {
         hatchable_item_id: ItemId,
     },
+    GotchiRename {
+      item_id: ItemId,
+      new_name: String,
+    },
 }
 
 #[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
@@ -184,6 +200,10 @@ pub enum PlantAsk {
     Rub {
         tile_id: TileId,
         rub_item_id: ItemId,
+    },
+    Nickname {
+      tile_id: TileId,
+      new_name: String,
     },
 }
 
