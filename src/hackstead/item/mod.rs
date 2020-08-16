@@ -3,10 +3,12 @@ use config::{Archetype, ArchetypeHandle, ConfigResult};
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 use std::fmt;
+use crate::id::{NoSuch, NoSuchResult, NoSuchGotchiOnItem};
 
 pub mod gotchi;
 
 pub use gotchi::Gotchi;
+
 
 #[derive(SerdeDiff, Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct LoggedOwner {
@@ -54,7 +56,7 @@ pub struct Item {
     pub item_id: ItemId,
     pub owner_id: SteaderId,
     pub archetype_handle: ArchetypeHandle,
-    pub gotchi: Option<Gotchi>,
+    gotchi: Option<Gotchi>,
     pub ownership_log: Vec<LoggedOwner>,
 }
 
@@ -164,4 +166,14 @@ impl Item {
             _ => &self.name,
         }
     }
-}
+
+    pub fn gotchi(&self) -> NoSuchResult<&Gotchi> {
+     
+     Ok(self.gotchi.as_ref().ok_or_else(|| NoSuch::Gotchi(NoSuchGotchiOnItem(self.owner_id, self.item_id)))?)
+    }
+
+    pub fn gotchi_mut(&mut self) -> NoSuchResult<&mut Gotchi> {
+      let (owner_id, item_id) = (self.owner_id, self.item_id);
+      Ok(self.gotchi.as_mut().ok_or_else( | | NoSuch::Gotchi(NoSuchGotchiOnItem(owner_id, item_id)))?)
+    }
+  }
