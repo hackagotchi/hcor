@@ -150,7 +150,7 @@ impl Item {
             item_id,
             archetype_handle: ah,
             owner_id: logged_owner_id,
-            gotchi: Some(Gotchi::new(ah)).filter(|_| a.gotchi.is_some()),
+            gotchi: Some(Gotchi::new(ah, item_id)).filter(|_| a.gotchi.is_some()),
             ownership_log: vec![LoggedOwner {
                 owner_index: 0,
                 logged_owner_id,

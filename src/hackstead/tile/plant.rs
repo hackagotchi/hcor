@@ -1,5 +1,4 @@
-use crate::{
-    config,
+use crate::{ config,
     id::{NoSuchEffectOnPlant, NoSuchResult},
     IdentifiesSteader, IdentifiesTile, SteaderId, TileId,
 };
@@ -213,7 +212,7 @@ mod client {
         }
         pub async fn rename(&self, new_name: String) -> ClientResult<String> {
             let a = Ask::Plant(PlantAsk::Nickname {
-                item_id: self.item_id,
+                tile_id: self.tile_id,
                 new_name: new_name,
             });
 
