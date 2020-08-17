@@ -129,6 +129,12 @@ impl Config {
             .iter()
             .filter_map(|a| Some((a.seed.as_ref()?, a)))
     }
+    pub fn gotchi(&self) -> impl Iterator<Item = (&GotchiArchetype, &Archetype)> {
+        self.possession_archetypes
+            .iter()
+            .filter_map(|a| Some((a.gotchi.as_ref()?, a)))
+    }
+
 
     pub fn land_unlockers(&self) -> impl Iterator<Item = (&LandUnlock, &Archetype)> {
         self.possession_archetypes
