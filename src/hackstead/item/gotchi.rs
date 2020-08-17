@@ -28,7 +28,7 @@ mod client {
     };
 
     impl Gotchi {
-        pub async fn rename(&mut self, new_name: String) -> ClientResult<String> {
+        pub async fn rename(&self, new_name: String) -> ClientResult<String> {
             let a = Ask::Item(ItemAsk::GotchiRename {
                 item_id: self.item_id,
                 new_name,
