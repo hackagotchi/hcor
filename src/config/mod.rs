@@ -129,6 +129,7 @@ impl Config {
             .iter()
             .filter_map(|a| Some((a.seed.as_ref()?, a)))
     }
+
     pub fn gotchi(&self) -> impl Iterator<Item = (&GotchiArchetype, &Archetype)> {
         self.possession_archetypes
             .iter()
