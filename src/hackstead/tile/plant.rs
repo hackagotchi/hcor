@@ -1,4 +1,5 @@
-use crate::{ config,
+use crate::{
+    config,
     id::{NoSuchEffectOnPlant, NoSuchResult},
     IdentifiesSteader, IdentifiesTile, SteaderId, TileId,
 };
@@ -225,6 +226,5 @@ mod client {
             .await?
             .map_err(|e| ClientError::bad_ask(a, "PlantNickname", e))
         }
- 
     }
 }
