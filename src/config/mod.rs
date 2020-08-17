@@ -135,7 +135,6 @@ impl Config {
             .filter_map(|a| Some((a.gotchi.as_ref()?, a)))
     }
 
-
     pub fn land_unlockers(&self) -> impl Iterator<Item = (&LandUnlock, &Archetype)> {
         self.possession_archetypes
             .iter()
