@@ -68,7 +68,14 @@ lazy_static::lazy_static! {
                     let merged = yaml_merge_keys::merge_keys_serde(value)
                         .unwrap_or_else(|e| fatal!("\nI don't like your Item YAML merge keys in {}: {}", pd, e));
                     let mut contents: Vec<item::RawConfig> = serde_yaml::from_value(merged)
-                        .unwrap_or_else(|e| fatal!("\nI don't like your Item YAML {}: {}", pd, e));
+                        .unwrap_or_else(|e| {
+                            let mut err = format!("\nI don't like your Item YAML in {}\n", pd);
+                            if let Err(e) = serde_yaml::from_str::<Vec<item::RawConfig>>(&file) {
+                                err.push_str(&format!("\npossible error with line numbers: {}\n", e));
+                            }
+                            err.push_str(&format!("\nline numberless error: {}", e));
+                            fatal!("{}", err)
+                        });
                     info!("I like all {} items in {}!", contents.len(), pd);
                     items.append(&mut contents);
                 }

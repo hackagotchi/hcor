@@ -336,26 +336,38 @@ pub enum RawEffectConfigKind {
     Buff(RawBuff),
     /// Should get verified into a Conf pointing to a valid plant.
     Transmogrification(String),
+    Art {
+        file: String,
+        precedence: usize,
+    },
+    Title(String)
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EffectConfigKind {
     Buff(Buff),
     Transmogrification(Conf),
+    Art {
+        file: String,
+        precedence: usize,
+    },
+    Title(String)
 }
 
 impl config::Verify for RawEffectConfig {
     type Verified = EffectConfig;
     fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+        use EffectConfigKind::*;
+        use RawEffectConfigKind as Raw;
         Ok(EffectConfig {
             effect_description: self.effect_description,
             for_plants: self.for_plants.verify(raw)?,
             duration: self.duration,
             kind: match self.kind {
-                RawEffectConfigKind::Buff(b) => EffectConfigKind::Buff(b.verify(raw)?),
-                RawEffectConfigKind::Transmogrification(plant_name) => {
-                    EffectConfigKind::Transmogrification(raw.plant_conf(&plant_name)?)
-                }
+                Raw::Buff(b) => Buff(b.verify(raw)?),
+                Raw::Transmogrification(plant_name) => Transmogrification(raw.plant_conf(&plant_name)?),
+                Raw::Art { file, precedence } => Art { file, precedence },
+                Raw::Title(title) => Title(title),
             },
         })
     }

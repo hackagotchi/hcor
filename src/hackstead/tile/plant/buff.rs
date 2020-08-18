@@ -65,19 +65,15 @@ impl config::Verify for RawBuffKind {
 #[serde(deny_unknown_fields)]
 pub struct RawBuff {
     pub kind: RawBuffKind,
-    pub art: String,
     pub title: String,
     pub description: String,
-    pub achiever_title: String,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Buff {
     pub kind: BuffKind,
-    pub art: String,
     pub title: String,
     pub description: String,
-    pub achiever_title: String,
 }
 
 impl config::Verify for RawBuff {
@@ -85,10 +81,8 @@ impl config::Verify for RawBuff {
     fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
         Ok(Buff {
             kind: self.kind.verify(raw)?,
-            art: self.art,
             title: self.title,
             description: self.description,
-            achiever_title: self.achiever_title,
         })
     }
 }
