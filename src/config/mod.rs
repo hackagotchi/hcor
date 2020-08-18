@@ -18,22 +18,20 @@ lazy_static::lazy_static! {
             items: {
                 let mut items = vec![];
 
-                for entry in walkdir::WalkDir::new(&*CONFIG_PATH)
+                for path in walkdir::WalkDir::new(&*CONFIG_PATH)
                     .contents_first(true)
                     .into_iter()
-                    .filter_map(|e| e.ok())
+                    .filter_map(|e| Some(e.ok()?.path().to_owned()))
+                    .filter(|p| p.extension().map(|e| e == "yml" || e == "yaml").unwrap_or(false))
                 {
-                    if entry.metadata().unwrap().is_file() {
-                        let p = entry.path();
-                        let pd = p.display();
-                        items.append(
-                            &mut serde_yaml::from_str(
-                                &fs::read_to_string(p)
-                                    .unwrap_or_else(|e| panic!("Couldn't read your YAML in {}: {}", pd, e))
-                            )
-                            .unwrap_or_else(|e| panic!("I don't like your YAML in {}: {}", pd, e))
+                    let pd = path.display();
+                    items.append(
+                        &mut serde_yaml::from_str(
+                            &fs::read_to_string(&path)
+                                .unwrap_or_else(|e| panic!("Couldn't read your YAML in {}: {}", pd, e))
                         )
-                    }
+                        .unwrap_or_else(|e| panic!("I don't like your YAML in {}: {}", pd, e))
+                    )
                 }
 
                 items
