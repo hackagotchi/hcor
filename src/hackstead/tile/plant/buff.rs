@@ -9,8 +9,8 @@ pub struct Conf(pub(crate) usize);
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(deny_unknown_fields)]
-pub enum RawBuffKind {
-    Neighbor(Box<RawBuffKind>),
+pub enum RawBuff {
+    Neighbor(Box<RawBuff>),
     ExtraTimeTicks(usize),
     TimeTicksMultiplier(f32),
     Xp(f32),
@@ -23,11 +23,15 @@ pub enum RawBuffKind {
     CraftSpeedMultiplier(f32),
     CraftReturnChance(f32),
     DoubleCraftYield(f32),
+    Art {
+        file: String,
+        precedence: usize
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum BuffKind {
-    Neighbor(Box<BuffKind>),
+pub enum Buff {
+    Neighbor(Box<Buff>),
     /// Stores the number of extra cycles to add for the duration of the effect
     ExtraTimeTicks(usize),
     TimeTicksMultiplier(f32),
@@ -39,12 +43,16 @@ pub enum BuffKind {
     CraftSpeedMultiplier(f32),
     CraftReturnChance(f32),
     DoubleCraftYield(f32),
+    Art {
+        file: String,
+        precedence: usize,
+    },
 }
-impl config::Verify for RawBuffKind {
-    type Verified = BuffKind;
+impl config::Verify for RawBuff {
+    type Verified = Buff;
     fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
-        use BuffKind as B;
-        use RawBuffKind::*;
+        use Buff as B;
+        use RawBuff::*;
         Ok(match self {
             Neighbor(b) => B::Neighbor(Box::new(b.verify(raw)?)),
             ExtraTimeTicks(u) => B::ExtraTimeTicks(u),
@@ -57,32 +65,7 @@ impl config::Verify for RawBuffKind {
             CraftSpeedMultiplier(f) => B::CraftSpeedMultiplier(f),
             CraftReturnChance(f) => B::CraftReturnChance(f),
             DoubleCraftYield(f) => B::DoubleCraftYield(f),
-        })
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-#[serde(deny_unknown_fields)]
-pub struct RawBuff {
-    pub kind: RawBuffKind,
-    pub title: String,
-    pub description: String,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Buff {
-    pub kind: BuffKind,
-    pub title: String,
-    pub description: String,
-}
-
-impl config::Verify for RawBuff {
-    type Verified = Buff;
-    fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
-        Ok(Buff {
-            kind: self.kind.verify(raw)?,
-            title: self.title,
-            description: self.description,
+            Art { file, precedence } => B::Art { file, precedence }
         })
     }
 }
@@ -90,25 +73,28 @@ impl config::Verify for RawBuff {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct RawSkill {
+    title: String,
     unlocks: Vec<String>,
-    buff: RawBuff,
+    effects: Vec<super::RawEffectConfig>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Skill {
+    title: String,
     unlocks: Vec<Conf>,
-    buff: Buff,
+    effects: Vec<super::EffectConfig>,
 }
 impl config::Verify for (&[RawSkill], RawSkill) {
     type Verified = Skill;
     fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
         let (skills, rsk) = self;
         Ok(Skill {
+            title: rsk.title,
             unlocks: rsk
                 .unlocks
                 .iter()
                 .map(
-                    |skill_title| match skills.iter().position(|s| s.buff.title == *skill_title) {
+                    |skill_title| match skills.iter().position(|s| s.title == *skill_title) {
                         None => Err(config::VerifError::Custom(format!(
                             "no such skill with title {}",
                             skill_title
@@ -117,7 +103,7 @@ impl config::Verify for (&[RawSkill], RawSkill) {
                     },
                 )
                 .collect::<Result<_, _>>()?,
-            buff: rsk.buff.verify(raw)?,
+            effects: rsk.effects.verify(raw)?,
         })
     }
 }

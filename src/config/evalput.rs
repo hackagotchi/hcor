@@ -1,7 +1,7 @@
 use crate::item;
 use rand::Rng;
 use serde::{
-    de::{self, MapAccess, Visitor},
+    de::{self, MapAccess, SeqAccess, Visitor},
     Deserialize, Serialize,
 };
 use std::fmt;
@@ -41,7 +41,9 @@ pub enum Evalput<I: Clone> {
         Box<Evalput<I>>,
     ),
     Chance(f32, Box<Evalput<I>>),
-    Xp(usize),
+    Xp(
+        #[serde(deserialize_with = "num_or_variant")] Repeats,
+    ),
     Item(I),
 }
 
@@ -119,11 +121,11 @@ impl<I: Clone> Evalput<I> {
                 }
             }
             Chance(chance, body) => {
-                if rand::thread_rng().gen_range(0.0, 1.0) < *chance {
+                if rng.gen_range(0.0, 1.0) < *chance {
                     body.eval(output, rng)
                 }
             }
-            Xp(amount) => output.xp += amount,
+            Xp(amount) => output.xp += amount.eval(rng),
             Item(s) => output.items.push(s.clone()),
         }
     }
@@ -149,7 +151,8 @@ fn num_or_variant<'de, D>(deserializer: D) -> Result<Repeats, D::Error>
 where
     D: serde::de::Deserializer<'de>,
 {
-    use Repeats::Just;
+    use Repeats::*;
+    use de::value::{SeqAccessDeserializer, MapAccessDeserializer};
 
     struct NumOrVariant;
     impl<'de> Visitor<'de> for NumOrVariant {
@@ -158,7 +161,7 @@ where
         fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
             write!(
                 f,
-                "`n` OR `n` OR `Between: [n, n]` where `n` is any positive number"
+                "`n` OR `[n, n]` OR `Just: n` OR `Between: [n, n]` where `n` is any positive number"
             )
         }
 
@@ -172,15 +175,19 @@ where
             Ok(Just(value as f32))
         }
 
+        fn visit_seq<M>(self, seq: M) -> Result<Repeats, M::Error>
+        where
+            M: SeqAccess<'de>,
+        {
+            let (lo, hi) = Deserialize::deserialize(SeqAccessDeserializer::new(seq))?;
+            Ok(Between(lo, hi))
+        }
+
         fn visit_map<M>(self, map: M) -> Result<Repeats, M::Error>
         where
             M: MapAccess<'de>,
         {
-            // `MapAccessDeserializer` is a wrapper that turns a `MapAccess`
-            // into a `Deserializer`, allowing it to be used as the input to T's
-            // `Deserialize` implementation. T then deserializes itself using
-            // the entries from the map visitor.
-            Deserialize::deserialize(de::value::MapAccessDeserializer::new(map))
+            Deserialize::deserialize(MapAccessDeserializer::new(map))
         }
     }
     deserializer.deserialize_any(NumOrVariant)

@@ -31,9 +31,10 @@ impl std::ops::Deref for Conf {
 #[serde(deny_unknown_fields)]
 pub struct RawConfig {
     pub name: String,
+    pub skillpoint_unlock_xps: Vec<usize>,
     #[serde(default)]
     pub base_yield_duration: Option<f32>,
-    pub skillpoint_unlock_xps: Vec<usize>,
+    #[serde(default)]
     pub skills: Vec<RawSkill>,
 }
 
@@ -232,12 +233,22 @@ pub enum RawFilter {
     Not(Vec<String>),
     All,
 }
+impl Default for RawFilter {
+    fn default() -> Self {
+        RawFilter::All
+    }
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Filter {
     Only(Vec<Conf>),
     Not(Vec<Conf>),
     All,
+}
+impl Default for Filter {
+    fn default() -> Self {
+        Filter::All
+    }
 }
 
 impl config::Verify for RawFilter {
@@ -315,60 +326,38 @@ impl config::Verify for RawRecipe {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct RawEffectConfig {
-    pub effect_description: String,
+    pub description: String,
+    pub buff: RawBuff,
+    #[serde(default)]
     pub for_plants: RawFilter,
     #[serde(default)]
     pub duration: Option<f32>,
-    pub kind: RawEffectConfigKind,
+    #[serde(default)]
+    pub transmogrification: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct EffectConfig {
-    pub effect_description: String,
+    pub description: String,
+    pub buff: Buff,
     pub for_plants: Filter,
     pub duration: Option<f32>,
-    pub kind: EffectConfigKind,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-#[serde(deny_unknown_fields)]
-pub enum RawEffectConfigKind {
-    Buff(RawBuff),
-    /// Should get verified into a Conf pointing to a valid plant.
-    Transmogrification(String),
-    Art {
-        file: String,
-        precedence: usize,
-    },
-    Title(String)
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum EffectConfigKind {
-    Buff(Buff),
-    Transmogrification(Conf),
-    Art {
-        file: String,
-        precedence: usize,
-    },
-    Title(String)
+    pub transmogrification: Option<Conf>,
 }
 
 impl config::Verify for RawEffectConfig {
     type Verified = EffectConfig;
     fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
-        use EffectConfigKind::*;
-        use RawEffectConfigKind as Raw;
         Ok(EffectConfig {
-            effect_description: self.effect_description,
+            description: self.description,
+            buff: self.buff.verify(raw)?,
             for_plants: self.for_plants.verify(raw)?,
             duration: self.duration,
-            kind: match self.kind {
-                Raw::Buff(b) => Buff(b.verify(raw)?),
-                Raw::Transmogrification(plant_name) => Transmogrification(raw.plant_conf(&plant_name)?),
-                Raw::Art { file, precedence } => Art { file, precedence },
-                Raw::Title(title) => Title(title),
-            },
+            transmogrification: self
+                .transmogrification
+                .as_ref()
+                .map(|plant_name| raw.plant_conf(plant_name))
+                .transpose()?,
         })
     }
 }
