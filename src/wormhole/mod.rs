@@ -1,4 +1,4 @@
-use crate::{plant, Item, ItemId, Plant, SteaderId, Tile, TileId};
+use crate::{item, plant, Item, ItemId, Plant, SteaderId, Tile, TileId};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
@@ -55,7 +55,7 @@ pub enum AskedNote {
     ///
     /// Returns the fresh tile, if successful.
     TileSummonResult(StrResult<Tile>),
-    /// This can fail if an invalid archetype is provided, or if the user is not authorized to
+    /// This can fail if an invalid item_conf is provided, or if the user is not authorized to
     /// spawn items.
     ///
     /// Returns the list of new items, if successful.
@@ -106,10 +106,7 @@ impl AskedNote {
 /// they sort of barge in unnanounced.
 pub enum RudeNote {
     /// Identifies the giver and contains a list of items, complete with updated ownership logs.
-    ItemThrowReceipt {
-        from: SteaderId,
-        items: Vec<Item>,
-    },
+    ItemThrowReceipt { from: SteaderId, items: Vec<Item> },
     YieldFinish {
         items: Vec<Item>,
         xp: i32,
@@ -156,7 +153,7 @@ pub enum EditNote {
 pub enum ItemAsk {
     /// This Ask should only be performed by privileged users.
     Spawn {
-        item_archetype_handle: usize,
+        item_conf: item::Conf,
         amount: usize,
     },
     Throw {
@@ -191,10 +188,14 @@ pub enum PlantAsk {
 #[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 pub enum Ask {
     /// This Ask should only be performed by privileged users.
-    KnowledgeSnort { xp: usize },
+    KnowledgeSnort {
+        xp: usize,
+    },
     Plant(PlantAsk),
     Item(ItemAsk),
-    TileSummon { tile_redeemable_item_id: ItemId },
+    TileSummon {
+        tile_redeemable_item_id: ItemId,
+    },
 }
 
 #[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]

@@ -1,5 +1,5 @@
 use crate::{
-    config::{self, CONFIG},
+    config,
     id::{NoSuchItem, NoSuchPlantOnTile, NoSuchResult, NoSuchTile},
     IdentifiesItem, IdentifiesPlant, IdentifiesSteader, IdentifiesTile, SteaderId,
 };
@@ -41,22 +41,23 @@ impl Hackstead {
 
     pub fn new_user(slack_id: Option<impl ToString>) -> Self {
         let mut hs = Hackstead::empty(slack_id);
-        hs.inventory = CONFIG
+        hs.inventory = config::CONFIG
             .welcome_gifts()
-            .map(|a| Item::from_archetype(a, hs.profile.steader_id, item::Acquisition::spawned()))
-            .collect::<Result<Vec<_>, _>>()
-            .expect("fresh possession archetypes somehow invalid");
+            .map(|c| Item::from_conf(c.conf, &hs, item::Acquisition::spawned()))
+            .collect();
         hs.land.push(Tile::new(hs.profile.steader_id));
         hs
     }
 
     /// Returns true if this hackstead has enough xp to redeem another tile of land.
     pub fn land_unlock_eligible(&self) -> bool {
+        unreachable!()
+        /*
         let xp_allows = self.profile.advancements_sum().land;
         let extra = self.profile.extra_land_plot_count;
         let eligible = (xp_allows + extra) as usize;
 
-        self.land.len() < eligible
+        self.land.len() < eligible*/
     }
 
     /// Returns an iterator over all tiles which are not occupied by plants.
@@ -217,13 +218,10 @@ mod client {
 
         pub async fn spawn_items(
             &self,
-            item_archetype_handle: crate::config::ArchetypeHandle,
+            item_conf: item::Conf,
             amount: usize,
         ) -> ClientResult<Vec<Item>> {
-            let a = Ask::Item(ItemAsk::Spawn {
-                item_archetype_handle,
-                amount,
-            });
+            let a = Ask::Item(ItemAsk::Spawn { item_conf, amount });
             let ask_id = ask(a.clone()).await?;
 
             until_ask_id_map(ask_id, |n| match n {
@@ -286,13 +284,6 @@ pub struct Profile {
     #[serde_diff(opaque)]
     pub last_farm: DateTime<Utc>,
 }
-impl std::ops::Deref for Profile {
-    type Target = config::ProfileArchetype;
-
-    fn deref(&self) -> &Self::Target {
-        &CONFIG.profile_archetype
-    }
-}
 impl Profile {
     pub fn new(slack_id: Option<String>) -> Self {
         Self {
@@ -304,25 +295,5 @@ impl Profile {
             last_active: Utc::now(),
             last_farm: Utc::now(),
         }
-    }
-
-    // TODO: store xp in advancements so methods like these aren't necessary
-    pub fn current_advancement(&self) -> &config::HacksteadAdvancement {
-        self.advancements.current(self.xp)
-    }
-
-    pub fn next_advancement(&self) -> Option<&config::HacksteadAdvancement> {
-        self.advancements.next(self.xp)
-    }
-
-    pub fn advancements_sum(&self) -> config::HacksteadAdvancementSum {
-        self.advancements.sum(self.xp, std::iter::empty())
-    }
-
-    pub fn increase_xp(&mut self, amt: usize) -> Option<&config::HacksteadAdvancement> {
-        CONFIG
-            .profile_archetype
-            .advancements
-            .increase_xp(&mut self.xp, amt)
     }
 }

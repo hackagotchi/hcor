@@ -1,5 +1,4 @@
-use crate::{config, ItemId, SteaderId, CONFIG};
-use config::{Archetype, ArchetypeHandle, ConfigResult};
+use crate::{config, plant, IdentifiesSteader, ItemId, SteaderId};
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 use std::fmt;
@@ -53,9 +52,102 @@ impl fmt::Display for Acquisition {
 pub struct Item {
     pub item_id: ItemId,
     pub owner_id: SteaderId,
-    pub archetype_handle: ArchetypeHandle,
+    pub conf: Conf,
     pub gotchi: Option<Gotchi>,
     pub ownership_log: Vec<LoggedOwner>,
+}
+
+#[derive(Deserialize, SerdeDiff, Serialize, Debug, PartialEq, Clone, Copy)]
+#[serde(transparent)]
+/// An item::Conf points to an item::Config in the CONFIG lazy_static.
+pub struct Conf(pub(crate) usize);
+
+impl std::ops::Deref for Conf {
+    type Target = Config;
+
+    fn deref(&self) -> &Self::Target {
+        config::CONFIG
+            .items
+            .get(self.0)
+            .as_ref()
+            .expect("invalid item Conf, this is very bad")
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(deny_unknown_fields)]
+pub struct RawConfig {
+    pub name: String,
+
+    pub description: String,
+
+    #[serde(default)]
+    pub gotchi: Option<gotchi::Config>,
+
+    /// This String needs to get verified into a plant::Conf
+    #[serde(default)]
+    pub grows_into: Option<String>,
+
+    #[serde(default)]
+    pub unlocks_land: Option<LandUnlock>,
+
+    #[serde(default)]
+    pub welcome_gift: bool,
+
+    #[serde(default)]
+    /// These raw plant effects need to get verified into plant effects
+    pub passive_plant_effects: Vec<plant::RawEffectConfig>,
+
+    #[serde(default)]
+    /// These raw plant effects need to get verified into plant effects
+    pub plant_rub_effects: Vec<plant::RawEffectConfig>,
+
+    #[serde(default)]
+    /// This RawEvalput needs to have its item names looked up n verified
+    pub hatch_table: Option<config::RawEvalput>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Config {
+    pub name: String,
+    pub description: String,
+    pub conf: Conf,
+    pub gotchi: Option<gotchi::Config>,
+    pub grows_into: Option<plant::Conf>,
+    pub unlocks_land: Option<LandUnlock>,
+    pub welcome_gift: bool,
+    pub passive_plant_effects: Vec<plant::EffectConfig>,
+    pub plant_rub_effects: Vec<plant::EffectConfig>,
+    pub hatch_table: Option<config::Evalput<Conf>>,
+}
+
+impl config::Verify for RawConfig {
+    type Verified = Config;
+
+    fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+        Ok(Config {
+            conf: raw.item_conf(&self.name)?,
+            name: self.name,
+            description: self.description,
+            gotchi: self.gotchi,
+            grows_into: self
+                .grows_into
+                .as_ref()
+                .map(|plant_name| raw.plant_conf(plant_name))
+                .transpose()?,
+            unlocks_land: self.unlocks_land,
+            welcome_gift: self.welcome_gift,
+            passive_plant_effects: self.passive_plant_effects.verify(raw)?,
+            plant_rub_effects: self.plant_rub_effects.verify(raw)?,
+            hatch_table: self.hatch_table.verify(raw)?,
+        })
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(deny_unknown_fields)]
+pub struct LandUnlock {
+    pub requires_xp: bool,
 }
 
 #[cfg(feature = "client")]
@@ -120,48 +212,27 @@ mod client {
     }
 }
 
-impl std::ops::Deref for Item {
-    type Target = Archetype;
-
-    fn deref(&self) -> &Self::Target {
-        CONFIG.item(self.archetype_handle).unwrap()
-    }
-}
-
 impl Item {
-    pub fn from_archetype_handle(
-        ah: ArchetypeHandle,
-        logged_owner_id: SteaderId,
-        acquisition: Acquisition,
-    ) -> ConfigResult<Self> {
-        let a = CONFIG.item(ah)?;
-        Self::from_archetype(a, logged_owner_id, acquisition)
-    }
-
-    pub fn from_archetype(
-        a: &'static Archetype,
-        logged_owner_id: SteaderId,
-        acquisition: Acquisition,
-    ) -> ConfigResult<Self> {
+    pub fn from_conf(conf: Conf, owner: impl IdentifiesSteader, acquisition: Acquisition) -> Self {
+        let logged_owner_id = owner.steader_id();
         let item_id = ItemId(uuid::Uuid::new_v4());
-        let ah = CONFIG.possession_archetype_to_handle(a)?;
-        Ok(Self {
+        Self {
             item_id,
-            archetype_handle: ah,
+            gotchi: Some(Gotchi::new(conf)).filter(|_| conf.gotchi.is_some()),
             owner_id: logged_owner_id,
-            gotchi: Some(Gotchi::new(ah)).filter(|_| a.gotchi.is_some()),
             ownership_log: vec![LoggedOwner {
                 owner_index: 0,
                 logged_owner_id,
                 acquisition,
             }],
-        })
+            conf,
+        }
     }
 
     pub fn nickname(&self) -> &str {
         match &self.gotchi {
             Some(g) => &g.nickname,
-            _ => &self.name,
+            _ => &self.conf.name,
         }
     }
 }

@@ -8,7 +8,6 @@ pub use serde_diff;
 pub mod config;
 //pub use config::{ConfigError, ConfigResult, CONFIG};
 
-/*
 #[cfg(feature = "client")]
 mod client;
 #[cfg(feature = "client")]
@@ -59,4 +58,4 @@ pub mod frontend {
     pub fn emojify<S: ToString>(txt: S) -> String {
         format!(":{}:", txt.to_string().replace(" ", "_"))
     }
-}*/
+}
