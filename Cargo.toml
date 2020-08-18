@@ -26,7 +26,6 @@ uuid = { version = "0.8", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = [ "serde" ] }
 rand = "0.7"
 lazy_static = "1.4"
-log = "0.4"
 
 # client
 awc = { version = "1.0.1", optional = true }
@@ -41,3 +40,7 @@ futures = { version = "0.3.5", optional = true }
 dashmap = { version = "3.11.10", optional = true }
 serde_yaml = "0.8.13"
 walkdir = "2.3.1"
+log = { package = "tao-log", version = "1.0.0" }
+
+[dev-dependencies]
+pretty_env_logger = "0.4.0"

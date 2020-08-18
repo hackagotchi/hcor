@@ -1,5 +1,6 @@
 use crate::{item, plant};
 use std::{fmt, fs};
+use ::log::*;
 
 mod evalput;
 pub use evalput::{Evalput, RawEvalput};
@@ -7,7 +8,7 @@ pub use evalput::{Evalput, RawEvalput};
 lazy_static::lazy_static! {
     pub static ref CONFIG_PATH: String = {
         std::env::var("CONFIG_PATH").unwrap_or_else(|e| {
-            log::warn!("CONFIG_PATH err, defaulting to '../config'. err: {}", e);
+            warn!("CONFIG_PATH err, defaulting to '../config'. err: {}", e);
             "../config".to_string()
         })
     };
@@ -18,32 +19,36 @@ lazy_static::lazy_static! {
             items: {
                 let mut items = vec![];
 
-                for path in walkdir::WalkDir::new(&*CONFIG_PATH)
+                let items_path = format!("{}/items/", &*CONFIG_PATH);
+                info!("\nreading {}", items_path);
+                for path in walkdir::WalkDir::new(items_path)
                     .contents_first(true)
                     .into_iter()
                     .filter_map(|e| Some(e.ok()?.path().to_owned()))
                     .filter(|p| p.extension().map(|e| e == "yml" || e == "yaml").unwrap_or(false))
                 {
                     let pd = path.display();
-                    items.append(
-                        &mut serde_yaml::from_str(
-                            &fs::read_to_string(&path)
-                                .unwrap_or_else(|e| panic!("Couldn't read your YAML in {}: {}", pd, e))
-                        )
-                        .unwrap_or_else(|e| panic!("I don't like your YAML in {}: {}", pd, e))
-                    )
+                    let file = fs::read_to_string(&path).unwrap_or_else(|e| {
+                        fatal!("\nCouldn't read file {}: {}", pd, e)
+                    });
+                    let mut contents: Vec<item::RawConfig> = serde_yaml::from_str(&file)
+                        .unwrap_or_else(|e| fatal!("\nI don't like your YAML in {}: {}", pd, e));
+                    info!("I like all {} items in {}!", contents.len(), pd);
+                    items.append(&mut contents);
                 }
 
                 items
             }
         }
         .verify()
-        .expect("bad")
+        .unwrap_or_else(|e| fatal!("I ran into trouble verifying your config: {}", e))
     };
 }
 
 #[test]
 fn test_lazy() {
+    drop(pretty_env_logger::try_init());
+
     assert!(CONFIG.items.len() > 0);
 }
 
