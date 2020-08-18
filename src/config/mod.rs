@@ -14,25 +14,61 @@ lazy_static::lazy_static! {
     };
 
     pub static ref CONFIG: Config = {
+        fn yml_files(folder: &str) -> impl Iterator<Item = std::path::PathBuf> {
+            let path = format!("{}/{}/", &*CONFIG_PATH, folder);
+            info!("\nreading {}", path);
+            walkdir::WalkDir::new(path)
+                .contents_first(true)
+                .into_iter()
+                .filter_map(|e| Some(e.ok()?.path().to_owned()))
+                .filter(|p| p.extension().map(|e| e == "yml" || e == "yaml").unwrap_or(false))
+        }
+
         RawConfig {
-            plants: vec![],
+            plants: {
+                /*
+                let mut plants = vec![];
+
+                for path in yml_files("plants") {
+                    let pd = path.display();
+                    let plant_name = path.file_stem().unwrap().to_str().unwrap();
+
+                    let skills_p = path.with_file_name(&format!("{}_skills.yml", plant_name));
+                    let skills_pd = skills_p.display();
+                    debug!("found {}, looking for {}", pd, skills_pd);
+                    let skills: Vec<plant::RawSkill> = match fs::read_to_string(&skills_p) {
+                        Ok(s) => {
+                            info!("reading plant config folder at {}", pd);
+                            serde_yaml::from_str(&s)
+                                .unwrap_or_else(|e| {
+                                    fatal!("I don't like your Skill YAML in {}: {}", skills_pd, e)
+                                })
+                        },
+                        Err(e) => {
+                            debug!("couldn't read skills, {} must not be plant folder: {}", pd, e);
+                            continue;
+                        }
+                    };
+                }
+
+                plants
+                */
+                vec![]
+            },
             items: {
                 let mut items = vec![];
 
-                let items_path = format!("{}/items/", &*CONFIG_PATH);
-                info!("\nreading {}", items_path);
-                for path in walkdir::WalkDir::new(items_path)
-                    .contents_first(true)
-                    .into_iter()
-                    .filter_map(|e| Some(e.ok()?.path().to_owned()))
-                    .filter(|p| p.extension().map(|e| e == "yml" || e == "yaml").unwrap_or(false))
-                {
+                for path in yml_files("items") {
                     let pd = path.display();
                     let file = fs::read_to_string(&path).unwrap_or_else(|e| {
                         fatal!("\nCouldn't read file {}: {}", pd, e)
                     });
-                    let mut contents: Vec<item::RawConfig> = serde_yaml::from_str(&file)
-                        .unwrap_or_else(|e| fatal!("\nI don't like your YAML in {}: {}", pd, e));
+                    let value = serde_yaml::from_str(&file)
+                        .unwrap_or_else(|e| fatal!("\nI don't like your Item YAML in {}: {}", pd, e));
+                    let merged = yaml_merge_keys::merge_keys_serde(value)
+                        .unwrap_or_else(|e| fatal!("\nI don't like your Item YAML merge keys in {}: {}", pd, e));
+                    let mut contents: Vec<item::RawConfig> = serde_yaml::from_value(merged)
+                        .unwrap_or_else(|e| fatal!("\nI don't like your Item YAML {}: {}", pd, e));
                     info!("I like all {} items in {}!", contents.len(), pd);
                     items.append(&mut contents);
                 }
