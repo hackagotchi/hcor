@@ -72,7 +72,7 @@ impl RawConfig {
             None => Err(VerifError {
                 kind: VerifErrorKind::UnknownItem(
                     item_name.to_owned(),
-                    self.item_name_corpus.search(item_name, 0.2),
+                    self.item_name_corpus.search(item_name, 0.35),
                 ),
                 source: vec![],
             }),
@@ -129,23 +129,23 @@ impl fmt::Display for VerifErrorKind {
                 f,
                 "referenced item {}, \
                     but no item with this name could be found. \
-                    Perhaps you meant one of: {}?",
+                    Perhaps you meant {}?",
                 i,
                 sr.into_iter()
                     .map(|s| s.text.as_ref())
                     .collect::<Vec<_>>()
-                    .join(", "),
+                    .join(", or "),
             ),
             UnknownPlant(p, sr) => write!(
                 f,
                 "referenced plant {}, \
                     but no plant with this name could be found. \
-                    Perhaps you meant one of: {}?",
+                    Perhaps you meant {}?",
                 p,
                 sr.into_iter()
                     .map(|s| s.text.as_ref())
                     .collect::<Vec<_>>()
-                    .join(", "),
+                    .join(", or "),
             ),
             Custom(s) => write!(f, "{}", s),
         }

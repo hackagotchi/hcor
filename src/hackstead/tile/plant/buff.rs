@@ -118,14 +118,14 @@ impl config::Verify for (&[RawSkill], &ngrammatic::Corpus, RawSkill) {
                     None => Err(config::VerifError::custom(format!(
                         "referenced skill titled {}, \
                             but no skill with this title could be found. \
-                            Perhaps you meant one of: {}?",
+                            Perhaps you meant {}?",
                         skill_title,
                         corpus
                             .search(skill_title, 0.2)
                             .into_iter()
                             .map(|s| s.text)
                             .collect::<Vec<_>>()
-                            .join(", "),
+                            .join(", or "),
                     ))),
                     Some(i) => Ok(Conf(i)),
                 },

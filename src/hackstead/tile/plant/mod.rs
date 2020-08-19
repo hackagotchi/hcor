@@ -315,6 +315,8 @@ impl Filter {
 #[serde(deny_unknown_fields)]
 pub struct RawRecipe {
     pub title: String,
+    /// This needs to get verified into an item::Conf pointing to an item to use the art of
+    pub art: String,
     pub explanation: String,
     #[serde(default)]
     pub destroys_plant: bool,
@@ -328,6 +330,7 @@ pub struct RawRecipe {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Recipe {
     pub title: String,
+    pub art: item::Conf,
     pub explanation: String,
     pub destroys_plant: bool,
     pub time: f32,
@@ -348,6 +351,7 @@ impl config::Verify for RawRecipe {
                 .collect::<config::VerifResult<_>>()
                 .note("in what the recipe needs")?,
             title: self.title,
+            art: raw.item_conf(&self.art).note("in the art field")?,
             explanation: self.explanation,
             destroys_plant: self.destroys_plant,
             time: self.time,
@@ -390,11 +394,14 @@ pub enum EffectConfigKind {
 impl config::Verify for RawEffectConfig {
     type Verified = EffectConfig;
     fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+        use config::VerifNote;
+
         let transmogrification = self
             .transmogrification
             .as_ref()
             .map(|plant_name| raw.plant_conf(plant_name))
-            .transpose()?;
+            .transpose()
+            .note("in the transmogrification field")?;
         let buff = self.buff.clone().verify(raw)?;
 
         Ok(EffectConfig {
