@@ -124,23 +124,27 @@ pub struct Config {
 impl config::Verify for RawConfig {
     type Verified = Config;
 
-    fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+    fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
         Ok(Config {
-            conf: raw.item_conf(&self.name)?,
-            name: self.name,
-            description: self.description,
-            gotchi: self.gotchi,
             grows_into: self
                 .grows_into
                 .as_ref()
                 .map(|plant_name| raw.plant_conf(plant_name))
                 .transpose()?,
+            conf: raw.item_conf(&self.name)?,
+            name: self.name,
+            description: self.description,
+            gotchi: self.gotchi,
             unlocks_land: self.unlocks_land,
             welcome_gift: self.welcome_gift,
             passive_plant_effects: self.passive_plant_effects.verify(raw)?,
             plant_rub_effects: self.plant_rub_effects.verify(raw)?,
             hatch_table: self.hatch_table.verify(raw)?,
         })
+    }
+
+    fn context(&self) -> String {
+        format!("in the item named {}", self.name)
     }
 }
 

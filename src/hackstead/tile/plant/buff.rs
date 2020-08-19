@@ -25,8 +25,8 @@ pub enum RawBuff {
     DoubleCraftYield(f32),
     Art {
         file: String,
-        precedence: usize
-    }
+        precedence: usize,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -50,7 +50,7 @@ pub enum Buff {
 }
 impl config::Verify for RawBuff {
     type Verified = Buff;
-    fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+    fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
         use Buff as B;
         use RawBuff::*;
         Ok(match self {
@@ -65,8 +65,29 @@ impl config::Verify for RawBuff {
             CraftSpeedMultiplier(f) => B::CraftSpeedMultiplier(f),
             CraftReturnChance(f) => B::CraftReturnChance(f),
             DoubleCraftYield(f) => B::DoubleCraftYield(f),
-            Art { file, precedence } => B::Art { file, precedence }
+            Art { file, precedence } => B::Art { file, precedence },
         })
+    }
+
+    fn context(&self) -> String {
+        use RawBuff::*;
+        format!(
+            "in a{} buff",
+            match self {
+                Neighbor(_) => " neighbor",
+                ExtraTimeTicks(_) => "n extra time ticks",
+                TimeTicksMultiplier(_) => " time ticks multiplier",
+                Xp(_) => " xp",
+                YieldSpeedMultiplier(_) => " yield speed multiplier",
+                YieldSizeMultiplier(_) => " yield size multipler",
+                Yield(_) => " yield",
+                Craft(_) => " craft",
+                CraftSpeedMultiplier(_) => " craft speed multiplier",
+                CraftReturnChance(_) => " craft return chance",
+                DoubleCraftYield(_) => " double craft yield",
+                Art { .. } => "n art",
+            }
+        )
     }
 }
 
@@ -86,24 +107,31 @@ pub struct Skill {
 }
 impl config::Verify for (&[RawSkill], RawSkill) {
     type Verified = Skill;
-    fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
-        let (skills, rsk) = self;
+
+    fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+        let (skills, rsk) = &self;
+        let unlocks = rsk
+            .unlocks
+            .iter()
+            .map(
+                |skill_title| match skills.iter().position(|s| s.title == *skill_title) {
+                    None => {
+                        Err(config::VerifError::custom(format!("there's no such skill with title {}", skill_title)))
+                    }
+                    Some(i) => Ok(Conf(i)),
+                },
+            )
+            .collect::<Result<_, _>>()?;
+
+        let (_, rsk) = self;
         Ok(Skill {
+            unlocks,
             title: rsk.title,
-            unlocks: rsk
-                .unlocks
-                .iter()
-                .map(
-                    |skill_title| match skills.iter().position(|s| s.title == *skill_title) {
-                        None => Err(config::VerifError::Custom(format!(
-                            "no such skill with title {}",
-                            skill_title
-                        ))),
-                        Some(i) => Ok(Conf(i)),
-                    },
-                )
-                .collect::<Result<_, _>>()?,
             effects: rsk.effects.verify(raw)?,
         })
+    }
+
+    fn context(&self) -> String {
+        format!("in a skill titled {}", self.1.title.clone())
     }
 }

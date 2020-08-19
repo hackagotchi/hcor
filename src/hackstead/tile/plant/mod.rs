@@ -49,7 +49,8 @@ pub struct Config {
 impl config::Verify for RawConfig {
     type Verified = Config;
 
-    fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+    fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+        println!("verifying raw");
         let skills = self.skills.clone();
         Ok(Config {
             name: self.name,
@@ -61,6 +62,10 @@ impl config::Verify for RawConfig {
                 .map(|rsk| (skills.as_slice(), rsk).verify(raw))
                 .collect::<Result<_, _>>()?,
         })
+    }
+
+    fn context(&self) -> String {
+        format!("in a plant named {}", self.name)
     }
 }
 
@@ -253,19 +258,30 @@ impl Default for Filter {
 
 impl config::Verify for RawFilter {
     type Verified = Filter;
-    fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
-        let ok_or = |these: Vec<String>| {
+    fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+        let ok_or = |these: &[String]| {
             these
                 .iter()
                 .map(|p| raw.plant_conf(p))
                 .collect::<Result<_, _>>()
         };
 
-        Ok(match self {
+        Ok(match &self {
             RawFilter::Only(these) => Filter::Only(ok_or(these)?),
             RawFilter::Not(these) => Filter::Not(ok_or(these)?),
             RawFilter::All => Filter::All,
         })
+    }
+
+    fn context(&self) -> String {
+        format!(
+            "in a {} filter",
+            match self {
+                RawFilter::Only(_) => "only",
+                RawFilter::Not(_) => "not",
+                RawFilter::All => "all",
+            }
+        )
     }
 }
 
@@ -307,19 +323,23 @@ pub struct Recipe {
 
 impl config::Verify for RawRecipe {
     type Verified = Recipe;
-    fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+    fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
         Ok(Recipe {
-            title: self.title,
-            explanation: self.explanation,
-            destroys_plant: self.destroys_plant,
-            time: self.time,
             needs: self
                 .needs
                 .iter()
                 .map(|(n, item_name)| Ok((*n, raw.item_conf(item_name)?)))
                 .collect::<config::VerifResult<_>>()?,
+            title: self.title,
+            explanation: self.explanation,
+            destroys_plant: self.destroys_plant,
+            time: self.time,
             makes: self.makes.verify(raw)?,
         })
+    }
+
+    fn context(&self) -> String {
+        format!("in a recipe named {}", self.title)
     }
 }
 
@@ -327,7 +347,7 @@ impl config::Verify for RawRecipe {
 #[serde(deny_unknown_fields)]
 pub struct RawEffectConfig {
     pub description: String,
-    pub buff: RawBuff,
+    pub buff: Option<RawBuff>,
     #[serde(default)]
     pub for_plants: RawFilter,
     #[serde(default)]
@@ -339,26 +359,47 @@ pub struct RawEffectConfig {
 #[derive(Debug, Clone, PartialEq)]
 pub struct EffectConfig {
     pub description: String,
-    pub buff: Buff,
+    pub kind: EffectConfigKind,
     pub for_plants: Filter,
     pub duration: Option<f32>,
-    pub transmogrification: Option<Conf>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum EffectConfigKind {
+    Buff(Buff),
+    Transmogrification(Conf),
 }
 
 impl config::Verify for RawEffectConfig {
     type Verified = EffectConfig;
-    fn verify(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+    fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+        let transmogrification = self
+            .transmogrification
+            .as_ref()
+            .map(|plant_name| raw.plant_conf(plant_name))
+            .transpose()?;
+        let buff = self.buff.clone().verify(raw)?;
+
         Ok(EffectConfig {
+            kind: match (buff, transmogrification) {
+                (Some(buff), None) => Ok(EffectConfigKind::Buff(buff)),
+                (None, Some(trans)) => Ok(EffectConfigKind::Transmogrification(trans)),
+                (Some(_), Some(_)) => {
+                    Err(config::VerifError::custom("a single effect should not transmog AND buff"))
+                }
+                (None, None) => Err(config::VerifError::custom("an effect should either transmog OR buff")),
+            }?,
             description: self.description,
-            buff: self.buff.verify(raw)?,
             for_plants: self.for_plants.verify(raw)?,
             duration: self.duration,
-            transmogrification: self
-                .transmogrification
-                .as_ref()
-                .map(|plant_name| raw.plant_conf(plant_name))
-                .transpose()?,
         })
+    }
+
+    fn context(&self) -> String {
+        format!(
+            "in an effect described \"{}...\"",
+            &self.description[0..20.min(self.description.len())]
+        )
     }
 }
 

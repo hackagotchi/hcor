@@ -26,8 +26,23 @@ pub type RawEvalput = Evalput<String>;
 impl super::Verify for RawEvalput {
     type Verified = Evalput<item::Conf>;
 
-    fn verify(self, raw: &super::RawConfig) -> super::VerifResult<Self::Verified> {
+    fn verify_raw(self, raw: &super::RawConfig) -> super::VerifResult<Self::Verified> {
         self.ok_or_item(&mut |item_name| raw.item_conf(&item_name))
+    }
+
+    fn context(&self) -> String {
+        use Evalput::*;
+        format!(
+            "in an evalput's {} node",
+            match self {
+                All(_) => "All",
+                OneOf(_) => "OneOf",
+                Amount(_, _) => "Amount",
+                Chance(_, _) => "Chance",
+                Xp(_) => "Xp",
+                Item(_) => "Item",
+            }
+        )
     }
 }
 
@@ -41,9 +56,7 @@ pub enum Evalput<I: Clone> {
         Box<Evalput<I>>,
     ),
     Chance(f32, Box<Evalput<I>>),
-    Xp(
-        #[serde(deserialize_with = "num_or_variant")] Repeats,
-    ),
+    Xp(#[serde(deserialize_with = "num_or_variant")] Repeats),
     Item(I),
 }
 
@@ -151,8 +164,8 @@ fn num_or_variant<'de, D>(deserializer: D) -> Result<Repeats, D::Error>
 where
     D: serde::de::Deserializer<'de>,
 {
+    use de::value::{MapAccessDeserializer, SeqAccessDeserializer};
     use Repeats::*;
-    use de::value::{SeqAccessDeserializer, MapAccessDeserializer};
 
     struct NumOrVariant;
     impl<'de> Visitor<'de> for NumOrVariant {
