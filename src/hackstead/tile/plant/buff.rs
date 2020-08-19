@@ -69,9 +69,9 @@ impl config::Verify for RawBuff {
         })
     }
 
-    fn context(&self) -> String {
+    fn context(&self) -> Option<String> {
         use RawBuff::*;
-        format!(
+        Some(format!(
             "in a{} buff",
             match self {
                 Neighbor(_) => " neighbor",
@@ -87,43 +87,51 @@ impl config::Verify for RawBuff {
                 DoubleCraftYield(_) => " double craft yield",
                 Art { .. } => "n art",
             }
-        )
+        ))
     }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct RawSkill {
-    title: String,
-    unlocks: Vec<String>,
-    effects: Vec<super::RawEffectConfig>,
+    pub title: String,
+    pub unlocks: Vec<String>,
+    pub effects: Vec<super::RawEffectConfig>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Skill {
-    title: String,
-    unlocks: Vec<Conf>,
-    effects: Vec<super::EffectConfig>,
+    pub title: String,
+    pub unlocks: Vec<Conf>,
+    pub effects: Vec<super::EffectConfig>,
 }
-impl config::Verify for (&[RawSkill], RawSkill) {
+impl config::Verify for (&[RawSkill], &ngrammatic::Corpus, RawSkill) {
     type Verified = Skill;
 
     fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
-        let (skills, rsk) = &self;
+        let (skills, corpus, rsk) = self;
         let unlocks = rsk
             .unlocks
             .iter()
             .map(
                 |skill_title| match skills.iter().position(|s| s.title == *skill_title) {
-                    None => {
-                        Err(config::VerifError::custom(format!("there's no such skill with title {}", skill_title)))
-                    }
+                    None => Err(config::VerifError::custom(format!(
+                        "referenced skill titled {}, \
+                            but no skill with this title could be found. \
+                            Perhaps you meant one of: {}?",
+                        skill_title,
+                        corpus
+                            .search(skill_title, 0.2)
+                            .into_iter()
+                            .map(|s| s.text)
+                            .collect::<Vec<_>>()
+                            .join(", "),
+                    ))),
                     Some(i) => Ok(Conf(i)),
                 },
             )
             .collect::<Result<_, _>>()?;
 
-        let (_, rsk) = self;
         Ok(Skill {
             unlocks,
             title: rsk.title,
@@ -131,7 +139,7 @@ impl config::Verify for (&[RawSkill], RawSkill) {
         })
     }
 
-    fn context(&self) -> String {
-        format!("in a skill titled {}", self.1.title.clone())
+    fn context(&self) -> Option<String> {
+        Some(format!("in a skill titled {}", self.2.title.clone()))
     }
 }

@@ -41,10 +41,22 @@ fn test_lazy() {
 }
 
 pub struct RawConfig {
-    plants: Vec<plant::RawConfig>,
+    plants: Vec<FromFile<plant::RawConfig>>,
     plant_name_corpus: ngrammatic::Corpus,
-    items: Vec<item::RawConfig>,
+    items: Vec<FromFile<item::RawConfig>>,
     item_name_corpus: ngrammatic::Corpus,
+}
+impl Default for RawConfig {
+    fn default() -> Self {
+        use ngrammatic::CorpusBuilder;
+
+        Self {
+            plants: vec![],
+            plant_name_corpus: CorpusBuilder::new().finish(),
+            items: vec![],
+            item_name_corpus: CorpusBuilder::new().finish(),
+        }
+    }
 }
 impl RawConfig {
     pub fn verify(&self) -> VerifResult<Config> {
@@ -68,10 +80,7 @@ impl RawConfig {
         }
     }
 
-    pub fn plant_conf(
-        &self,
-        plant_name: &str,
-    ) -> VerifResult<plant::Conf> {
+    pub fn plant_conf(&self, plant_name: &str) -> VerifResult<plant::Conf> {
         match self.plants.iter().position(|i| i.name == plant_name) {
             None => Err(VerifError {
                 kind: VerifErrorKind::UnknownPlant(
@@ -85,6 +94,7 @@ impl RawConfig {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Config {
     pub(crate) plants: Vec<plant::Config>,
     pub(crate) items: Vec<item::Config>,
@@ -117,7 +127,7 @@ impl fmt::Display for VerifErrorKind {
         match self {
             UnknownItem(i, sr) => write!(
                 f,
-                "Config referenced item {}, \
+                "referenced item {}, \
                     but no item with this name could be found. \
                     Perhaps you meant one of: {}?",
                 i,
@@ -128,7 +138,7 @@ impl fmt::Display for VerifErrorKind {
             ),
             UnknownPlant(p, sr) => write!(
                 f,
-                "Config referenced plant {}, \
+                "referenced plant {}, \
                     but no plant with this name could be found. \
                     Perhaps you meant one of: {}?",
                 p,
@@ -173,18 +183,32 @@ impl fmt::Display for VerifError {
 impl std::error::Error for VerifError {}
 pub type VerifResult<T> = Result<T, VerifError>;
 
+pub trait VerifNote {
+    fn note(self, context: impl AsRef<str>) -> Self;
+}
+
+impl<T> VerifNote for VerifResult<T> {
+    fn note(self, context: impl AsRef<str>) -> Self {
+        self.map_err(|mut e| {
+            e.source.push(context.as_ref().to_string());
+            e
+        })
+    }
+}
+
 pub trait Verify: Sized {
     type Verified;
 
     fn verify_raw(self, raw: &RawConfig) -> VerifResult<Self::Verified>;
 
-    fn context(&self) -> String;
+    fn context(&self) -> Option<String>;
 
     fn verify(self, raw: &RawConfig) -> VerifResult<Self::Verified> {
         let context = self.context().clone();
         self.verify_raw(raw).map_err(|mut e| {
-            println!("pushing {}", context);
-            e.source.push(context);
+            if let Some(c) = context {
+                e.source.push(c)
+            }
             e
         })
     }
@@ -197,11 +221,13 @@ impl<V: Verify> Verify for Vec<V> {
         self.into_iter().map(|v| v.verify(raw)).collect()
     }
 
-    fn context(&self) -> String {
-        match self.first() {
-            Some(v) => v.context(),
-            None => String::from("Unknown"),
-        }
+    fn context(&self) -> Option<String> {
+        None
+        /*
+        Some(match self.first().and_then(|e| e.context()) {
+            Some(v) => format!("in a list beginning {}", v),
+            None => "in an empty list".to_string(),
+        })*/
     }
 }
 
@@ -212,10 +238,50 @@ impl<V: Verify> Verify for Option<V> {
         self.map(|v| v.verify(raw)).transpose()
     }
 
-    fn context(&self) -> String {
-        match self {
-            Some(v) => v.context(),
-            None => String::from("Unknown"),
+    fn context(&self) -> Option<String> {
+        None
+    }
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(transparent)]
+pub struct FromFile<V> {
+    pub inner: V,
+    #[serde(skip)]
+    pub file: String,
+}
+impl<V> FromFile<V> {
+    pub fn new(inner: V, file: String) -> Self {
+        Self { inner, file }
+    }
+
+    pub fn map<T>(self, f: impl FnOnce(V) -> T) -> FromFile<T> {
+        FromFile {
+            inner: f(self.inner),
+            file: self.file,
         }
+    }
+}
+impl<V> std::ops::Deref for FromFile<V> {
+    type Target = V;
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+impl<V> std::ops::DerefMut for FromFile<V> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
+}
+
+impl<V: Verify> Verify for FromFile<V> {
+    type Verified = V::Verified;
+
+    fn verify_raw(self, raw: &RawConfig) -> VerifResult<Self::Verified> {
+        self.inner.verify(raw)
+    }
+
+    fn context(&self) -> Option<String> {
+        Some(format!("from a file {}", self.file))
     }
 }

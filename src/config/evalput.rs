@@ -30,9 +30,9 @@ impl super::Verify for RawEvalput {
         self.ok_or_item(&mut |item_name| raw.item_conf(&item_name))
     }
 
-    fn context(&self) -> String {
+    fn context(&self) -> Option<String> {
         use Evalput::*;
-        format!(
+        Some(format!(
             "in an evalput's {} node",
             match self {
                 All(_) => "All",
@@ -42,7 +42,7 @@ impl super::Verify for RawEvalput {
                 Xp(_) => "Xp",
                 Item(_) => "Item",
             }
-        )
+        ))
     }
 }
 

@@ -34,8 +34,14 @@ pub struct RawConfig {
     pub skillpoint_unlock_xps: Vec<usize>,
     #[serde(default)]
     pub base_yield_duration: Option<f32>,
-    #[serde(default)]
-    pub skills: Vec<RawSkill>,
+    #[serde(default = "default_skills")]
+    pub skills: config::FromFile<Vec<RawSkill>>,
+}
+fn default_skills() -> config::FromFile<Vec<RawSkill>> {
+    config::FromFile::new(
+        Default::default(),
+        "please supply a skills file".to_string(),
+    )
 }
 
 #[derive(Debug, Clone)]
@@ -50,22 +56,30 @@ impl config::Verify for RawConfig {
     type Verified = Config;
 
     fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
-        println!("verifying raw");
-        let skills = self.skills.clone();
+        use config::FromFile;
+
+        let corpus = ngrammatic::CorpusBuilder::new()
+            .fill(self.skills.iter().map(|s| s.title.as_ref()))
+            .finish();
+        let skills_ref = self.skills.clone();
+        let FromFile {
+            inner: skills,
+            file,
+        } = self.skills;
+
         Ok(Config {
             name: self.name,
             base_yield_duration: self.base_yield_duration,
             skillpoint_unlock_xps: self.skillpoint_unlock_xps,
-            skills: self
-                .skills
+            skills: skills
                 .into_iter()
-                .map(|rsk| (skills.as_slice(), rsk).verify(raw))
+                .map(|rsk| FromFile::new((skills_ref.as_slice(), &corpus, rsk), file.clone()).verify(raw))
                 .collect::<Result<_, _>>()?,
         })
     }
 
-    fn context(&self) -> String {
-        format!("in a plant named {}", self.name)
+    fn context(&self) -> Option<String> {
+        Some(format!("in a plant named {}", self.name))
     }
 }
 
@@ -273,15 +287,15 @@ impl config::Verify for RawFilter {
         })
     }
 
-    fn context(&self) -> String {
-        format!(
+    fn context(&self) -> Option<String> {
+        Some(format!(
             "in a {} filter",
             match self {
                 RawFilter::Only(_) => "only",
                 RawFilter::Not(_) => "not",
                 RawFilter::All => "all",
             }
-        )
+        ))
     }
 }
 
@@ -324,22 +338,25 @@ pub struct Recipe {
 impl config::Verify for RawRecipe {
     type Verified = Recipe;
     fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+        use config::VerifNote;
+
         Ok(Recipe {
             needs: self
                 .needs
                 .iter()
                 .map(|(n, item_name)| Ok((*n, raw.item_conf(item_name)?)))
-                .collect::<config::VerifResult<_>>()?,
+                .collect::<config::VerifResult<_>>()
+                .note("in what the recipe needs")?,
             title: self.title,
             explanation: self.explanation,
             destroys_plant: self.destroys_plant,
             time: self.time,
-            makes: self.makes.verify(raw)?,
+            makes: self.makes.verify(raw).note("in what the recipe makes")?,
         })
     }
 
-    fn context(&self) -> String {
-        format!("in a recipe named {}", self.title)
+    fn context(&self) -> Option<String> {
+        Some(format!("in a recipe named \"{}\"", self.title))
     }
 }
 
@@ -384,10 +401,12 @@ impl config::Verify for RawEffectConfig {
             kind: match (buff, transmogrification) {
                 (Some(buff), None) => Ok(EffectConfigKind::Buff(buff)),
                 (None, Some(trans)) => Ok(EffectConfigKind::Transmogrification(trans)),
-                (Some(_), Some(_)) => {
-                    Err(config::VerifError::custom("a single effect should not transmog AND buff"))
-                }
-                (None, None) => Err(config::VerifError::custom("an effect should either transmog OR buff")),
+                (Some(_), Some(_)) => Err(config::VerifError::custom(
+                    "a single effect should not transmog AND buff",
+                )),
+                (None, None) => Err(config::VerifError::custom(
+                    "an effect should either transmog OR buff",
+                )),
             }?,
             description: self.description,
             for_plants: self.for_plants.verify(raw)?,
@@ -395,11 +414,11 @@ impl config::Verify for RawEffectConfig {
         })
     }
 
-    fn context(&self) -> String {
-        format!(
+    fn context(&self) -> Option<String> {
+        Some(format!(
             "in an effect described \"{}...\"",
             &self.description[0..20.min(self.description.len())]
-        )
+        ))
     }
 }
 

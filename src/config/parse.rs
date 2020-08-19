@@ -1,19 +1,22 @@
-use super::CONFIG_PATH;
+use super::{FromFile, CONFIG_PATH};
 use crate::{item, plant};
 use ::log::*;
 use serde::de::DeserializeOwned;
 use serde_yaml::Value;
 use std::{fmt, fs};
 
-pub(super) fn read_items() -> Vec<item::RawConfig> {
+pub(super) fn read_items() -> Vec<FromFile<item::RawConfig>> {
     let mut items = vec![];
 
     for path in yml_files("items") {
         let pd = path.display();
         let file = fs::read_to_string(&path)
             .unwrap_or_else(|e| fatal!("\nCouldn't read file {}: {}", pd, e));
-        let mut contents: Vec<item::RawConfig> = parse_and_merge_vec(&file)
-            .unwrap_or_else(|e| fatal!("I don't like your YAML in {}: {}", pd, e));
+        let mut contents: Vec<FromFile<item::RawConfig>> = parse_and_merge_vec(&file)
+            .unwrap_or_else(|e| fatal!("I don't like your YAML in {}: {}", pd, e))
+            .into_iter()
+            .map(|i| FromFile::new(i, pd.to_string()))
+            .collect();
         info!("I like all {} items in {}!", contents.len(), pd);
         items.append(&mut contents);
     }
@@ -21,7 +24,7 @@ pub(super) fn read_items() -> Vec<item::RawConfig> {
     items
 }
 
-pub(super) fn read_plants() -> Vec<plant::RawConfig> {
+pub(super) fn read_plants() -> Vec<FromFile<plant::RawConfig>> {
     let mut plants = vec![];
 
     for path in yml_files("plants") {
@@ -63,8 +66,8 @@ pub(super) fn read_plants() -> Vec<plant::RawConfig> {
         if plant.skills.len() > 0 {
             fatal!("plant skills must be defined in external file");
         }
-        plant.skills = skills;
-        plants.push(plant)
+        plant.skills = FromFile::new(skills, skills_pd.to_string());
+        plants.push(FromFile::new(plant, pd.to_string()))
     }
 
     plants

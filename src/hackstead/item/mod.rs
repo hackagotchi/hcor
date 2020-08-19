@@ -143,8 +143,8 @@ impl config::Verify for RawConfig {
         })
     }
 
-    fn context(&self) -> String {
-        format!("in the item named {}", self.name)
+    fn context(&self) -> Option<String> {
+        Some(format!("in the item named {}", self.name))
     }
 }
 
