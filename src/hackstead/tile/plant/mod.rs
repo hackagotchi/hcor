@@ -73,7 +73,9 @@ impl config::Verify for RawConfig {
             skillpoint_unlock_xps: self.skillpoint_unlock_xps,
             skills: skills
                 .into_iter()
-                .map(|rsk| FromFile::new((skills_ref.as_slice(), &corpus, rsk), file.clone()).verify(raw))
+                .map(|rsk| {
+                    FromFile::new((skills_ref.as_slice(), &corpus, rsk), file.clone()).verify(raw)
+                })
                 .collect::<Result<_, _>>()?,
         })
     }

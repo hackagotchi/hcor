@@ -1,3 +1,4 @@
+use super::{VerifError, VerifResult};
 use crate::item;
 use rand::Rng;
 use serde::{
@@ -18,31 +19,6 @@ impl<I: Clone> Output<I> {
             xp: 0,
             items: vec![],
         }
-    }
-}
-
-pub type RawEvalput = Evalput<String>;
-
-impl super::Verify for RawEvalput {
-    type Verified = Evalput<item::Conf>;
-
-    fn verify_raw(self, raw: &super::RawConfig) -> super::VerifResult<Self::Verified> {
-        self.ok_or_item(&mut |item_name| raw.item_conf(&item_name))
-    }
-
-    fn context(&self) -> Option<String> {
-        use Evalput::*;
-        Some(format!(
-            "in an evalput's {} node",
-            match self {
-                All(_) => "All",
-                OneOf(_) => "OneOf",
-                Amount(_, _) => "Amount",
-                Chance(_, _) => "Chance",
-                Xp(_) => "Xp",
-                Item(_) => "Item",
-            }
-        ))
     }
 }
 
@@ -141,6 +117,95 @@ impl<I: Clone> Evalput<I> {
             Xp(amount) => output.xp += amount.eval(rng),
             Item(s) => output.items.push(s.clone()),
         }
+    }
+}
+
+pub type RawEvalput = Evalput<String>;
+
+impl super::Verify for RawEvalput {
+    type Verified = Evalput<item::Conf>;
+
+    fn verify_raw(self, raw: &super::RawConfig) -> VerifResult<Self::Verified> {
+        use Evalput::*;
+
+        fn err(e: impl AsRef<str>) -> VerifResult<()> {
+            Err(VerifError::custom(e))
+        }
+
+        fn verify_repeats(rpts: &Repeats) -> VerifResult<()> {
+            use Repeats::*;
+
+            if let Just(x) = rpts {
+                if *x == 1.0 {
+                    err("There is no point in repeating something just once.")?;
+                }
+            }
+
+            if let Between(hi, lo) = rpts {
+                if hi == lo {
+                    err("There is no point in having the upper and lower bounds be identical.")?;
+                }
+            }
+
+            Ok(())
+        }
+
+        Ok(match self {
+            All(these) => All(these
+                .into_iter()
+                .map(|i| i.verify(raw))
+                .collect::<VerifResult<_>>()?),
+            OneOf(these) => {
+                if these.iter().map(|(c, _)| c).sum::<f32>() != 1.0 {
+                    err("OneOf chances must add up to 1.0.")?;
+                }
+
+                if these.len() == 1 {
+                    err("There is no point in having a OneOf with only one option.")?;
+                }
+
+                OneOf(
+                    these
+                        .into_iter()
+                        .map(|(c, i)| Ok((c, i.verify(raw)?)))
+                        .collect::<VerifResult<_>>()?,
+                )
+            }
+            Amount(m, body) => {
+                verify_repeats(&m)?;
+                Amount(m, Box::new(body.verify(raw)?))
+            }
+            Chance(c, body) => {
+                if c == 1.0 {
+                    err("There is no point in having a 100% chance like this.")?;
+                }
+                if c > 1.0 {
+                    err("It's impossible to have a greater than 100% chance like this.")?;
+                }
+
+                Chance(c, Box::new(body.verify(raw)?))
+            }
+            Xp(xp) => {
+                verify_repeats(&xp)?;
+                Xp(xp)
+            }
+            Item(i) => Item(raw.item_conf(&i)?),
+        })
+    }
+
+    fn context(&self) -> Option<String> {
+        use Evalput::*;
+        Some(format!(
+            "in an evalput's {} node",
+            match self {
+                All(_) => "All",
+                OneOf(_) => "OneOf",
+                Amount(_, _) => "Amount",
+                Chance(_, _) => "Chance",
+                Xp(_) => "Xp",
+                Item(_) => "Item",
+            }
+        ))
     }
 }
 
@@ -248,4 +313,38 @@ All:
     let output = raw.clone().evaluated(&mut rng);
 
     println!("{:#?}", output);
+}
+
+#[test]
+fn test_one_of_verification() {
+    use super::Verify;
+
+    let raw = super::RawConfig {
+        items: vec![super::FromFile::new(
+            item::RawConfig {
+                name: "pig".to_string(),
+                description: "oink".to_string(),
+                gotchi: None,
+                grows_into: None,
+                hatch_table: None,
+                passive_plant_effects: vec![],
+                plant_rub_effects: vec![],
+                unlocks_land: None,
+                welcome_gift: false,
+            },
+            "test".to_string(),
+        )],
+        ..Default::default()
+    };
+
+    let pig = RawEvalput::Item("pig".to_string());
+    let p = || pig.clone();
+    assert!(RawEvalput::OneOf(vec![(0.1, p())]).verify(&raw).is_err());
+    assert!(RawEvalput::OneOf(vec![(0.1, p()), (0.9, p()), (1.1, p())])
+        .verify(&raw)
+        .is_err());
+    assert!(RawEvalput::OneOf(vec![(1.0, p())]).verify(&raw).is_err());
+    assert!(RawEvalput::OneOf(vec![(0.5, p()), (0.5, p())])
+        .verify(&raw)
+        .is_ok());
 }
