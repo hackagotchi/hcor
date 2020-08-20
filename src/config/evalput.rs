@@ -120,8 +120,10 @@ impl<I: Clone> Evalput<I> {
     }
 }
 
+#[cfg(feature = "config_verify")]
 pub type RawEvalput = Evalput<String>;
 
+#[cfg(feature = "config_verify")]
 impl super::Verify for RawEvalput {
     type Verified = Evalput<item::Conf>;
 
@@ -149,6 +151,7 @@ impl super::Verify for RawEvalput {
 
             Ok(())
         }
+
 
         Ok(match self {
             All(these) => All(these
@@ -315,6 +318,7 @@ All:
     println!("{:#?}", output);
 }
 
+#[cfg(feature = "config_verify")]
 #[test]
 fn test_one_of_verification() {
     use super::Verify;

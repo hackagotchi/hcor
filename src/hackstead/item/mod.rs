@@ -74,7 +74,8 @@ impl std::ops::Deref for Conf {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[cfg(feature = "config_verify")]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct RawConfig {
     pub name: String,
@@ -107,7 +108,7 @@ pub struct RawConfig {
     pub hatch_table: Option<config::RawEvalput>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     pub name: String,
     pub description: String,
@@ -121,6 +122,7 @@ pub struct Config {
     pub hatch_table: Option<config::Evalput<Conf>>,
 }
 
+#[cfg(feature = "config_verify")]
 impl config::Verify for RawConfig {
     type Verified = Config;
 

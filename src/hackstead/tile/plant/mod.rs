@@ -27,7 +27,8 @@ impl std::ops::Deref for Conf {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[cfg(feature = "config_verify")]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct RawConfig {
     pub name: String,
@@ -44,7 +45,7 @@ fn default_skills() -> config::FromFile<Vec<RawSkill>> {
     )
 }
 
-#[derive(Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     pub name: String,
     pub base_yield_duration: Option<f32>,
@@ -52,6 +53,7 @@ pub struct Config {
     pub skills: Vec<Skill>,
 }
 
+#[cfg(feature = "config_verify")]
 impl config::Verify for RawConfig {
     type Verified = Config;
 
@@ -247,7 +249,8 @@ impl std::ops::Deref for Effect {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[cfg(feature = "config_verify")]
+#[derive(Deserialize, Debug, Clone, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub enum RawFilter {
     Only(Vec<String>),
@@ -260,7 +263,7 @@ impl Default for RawFilter {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub enum Filter {
     Only(Vec<Conf>),
     Not(Vec<Conf>),
@@ -272,6 +275,7 @@ impl Default for Filter {
     }
 }
 
+#[cfg(feature = "config_verify")]
 impl config::Verify for RawFilter {
     type Verified = Filter;
     fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
@@ -313,7 +317,8 @@ impl Filter {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[cfg(feature = "config_verify")]
+#[derive(Deserialize, Debug, Clone, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct RawRecipe {
     pub title: String,
@@ -329,7 +334,7 @@ pub struct RawRecipe {
     pub makes: config::RawEvalput,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct Recipe {
     pub title: String,
     pub art: item::Conf,
@@ -340,6 +345,7 @@ pub struct Recipe {
     pub makes: config::Evalput<item::Conf>,
 }
 
+#[cfg(feature = "config_verify")]
 impl config::Verify for RawRecipe {
     type Verified = Recipe;
     fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
@@ -366,7 +372,8 @@ impl config::Verify for RawRecipe {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[cfg(feature = "config_verify")]
+#[derive(Deserialize, Debug, Clone, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct RawEffectConfig {
     pub description: String,
@@ -379,7 +386,7 @@ pub struct RawEffectConfig {
     pub transmogrification: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct EffectConfig {
     pub description: String,
     pub kind: EffectConfigKind,
@@ -387,12 +394,13 @@ pub struct EffectConfig {
     pub duration: Option<f32>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub enum EffectConfigKind {
     Buff(Buff),
     Transmogrification(Conf),
 }
 
+#[cfg(feature = "config_verify")]
 impl config::Verify for RawEffectConfig {
     type Verified = EffectConfig;
     fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {

@@ -7,7 +7,8 @@ use serde::{Deserialize, Serialize};
 /// A skill::Conf points to an skill::Skill on a certain plant's list of Skills
 pub struct Conf(pub(crate) usize);
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[cfg(feature = "config_verify")]
+#[derive(Deserialize, Debug, Clone, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub enum RawBuff {
     Neighbor(Box<RawBuff>),
@@ -29,7 +30,7 @@ pub enum RawBuff {
     },
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub enum Buff {
     Neighbor(Box<Buff>),
     /// Stores the number of extra cycles to add for the duration of the effect
@@ -48,6 +49,7 @@ pub enum Buff {
         precedence: usize,
     },
 }
+#[cfg(feature = "config_verify")]
 impl config::Verify for RawBuff {
     type Verified = Buff;
     fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
@@ -91,7 +93,8 @@ impl config::Verify for RawBuff {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[cfg(feature = "config_verify")]
+#[derive(Deserialize, Debug, Clone, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct RawSkill {
     pub title: String,
@@ -99,12 +102,13 @@ pub struct RawSkill {
     pub effects: Vec<super::RawEffectConfig>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct Skill {
     pub title: String,
     pub unlocks: Vec<Conf>,
     pub effects: Vec<super::EffectConfig>,
 }
+#[cfg(feature = "config_verify")]
 impl config::Verify for (&[RawSkill], &ngrammatic::Corpus, RawSkill) {
     type Verified = Skill;
 
