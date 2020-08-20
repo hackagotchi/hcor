@@ -34,6 +34,7 @@ pub enum Evalput<I: Clone> {
     Chance(f32, Box<Evalput<I>>),
     Xp(#[serde(deserialize_with = "num_or_variant")] Repeats),
     Item(I),
+    Nothing,
 }
 
 impl<I: Clone> Evalput<I> {
@@ -58,6 +59,7 @@ impl<I: Clone> Evalput<I> {
             Chance(c, body) => Chance(c, Box::new(body.map_item(map))),
             Xp(xp) => Xp(xp),
             Item(i) => Item(map(i)),
+            Nothing => Nothing,
         }
     }
 
@@ -82,6 +84,7 @@ impl<I: Clone> Evalput<I> {
             Chance(c, body) => Chance(c, Box::new(body.ok_or_item(ok_or)?)),
             Xp(xp) => Xp(xp),
             Item(i) => Item(ok_or(i)?),
+            Nothing => Nothing,
         })
     }
 
@@ -116,6 +119,7 @@ impl<I: Clone> Evalput<I> {
             }
             Xp(amount) => output.xp += amount.eval(rng),
             Item(s) => output.items.push(s.clone()),
+            Nothing => {},
         }
     }
 }
@@ -193,6 +197,7 @@ impl super::Verify for RawEvalput {
                 Xp(xp)
             }
             Item(i) => Item(raw.item_conf(&i)?),
+            Nothing => Nothing,
         })
     }
 
@@ -207,6 +212,7 @@ impl super::Verify for RawEvalput {
                 Chance(_, _) => "Chance",
                 Xp(_) => "Xp",
                 Item(_) => "Item",
+                Nothing => "Nothing",
             }
         ))
     }
