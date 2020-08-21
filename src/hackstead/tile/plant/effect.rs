@@ -1,10 +1,10 @@
-use std::fmt;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
+use std::fmt;
 
+use super::{Buff, Conf, Filter};
 #[cfg(feature = "config_verify")]
-use super::{RawFilter, RawBuff};
-use super::{Filter, Buff, Conf};
+use super::{RawBuff, RawFilter};
 use crate::{config, item};
 
 #[derive(SerdeDiff, Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash)]

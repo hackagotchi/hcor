@@ -1,6 +1,6 @@
-use serde::{Serialize, Deserialize};
-use serde_diff::SerdeDiff;
 use super::{EffectId, TileId};
+use serde::{Deserialize, Serialize};
+use serde_diff::SerdeDiff;
 
 #[derive(Debug, Clone, Copy, SerdeDiff, Serialize, Deserialize, PartialEq)]
 pub enum TimerKind {

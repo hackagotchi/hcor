@@ -12,7 +12,7 @@ pub use skill::{Buff, Skill};
 pub use skill::{RawBuff, RawSkill};
 
 pub mod effect;
-pub use effect::{EffectId, Effect};
+pub use effect::{Effect, EffectId};
 
 pub mod timer;
 pub use timer::{Timer, TimerKind};
@@ -66,27 +66,23 @@ impl config::Verify for RawConfig {
     type Verified = Config;
 
     fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
-        use config::FromFile;
-
         let corpus = ngrammatic::CorpusBuilder::new()
             .fill(self.skills.iter().map(|s| s.title.as_ref()))
             .finish();
-        let skills_ref = self.skills.clone();
-        let FromFile {
-            inner: skills,
-            file,
-        } = self.skills;
+        let skills_ref = self.skills.inner.clone();
 
         Ok(Config {
             name: self.name,
             base_yield_duration: self.base_yield_duration,
             skillpoint_unlock_xps: self.skillpoint_unlock_xps,
-            skills: skills
-                .into_iter()
-                .map(|rsk| {
-                    FromFile::new((skills_ref.as_slice(), &corpus, rsk), file.clone()).verify(raw)
+            skills: self
+                .skills
+                .map(|s| {
+                    s.into_iter()
+                        .map(|rsk| (skills_ref.as_slice(), &corpus, rsk))
+                        .collect::<Vec<_>>()
                 })
-                .collect::<Result<_, _>>()?,
+                .verify(raw)?,
         })
     }
 
@@ -165,7 +161,6 @@ impl Plant {
             .ok_or_else(|| NoSuchEffectOnPlant(owner_id, tile_id, effect_id))?)
     }
 }
-
 
 #[derive(Debug, Clone, Copy, SerdeDiff, Serialize, Deserialize, PartialEq)]
 pub struct Craft {
