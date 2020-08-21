@@ -7,7 +7,9 @@ mod verify;
 pub use verify::{VerifResult, VerifError, Verify, FromFile, RawConfig, VerifNote, yaml_and_verify};
 
 mod evalput;
-pub use evalput::{Evalput, RawEvalput};
+#[cfg(feature = "config_verify")]
+pub use evalput::RawEvalput;
+pub use evalput::Evalput;
 
 lazy_static::lazy_static! {
     pub static ref CONFIG_PATH: String = {

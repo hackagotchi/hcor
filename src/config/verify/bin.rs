@@ -1,6 +1,8 @@
 use std::fs;
 
 fn main() {
+    pretty_env_logger::init();
+
     match hcor::config::yaml_and_verify() {
         Err(e) => println!("{}", e),
         Ok(config) => {
@@ -15,3 +17,4 @@ fn main() {
         }
     }
 }
+

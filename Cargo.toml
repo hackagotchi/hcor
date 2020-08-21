@@ -12,7 +12,7 @@ name = "hcor"
 [[bin]]
 name = "verify"
 path = "./src/config/verify/bin.rs"
-required-features = [ "config_verify" ]
+required-features = [ "config_verify", "pretty_env_logger" ]
 
 [features]
 config_verify = [ "serde_yaml", "yaml-merge-keys", "ngrammatic" ]
@@ -51,6 +51,7 @@ walkdir = "2.3.1"
 yaml-merge-keys = { version = "0.4.1", features = [ "serde_yaml" ], optional = true }
 serde_yaml = { version = "0.8.13", optional = true }
 ngrammatic = { version = "0.3.1", optional = true }
+pretty_env_logger = { version = "0.4.0", optional = true }
 
 [dev-dependencies]
 pretty_env_logger = "0.4.0"

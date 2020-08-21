@@ -1,4 +1,6 @@
-use super::{RawRecipe, Recipe};
+#[cfg(feature = "config_verify")]
+use super::RawRecipe;
+use super::Recipe;
 use crate::{config, item};
 use serde::{Deserialize, Serialize};
 

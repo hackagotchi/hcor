@@ -7,8 +7,10 @@ use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 use std::fmt;
 
-mod buff;
-pub use buff::{Buff, RawBuff, RawSkill, Skill};
+mod skill;
+#[cfg(feature = "config_verify")]
+pub use skill::{RawBuff, RawSkill};
+pub use skill::{Buff, Skill};
 
 #[derive(Deserialize, SerdeDiff, Serialize, Debug, PartialEq, Clone, Copy)]
 #[serde(transparent)]
@@ -38,6 +40,7 @@ pub struct RawConfig {
     #[serde(default = "default_skills")]
     pub skills: config::FromFile<Vec<RawSkill>>,
 }
+#[cfg(feature = "config_verify")]
 fn default_skills() -> config::FromFile<Vec<RawSkill>> {
     config::FromFile::new(
         Default::default(),
@@ -100,6 +103,7 @@ pub struct Plant {
     pub craft: Option<Craft>,
     /// Effects from potions, warp powder, etc. that actively change the behavior of this plant.
     pub effects: Vec<Effect>,
+    //pub skills_unlocked: Vec<skill::Conf>,
 }
 impl Plant {
     pub fn from_conf(iu: impl IdentifiesSteader, it: impl IdentifiesTile, conf: Conf) -> Self {
@@ -257,6 +261,7 @@ pub enum RawFilter {
     Not(Vec<String>),
     All,
 }
+#[cfg(feature = "config_verify")]
 impl Default for RawFilter {
     fn default() -> Self {
         RawFilter::All

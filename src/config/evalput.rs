@@ -1,11 +1,14 @@
-use super::{VerifError, VerifResult};
-use crate::item;
 use rand::Rng;
 use serde::{
     de::{self, MapAccess, SeqAccess, Visitor},
     Deserialize, Serialize,
 };
 use std::fmt;
+
+#[cfg(feature = "config_verify")]
+use super::{VerifError, VerifResult};
+#[cfg(feature = "config_verify")]
+use crate::item;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -220,14 +223,16 @@ impl super::Verify for RawEvalput {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum Repeats {
-    Just(f32),
-    Between(f32, f32),
+    Exactly(u64),
+    Just(f64),
+    Between(f64, f64),
 }
 impl Repeats {
     pub fn eval(&self, rng: &mut impl Rng) -> usize {
-        let x = match self {
-            &Repeats::Just(u) => u,
-            &Repeats::Between(lo, hi) => rng.gen_range(lo, hi),
+        let x = match *self {
+            Repeats::Exactly(a) => return a as usize,
+            Repeats::Just(u) => u,
+            Repeats::Between(lo, hi) => rng.gen_range(lo, hi),
         };
         let remaining_decimal = x - x.floor();
         let extra = remaining_decimal < rng.gen_range(0.0, 1.0);
@@ -254,12 +259,12 @@ where
 
         #[inline]
         fn visit_u64<E>(self, value: u64) -> Result<Repeats, E> {
-            Ok(Just(value as f32))
+            Ok(Exactly(value))
         }
 
         #[inline]
         fn visit_f64<E>(self, value: f64) -> Result<Repeats, E> {
-            Ok(Just(value as f32))
+            Ok(Just(value))
         }
 
         fn visit_seq<M>(self, seq: M) -> Result<Repeats, M::Error>
@@ -280,6 +285,7 @@ where
     deserializer.deserialize_any(NumOrVariant)
 }
 
+#[cfg(feature = "config_verify")]
 #[test]
 fn test_repeats_deserialize() {
     let mut rng = rand::thread_rng();
@@ -297,6 +303,7 @@ All:
     assert!(output.items.len() >= 3)
 }
 
+#[cfg(feature = "config_verify")]
 #[test]
 fn test_serialize_deeply_nested() {
     let raw: Evalput<String> = serde_yaml::from_str(
