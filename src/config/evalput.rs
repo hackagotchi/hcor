@@ -122,7 +122,7 @@ impl<I: Clone> Evalput<I> {
             }
             Xp(amount) => output.xp += amount.eval(rng),
             Item(s) => output.items.push(s.clone()),
-            Nothing => {},
+            Nothing => {}
         }
     }
 }
@@ -158,7 +158,6 @@ impl super::Verify for RawEvalput {
 
             Ok(())
         }
-
 
         Ok(match self {
             All(these) => All(these

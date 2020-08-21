@@ -4,12 +4,14 @@ use log::*;
 #[cfg(feature = "config_verify")]
 mod verify;
 #[cfg(feature = "config_verify")]
-pub use verify::{VerifResult, VerifError, Verify, FromFile, RawConfig, VerifNote, yaml_and_verify};
+pub use verify::{
+    yaml_and_verify, FromFile, RawConfig, VerifError, VerifNote, VerifResult, Verify,
+};
 
 mod evalput;
+pub use evalput::Evalput;
 #[cfg(feature = "config_verify")]
 pub use evalput::RawEvalput;
-pub use evalput::Evalput;
 
 lazy_static::lazy_static! {
     pub static ref CONFIG_PATH: String = {

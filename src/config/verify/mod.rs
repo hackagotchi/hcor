@@ -1,5 +1,5 @@
 use super::{Config, CONFIG_PATH};
-use crate::{plant, item};
+use crate::{item, plant};
 use std::fmt;
 
 mod parse;

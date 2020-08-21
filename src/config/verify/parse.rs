@@ -10,8 +10,8 @@ pub(super) fn read_items() -> Result<Vec<FromFile<item::RawConfig>>, String> {
 
     for path in yml_files("items") {
         let pd = path.display();
-        let file = fs::read_to_string(&path)
-            .map_err(|e| format!("\nCouldn't read file {}: {}", pd, e))?;
+        let file =
+            fs::read_to_string(&path).map_err(|e| format!("\nCouldn't read file {}: {}", pd, e))?;
         let mut contents: Vec<FromFile<item::RawConfig>> = parse_and_merge_vec(&file)
             .map_err(|e| format!("I don't like your YAML in {}: {}", pd, e))?
             .into_iter()
@@ -43,10 +43,13 @@ pub(super) fn read_plants() -> Result<Vec<FromFile<plant::RawConfig>>, String> {
         let skills: Vec<plant::RawSkill> = match fs::read_to_string(&skills_p) {
             Ok(s) => {
                 debug!("reading plant config folder at {}", pd);
-                let skills = parse_and_merge_vec(&s).map_err(|e| {
-                    format!("I don't like your Skill YAML in {}: {}", skills_pd, e)
-                })?;
-                info!("I'm happy with all {} skills in {}!", skills.len(), skills_pd);
+                let skills = parse_and_merge_vec(&s)
+                    .map_err(|e| format!("I don't like your Skill YAML in {}: {}", skills_pd, e))?;
+                info!(
+                    "I'm happy with all {} skills in {}!",
+                    skills.len(),
+                    skills_pd
+                );
                 skills
             }
             Err(e) => {
@@ -58,8 +61,8 @@ pub(super) fn read_plants() -> Result<Vec<FromFile<plant::RawConfig>>, String> {
             }
         };
 
-        let file = fs::read_to_string(&path)
-            .map_err(|e| format!("\nCouldn't read file {}: {}", pd, e))?;
+        let file =
+            fs::read_to_string(&path).map_err(|e| format!("\nCouldn't read file {}: {}", pd, e))?;
         let mut plant: plant::RawConfig = parse_and_merge(&file)
             .map_err(|e| format!("I don't like your Plant YAML in {}: {}", pd, e))?;
 

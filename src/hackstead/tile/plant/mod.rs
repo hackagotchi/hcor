@@ -8,9 +8,9 @@ use serde_diff::SerdeDiff;
 use std::fmt;
 
 mod skill;
+pub use skill::{Buff, Skill};
 #[cfg(feature = "config_verify")]
 pub use skill::{RawBuff, RawSkill};
-pub use skill::{Buff, Skill};
 
 #[derive(Deserialize, SerdeDiff, Serialize, Debug, PartialEq, Clone, Copy)]
 #[serde(transparent)]
@@ -103,7 +103,7 @@ pub struct Plant {
     pub craft: Option<Craft>,
     /// Effects from potions, warp powder, etc. that actively change the behavior of this plant.
     pub effects: Vec<Effect>,
-    //pub skills_unlocked: Vec<skill::Conf>,
+    pub skills_unlocked: Vec<skill::Conf>,
 }
 impl Plant {
     pub fn from_conf(iu: impl IdentifiesSteader, it: impl IdentifiesTile, conf: Conf) -> Self {
@@ -116,6 +116,7 @@ impl Plant {
             lifetime_rubs: 0,
             craft: None,
             effects: vec![],
+            skills_unlocked: vec![],
         }
     }
 
