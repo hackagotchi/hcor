@@ -194,14 +194,14 @@ impl Buff {
 pub struct RawSkill {
     pub title: String,
     pub unlocks: Vec<String>,
-    pub effects: Vec<super::RawEffectConfig>,
+    pub effects: Vec<super::effect::RawConfig>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct Skill {
     pub title: String,
     pub unlocks: Vec<Conf>,
-    pub effects: Vec<super::EffectConfig>,
+    pub effects: Vec<super::effect::Config>,
 }
 #[cfg(feature = "config_verify")]
 impl config::Verify for (&[RawSkill], &ngrammatic::Corpus, RawSkill) {

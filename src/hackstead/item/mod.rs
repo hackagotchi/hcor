@@ -97,11 +97,11 @@ pub struct RawConfig {
 
     #[serde(default)]
     /// These raw plant effects need to get verified into plant effects
-    pub passive_plant_effects: Vec<plant::RawEffectConfig>,
+    pub passive_plant_effects: Vec<plant::effect::RawConfig>,
 
     #[serde(default)]
     /// These raw plant effects need to get verified into plant effects
-    pub plant_rub_effects: Vec<plant::RawEffectConfig>,
+    pub plant_rub_effects: Vec<plant::effect::RawConfig>,
 
     #[serde(default)]
     /// This RawEvalput needs to have its item names looked up n verified
@@ -117,8 +117,8 @@ pub struct Config {
     pub grows_into: Option<plant::Conf>,
     pub unlocks_land: Option<LandUnlock>,
     pub welcome_gift: bool,
-    pub passive_plant_effects: Vec<plant::EffectConfig>,
-    pub plant_rub_effects: Vec<plant::EffectConfig>,
+    pub passive_plant_effects: Vec<plant::effect::Config>,
+    pub plant_rub_effects: Vec<plant::effect::Config>,
     pub hatch_table: Option<config::Evalput<Conf>>,
 }
 
