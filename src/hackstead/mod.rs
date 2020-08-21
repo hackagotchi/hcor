@@ -165,6 +165,21 @@ impl Hackstead {
         self.plant(p).is_ok()
     }
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Config {
+    advancements: Vec<ConfigAdvancement>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct ConfigAdvancement {
+    advancement_title: String,
+    description: String,
+    achiever_title: String,
+    xp: usize,
+    land_pieces: usize
+}
+
 #[cfg(feature = "client")]
 mod client {
     use super::*;

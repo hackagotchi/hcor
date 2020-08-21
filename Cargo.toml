@@ -12,10 +12,10 @@ name = "hcor"
 [[bin]]
 name = "verify"
 path = "./src/config/verify/bin.rs"
-required-features = [ "config_verify", "pretty_env_logger" ]
+required-features = [ "config_verify" ]
 
 [features]
-config_verify = [ "serde_yaml", "yaml-merge-keys", "ngrammatic" ]
+config_verify = [ "serde_yaml", "yaml-merge-keys", "ngrammatic", "pretty_env_logger" ]
 message_derive = [ "actix" ]
 simultaneous_systems = [ "client", "dashmap" ]
 client = [ "awc", "actix", "bytes", "actix-codec", "tokio", "bincode", "futures" ]
