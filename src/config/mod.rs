@@ -1,4 +1,4 @@
-use crate::{item, plant};
+use crate::{hackstead, item, plant};
 use log::*;
 
 #[cfg(feature = "config_verify")]
@@ -31,10 +31,26 @@ lazy_static::lazy_static! {
     };
 }
 
+pub fn max_level_index(
+    mut your_xp: usize,
+    mut level_xps: impl Iterator<Item = usize>,
+) -> usize {
+    level_xps
+        .position(|xp| match your_xp.checked_sub(xp) {
+            None => true,
+            Some(subbed_xp) => {
+                your_xp = subbed_xp;
+                false
+            }
+        })
+        .unwrap_or(0)
+}
+
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Config {
     pub(crate) plants: Vec<plant::Config>,
     pub(crate) items: Vec<item::Config>,
+    pub(crate) hackstead: hackstead::Config,
 }
 impl Config {
     pub fn welcome_gifts(&self) -> impl Iterator<Item = &item::Config> {

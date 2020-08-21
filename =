@@ -45,16 +45,11 @@ impl Default for RawConfig {
 }
 impl RawConfig {
     pub fn verify(&self) -> VerifResult<Config> {
-        let RawConfig {
-            hackstead,
-            plants,
-            items,
-            ..
-        } = self;
+        let RawConfig { hackstead, plants, items, .. } = self;
         Ok(Config {
             plants: plants.clone().verify(self)?,
             items: items.clone().verify(self)?,
-            hackstead: hackstead.inner.clone(),
+            hackstead,
         })
     }
 

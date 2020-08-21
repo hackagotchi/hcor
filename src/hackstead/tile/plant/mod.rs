@@ -14,7 +14,7 @@ pub use skill::Skill;
 pub mod buff;
 #[cfg(feature = "config_verify")]
 pub use buff::RawBuff;
-pub use buff::{Buff, BuffSum, BuffBook};
+pub use buff::{Buff, BuffBook, BuffSum};
 
 pub mod effect;
 pub use effect::{RubEffect, RubEffectId};

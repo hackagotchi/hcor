@@ -160,7 +160,10 @@ impl BuffSum {
                 &CraftSpeedMultiplier(m) => sum.craft_speed_multiplier *= m,
                 &CraftInputReturnChance(ret) => sum.craft_input_return_chance *= ret,
                 &CraftOutputDoubleChance(dub) => sum.craft_output_double_chance *= dub,
-                &Buff::Art { ref file, precedence } if precedence >= art.precedence => {
+                &Buff::Art {
+                    ref file,
+                    precedence,
+                } if precedence >= art.precedence => {
                     art = Art {
                         file: Some(file.clone()),
                         precedence,
@@ -231,7 +234,8 @@ impl BuffBook {
 
         s.spread_neighbors();
 
-        s.sums = s.plants
+        s.sums = s
+            .plants
             .iter()
             .map(|p| (p.tile, BuffSum::new(p.buffs.iter().map(|(buff, _)| buff))))
             .collect();

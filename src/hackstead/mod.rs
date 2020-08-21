@@ -51,13 +51,19 @@ impl Hackstead {
 
     /// Returns true if this hackstead has enough xp to redeem another tile of land.
     pub fn land_unlock_eligible(&self) -> bool {
-        unreachable!()
-        /*
-        let xp_allows = self.profile.advancements_sum().land;
+        let xp_allows = self.max_land();
         let extra = self.profile.extra_land_plot_count;
-        let eligible = (xp_allows + extra) as usize;
+        let eligible = xp_allows + extra;
 
-        self.land.len() < eligible*/
+        self.land.len() < eligible
+    }
+
+    /// The maximum amount of land this Hackstead is currently able to unlock based on the amount of xp it has.
+    pub fn max_land(&self) -> usize {
+        let lvls = &config::CONFIG.hackstead.advancements;
+        let i = config::max_level_index(self.profile.xp, lvls.iter().map(|lvl| lvl.xp));
+
+        lvls.iter().take(i).map(|adv| adv.land_pieces).sum()
     }
 
     /// Your one stop shop for all of your Plant BuffSum needs!
@@ -166,18 +172,18 @@ impl Hackstead {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default)]
 pub struct Config {
-    advancements: Vec<ConfigAdvancement>,
+    pub advancements: Vec<ConfigAdvancement>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default)]
 pub struct ConfigAdvancement {
     pub advancement_title: String,
     pub description: String,
     pub achiever_title: String,
     pub xp: usize,
-    pub land_pieces: usize
+    pub land_pieces: usize,
 }
 
 #[cfg(feature = "client")]
