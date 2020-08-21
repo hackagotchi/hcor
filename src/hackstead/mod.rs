@@ -173,11 +173,11 @@ pub struct Config {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct ConfigAdvancement {
-    advancement_title: String,
-    description: String,
-    achiever_title: String,
-    xp: usize,
-    land_pieces: usize
+    pub advancement_title: String,
+    pub description: String,
+    pub achiever_title: String,
+    pub xp: usize,
+    pub land_pieces: usize
 }
 
 #[cfg(feature = "client")]

@@ -3,6 +3,7 @@ use std::fs;
 fn main() {
     pretty_env_logger::init();
 
+    let start = std::time::Instant::now();
     match hcor::config::yaml_and_verify() {
         Err(e) => println!("{}", e),
         Ok(config) => {
@@ -16,4 +17,6 @@ fn main() {
             }
         }
     }
+    let elapsed = start.elapsed();
+    log::info!("Elapsed: {:?}", elapsed);
 }
