@@ -27,15 +27,22 @@ impl<I: Clone> Output<I> {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(deny_unknown_fields)]
+pub struct OneOfRow<I: Clone>(
+    #[serde(deserialize_with = "one_of_chance_parse")] OneOfChance,
+    Evalput<I>
+);
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(deny_unknown_fields)]
 pub enum Evalput<I: Clone> {
     All(Vec<Evalput<I>>),
-    OneOf(Vec<(f32, Evalput<I>)>),
+    OneOf(Vec<OneOfRow<I>>),
     Amount(
-        #[serde(deserialize_with = "num_or_variant")] Repeats,
+        #[serde(deserialize_with = "repeats_parse")] Repeats,
         Box<Evalput<I>>,
     ),
-    Chance(f32, Box<Evalput<I>>),
-    Xp(#[serde(deserialize_with = "num_or_variant")] Repeats),
+    Chance(f64, Box<Evalput<I>>),
+    Xp(#[serde(deserialize_with = "repeats_parse")] Repeats),
     Item(I),
     Nothing,
 }
@@ -55,7 +62,7 @@ impl<I: Clone> Evalput<I> {
             OneOf(these) => OneOf(
                 these
                     .into_iter()
-                    .map(|(c, i)| (c, i.map_item(map)))
+                    .map(|OneOfRow(c, i)| OneOfRow(c, i.map_item(map)))
                     .collect(),
             ),
             Amount(m, body) => Amount(m, Box::new(body.map_item(map))),
@@ -80,7 +87,7 @@ impl<I: Clone> Evalput<I> {
             OneOf(these) => OneOf(
                 these
                     .into_iter()
-                    .map(|(c, i)| Ok((c, i.ok_or_item(ok_or)?)))
+                    .map(|OneOfRow(c, i)| Ok(OneOfRow(c, i.ok_or_item(ok_or)?)))
                     .collect::<Result<_, E>>()?,
             ),
             Amount(m, body) => Amount(m, Box::new(body.ok_or_item(ok_or)?)),
@@ -101,10 +108,10 @@ impl<I: Clone> Evalput<I> {
                 }
             }
             OneOf(these) => {
-                let mut r: f32 = rng.gen_range(0.0, 1.0);
-                for (chance, x) in these {
-                    r -= chance;
-                    if r < 0.0 {
+                let mut r: f64 = rng.gen_range(0.0, 1.0);
+                for OneOfRow(chance, x) in these {
+                    r -= chance.chance().unwrap_or(0.0);
+                    if r < 0.0 || chance.is_rest() {
                         x.eval(output, rng);
                         break;
                     }
@@ -165,8 +172,19 @@ impl super::Verify for RawEvalput {
                 .map(|i| i.verify(raw))
                 .collect::<VerifResult<_>>()?),
             OneOf(these) => {
-                if these.iter().map(|(c, _)| c).sum::<f32>() != 1.0 {
-                    err("OneOf chances must add up to 1.0.")?;
+                let has_rest = these.iter().any(|OneOfRow(c, _)| c.is_rest());
+                let adds_up_to = these.iter().filter_map(|OneOfRow(c, _)| c.chance()).sum::<f64>();
+
+                if !(has_rest || adds_up_to == 1.0) {
+                    err("OneOf chances must add up to 1.0 or contain Rest")?;
+                }
+
+                if has_rest && adds_up_to == 1.0 {
+                    err("There is no point in having Rest when the other chances add up to 1.0")?;
+                }
+
+                if adds_up_to > 1.0 {
+                    err("OneOf chances should not exceed 1.0")?;
                 }
 
                 if these.len() == 1 {
@@ -176,7 +194,7 @@ impl super::Verify for RawEvalput {
                 OneOf(
                     these
                         .into_iter()
-                        .map(|(c, i)| Ok((c, i.verify(raw)?)))
+                        .map(|OneOfRow(c, i)| Ok(OneOfRow(c, i.verify(raw)?)))
                         .collect::<VerifResult<_>>()?,
                 )
             }
@@ -238,7 +256,7 @@ impl Repeats {
         x.floor() as usize + extra as usize
     }
 }
-fn num_or_variant<'de, D>(deserializer: D) -> Result<Repeats, D::Error>
+fn repeats_parse<'de, D>(deserializer: D) -> Result<Repeats, D::Error>
 where
     D: serde::de::Deserializer<'de>,
 {
@@ -284,6 +302,63 @@ where
     deserializer.deserialize_any(NumOrVariant)
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+pub enum OneOfChance {
+    Rest,
+    Chance(f64),
+}
+
+impl OneOfChance {
+    fn chance(self) -> Option<f64> {
+        use OneOfChance::*;
+
+        match self {
+            Chance(f) => Some(f),
+            Rest => None,
+        }
+    }
+
+    fn is_rest(&self) -> bool {
+        matches!(self, OneOfChance::Rest)
+    }
+}
+
+fn one_of_chance_parse<'de, D>(deserializer: D) -> Result<OneOfChance, D::Error>
+where
+    D: serde::de::Deserializer<'de>,
+{
+    struct NumOrVariant;
+    impl<'de> Visitor<'de> for NumOrVariant {
+        type Value = OneOfChance;
+
+        fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(
+                f,
+                "`n` OR `Rest` where `n` is any positive decimal less than 1.0"
+            )
+        }
+
+        #[inline]
+        fn visit_f64<E>(self, value: f64) -> Result<OneOfChance, E>
+        where E: de::Error {
+            if 0.0 < value && value < 1.0 {
+                Ok(OneOfChance::Chance(value))
+            } else {
+                Err(de::Error::invalid_value(de::Unexpected::Float(value), &"a float between 0.0 and 1.0, exclusive"))
+            }
+        }
+
+        fn visit_str<E>(self, s: &str) -> Result<OneOfChance, E> where E: de::Error {
+            if s == "Rest" {
+                Ok(OneOfChance::Rest)
+            } else {
+                Err(de::Error::invalid_value(de::Unexpected::Str(s), &"expected Rest"))
+            }
+        }
+    }
+    deserializer.deserialize_any(NumOrVariant)
+}
+
 #[cfg(feature = "config_verify")]
 #[test]
 fn test_repeats_deserialize() {
@@ -311,14 +386,14 @@ All:
   - Amount: [10, OneOf: [
         [0.15, Item: Cupcake],
         [0.15, Item: Strudel],
-        [0.70, Xp: 100],
+        [Rest, Xp: 100],
     ]]
   - Xp: 500
   - Chance: [0.8, All: [
         Item: Lollipop,
         Chance: [0.7, All: [
             Item: Ice Cream,
-            Amount: [ Between: [4, 6], Item: Cupcake],
+            Amount: [ [4, 6], Item: Cupcake],
         ]]
     ]]
     "#,
@@ -353,14 +428,11 @@ fn test_one_of_verification() {
         ..Default::default()
     };
 
-    let pig = RawEvalput::Item("pig".to_string());
-    let p = || pig.clone();
-    assert!(RawEvalput::OneOf(vec![(0.1, p())]).verify(&raw).is_err());
-    assert!(RawEvalput::OneOf(vec![(0.1, p()), (0.9, p()), (1.1, p())])
-        .verify(&raw)
-        .is_err());
-    assert!(RawEvalput::OneOf(vec![(1.0, p())]).verify(&raw).is_err());
-    assert!(RawEvalput::OneOf(vec![(0.5, p()), (0.5, p())])
+    let parse = |s| serde_yaml::from_str::<Evalput<String>>(s);
+    assert!(parse(r#"OneOf: [ [0.1, Item: pig] ]"#).unwrap().verify(&raw).is_err());
+    assert!(parse(r#"OneOf: [ [0.1, Item: pig], [0.9, Item: pig], [1.1, Item: pig]]"#).is_err());
+    assert!(parse(r#"OneOf: [ [1.0, Item: pig] ]"#).is_err());
+    assert!(parse(r#"OneOf: [ [0.5, Item: pig], [0.5, Item: pig]]"#).unwrap()
         .verify(&raw)
         .is_ok());
 }

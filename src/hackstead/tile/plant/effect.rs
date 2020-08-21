@@ -19,41 +19,25 @@ impl fmt::Display for RubEffectId {
 }
 
 #[derive(Debug, Clone, Copy, SerdeDiff, Serialize, Deserialize, PartialEq)]
-pub enum Origin {
-    Passive,
-    Rub,
-}
-
-#[derive(Debug, Clone, Copy, SerdeDiff, Serialize, Deserialize, PartialEq)]
 pub struct RubEffect {
     /// Records whether this is the first, second, third, etc. effect to be rubbed onto this plant.
     pub effect_id: RubEffectId,
     /// The conf of the item that was consumed to apply this effect.
     pub item_conf: item::Conf,
     /// The handle of the effect within this item that describes this effect.
-    pub effect_archetype_handle: usize,
-    /// How does an item give off this effect?
-    pub origin: Origin,
+    pub effect_conf: usize,
 }
 
 impl std::ops::Deref for RubEffect {
     type Target = Config;
 
     fn deref(&self) -> &Self::Target {
-        match self.origin {
-            Origin::Rub => self
-                .item_conf
-                .plant_rub_effects
-                .get(self.effect_archetype_handle)
-                .as_ref()
-                .expect("invalid rub effect_archetype_handle, this is pretty bad"),
-            Origin::Passive => self
-                .item_conf
-                .passive_plant_effects
-                .get(self.effect_archetype_handle)
-                .as_ref()
-                .expect("invalid passive effect_archetype_handle, this is pretty bad"),
-        }
+        self
+            .item_conf
+            .plant_rub_effects
+            .get(self.effect_conf)
+            .as_ref()
+            .expect("invalid rub effect_conf, this is pretty bad")
     }
 }
 
