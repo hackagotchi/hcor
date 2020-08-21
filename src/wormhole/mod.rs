@@ -50,7 +50,7 @@ pub enum AskedNote {
     /// plant, among a host of other reasons.
     ///
     /// Returns the effect struct, complete with ID and ticks until finish.
-    PlantRubStartResult(StrResult<Vec<plant::Effect>>),
+    PlantRubStartResult(StrResult<Vec<plant::RubEffect>>),
     /// Summoning a tile can fail if the item used isn't configured to do so.
     ///
     /// Returns the fresh tile, if successful.
@@ -118,7 +118,7 @@ pub enum RudeNote {
         tile_id: TileId,
     },
     RubEffectFinish {
-        effect: plant::Effect,
+        effect: plant::RubEffect,
         tile_id: TileId,
     },
 }

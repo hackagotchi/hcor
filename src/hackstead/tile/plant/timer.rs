@@ -1,4 +1,4 @@
-use super::{EffectId, TileId};
+use super::{RubEffectId, TileId};
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 
@@ -6,7 +6,7 @@ use serde_diff::SerdeDiff;
 pub enum TimerKind {
     Yield,
     Craft { recipe_index: usize },
-    Rub { effect_id: EffectId },
+    Rub { effect_id: RubEffectId },
 }
 
 #[derive(Debug, Clone, Copy, SerdeDiff, Serialize, Deserialize, PartialEq)]

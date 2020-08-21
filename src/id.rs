@@ -1,4 +1,4 @@
-use crate::plant::EffectId;
+use crate::plant::RubEffectId;
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 use std::fmt;
@@ -9,7 +9,7 @@ pub enum NoSuch {
     Plant(NoSuchPlantOnTile),
     Item(NoSuchItem),
     Tile(NoSuchTile),
-    Effect(NoSuchEffectOnPlant),
+    Effect(NoSuchRubEffectOnPlant),
 }
 pub type NoSuchResult<T> = Result<T, NoSuch>;
 impl std::error::Error for NoSuch {}
@@ -38,8 +38,8 @@ impl From<NoSuchPlantOnTile> for NoSuch {
         NoSuch::Plant(nspot)
     }
 }
-impl From<NoSuchEffectOnPlant> for NoSuch {
-    fn from(nseon: NoSuchEffectOnPlant) -> Self {
+impl From<NoSuchRubEffectOnPlant> for NoSuch {
+    fn from(nseon: NoSuchRubEffectOnPlant) -> Self {
         NoSuch::Effect(nseon)
     }
 }
@@ -79,9 +79,9 @@ impl fmt::Display for NoSuchPlantOnTile {
 }
 
 #[derive(Debug)]
-pub struct NoSuchEffectOnPlant(pub SteaderId, pub TileId, pub EffectId);
-impl std::error::Error for NoSuchEffectOnPlant {}
-impl fmt::Display for NoSuchEffectOnPlant {
+pub struct NoSuchRubEffectOnPlant(pub SteaderId, pub TileId, pub RubEffectId);
+impl std::error::Error for NoSuchRubEffectOnPlant {}
+impl fmt::Display for NoSuchRubEffectOnPlant {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let Self(sr, t, e) = self;
         write!(

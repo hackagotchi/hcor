@@ -10,9 +10,9 @@ use crate::{config, item};
 #[derive(SerdeDiff, Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash)]
 #[serde(transparent)]
 #[serde_diff(opaque)]
-pub struct EffectId(pub uuid::Uuid);
+pub struct RubEffectId(pub uuid::Uuid);
 
-impl fmt::Display for EffectId {
+impl fmt::Display for RubEffectId {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
     }
@@ -25,9 +25,9 @@ pub enum Origin {
 }
 
 #[derive(Debug, Clone, Copy, SerdeDiff, Serialize, Deserialize, PartialEq)]
-pub struct Effect {
+pub struct RubEffect {
     /// Records whether this is the first, second, third, etc. effect to be rubbed onto this plant.
-    pub effect_id: EffectId,
+    pub effect_id: RubEffectId,
     /// The conf of the item that was consumed to apply this effect.
     pub item_conf: item::Conf,
     /// The handle of the effect within this item that describes this effect.
@@ -36,7 +36,7 @@ pub struct Effect {
     pub origin: Origin,
 }
 
-impl std::ops::Deref for Effect {
+impl std::ops::Deref for RubEffect {
     type Target = Config;
 
     fn deref(&self) -> &Self::Target {
@@ -83,6 +83,15 @@ pub struct Config {
 pub enum ConfigKind {
     Buff(Buff),
     Transmogrification(Conf),
+}
+
+impl ConfigKind {
+    pub fn buff(&self) -> Option<&Buff> {
+        match self {
+            ConfigKind::Buff(b) => Some(b),
+            _ => None,
+        }
+    }
 }
 
 #[cfg(feature = "config_verify")]

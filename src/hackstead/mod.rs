@@ -60,6 +60,11 @@ impl Hackstead {
         self.land.len() < eligible*/
     }
 
+    /// Your one stop shop for all of your Plant BuffSum needs!
+    pub fn buff_book(&self) -> plant::BuffBook {
+        plant::BuffBook::new(&self)
+    }
+
     /// Returns an iterator over all tiles which are not occupied by plants.
     pub fn free_tiles(&self) -> impl Iterator<Item = &Tile> {
         self.land.iter().filter(|t| t.plant.is_none())

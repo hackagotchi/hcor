@@ -1,18 +1,23 @@
 use crate::{
     config,
-    id::{NoSuchEffectOnPlant, NoSuchResult},
-    item, IdentifiesSteader, IdentifiesTile, SteaderId, TileId,
+    id::{NoSuchResult, NoSuchRubEffectOnPlant},
+    item, Hackstead, IdentifiesSteader, IdentifiesTile, SteaderId, TileId,
 };
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 
 mod skill;
-pub use skill::{Buff, Skill};
 #[cfg(feature = "config_verify")]
-pub use skill::{RawBuff, RawSkill};
+pub use skill::RawSkill;
+pub use skill::Skill;
+
+pub mod buff;
+#[cfg(feature = "config_verify")]
+pub use buff::RawBuff;
+pub use buff::{Buff, BuffSum, BuffBook};
 
 pub mod effect;
-pub use effect::{Effect, EffectId};
+pub use effect::{RubEffect, RubEffectId};
 
 pub mod timer;
 pub use timer::{Timer, TimerKind};
@@ -70,6 +75,7 @@ impl config::Verify for RawConfig {
             .fill(self.skills.iter().map(|s| s.title.as_ref()))
             .finish();
         let skills_ref = self.skills.inner.clone();
+        let conf = raw.plant_conf(&self.name)?;
 
         Ok(Config {
             name: self.name,
@@ -79,7 +85,7 @@ impl config::Verify for RawConfig {
                 .skills
                 .map(|s| {
                     s.into_iter()
-                        .map(|rsk| (skills_ref.as_slice(), &corpus, rsk))
+                        .map(|rsk| (conf, skills_ref.as_slice(), &corpus, rsk))
                         .collect::<Vec<_>>()
                 })
                 .verify(raw)?,
@@ -103,8 +109,8 @@ pub struct Plant {
     pub lifetime_rubs: usize,
     pub craft: Option<Craft>,
     /// Effects from potions, warp powder, etc. that actively change the behavior of this plant.
-    pub effects: Vec<Effect>,
-    pub skills_unlocked: Vec<skill::Conf>,
+    pub rub_effects: Vec<RubEffect>,
+    pub unlocked_skills: Vec<skill::Conf>,
 }
 impl Plant {
     pub fn from_conf(iu: impl IdentifiesSteader, it: impl IdentifiesTile, conf: Conf) -> Self {
@@ -116,49 +122,87 @@ impl Plant {
             conf,
             lifetime_rubs: 0,
             craft: None,
-            effects: vec![],
-            skills_unlocked: vec![],
+            rub_effects: vec![],
+            unlocked_skills: vec![],
         }
     }
 
-    pub fn effect(&self, effect_id: EffectId) -> NoSuchResult<&Effect> {
+    /// includes:
+    ///  - passive item buffs
+    ///  - rub effects
+    ///  - unlocked skills
+    ///
+    /// does NOT include:
+    ///  - neighbor bonuses (any of the above, but from other plants)
+    ///
+    /// If you want neighbor bonuses, consult your local BuffBook.
+    fn buffs(&self, hs: &Hackstead) -> Vec<(Buff, buff::Source)> {
+        use buff::Source::*;
+
+        // buffs from passive items
+        hs.inventory
+            .iter()
+            .map(|i| &i.conf)
+            .flat_map(|ic| {
+                ic.passive_plant_effects
+                    .iter()
+                    .filter(|e| e.for_plants.allows(self.conf))
+                    .filter_map(move |e| Some((e.kind.buff()?.clone(), PassiveItemEffect(*ic))))
+            })
+            // buffs from rub effects
+            .chain(
+                self.rub_effects
+                    .iter()
+                    .filter_map(|e| Some((e.kind.buff()?.clone(), RubbedItemEffect(e.item_conf)))),
+            )
+            // buffs from unlocked skills
+            .chain(self.unlocked_skills.iter().flat_map(|sc| {
+                sc.effects
+                    .iter()
+                    .filter_map(move |e| Some((e.kind.buff()?.clone(), SkillUnlock(*sc))))
+            }))
+            // boom, one big fat allocation
+            .collect()
+    }
+
+    pub fn rub_effect(&self, effect_id: RubEffectId) -> NoSuchResult<&RubEffect> {
         let &Self {
             owner_id,
             tile_id,
-            ref effects,
+            ref rub_effects,
             ..
         } = self;
-        Ok(effects
+        Ok(rub_effects
             .iter()
             .find(|e| e.effect_id == effect_id)
-            .ok_or_else(|| NoSuchEffectOnPlant(owner_id, tile_id, effect_id))?)
+            .ok_or_else(|| NoSuchRubEffectOnPlant(owner_id, tile_id, effect_id))?)
     }
 
-    pub fn effect_mut(&mut self, effect_id: EffectId) -> NoSuchResult<&mut Effect> {
+    pub fn rub_effect_mut(&mut self, effect_id: RubEffectId) -> NoSuchResult<&mut RubEffect> {
         let &mut Self {
             owner_id,
             tile_id,
-            ref mut effects,
+            ref mut rub_effects,
             ..
         } = self;
-        Ok(effects
+        Ok(rub_effects
             .iter_mut()
             .find(|e| e.effect_id == effect_id)
-            .ok_or_else(|| NoSuchEffectOnPlant(owner_id, tile_id, effect_id))?)
+            .ok_or_else(|| NoSuchRubEffectOnPlant(owner_id, tile_id, effect_id))?)
     }
 
-    pub fn take_effect(&mut self, effect_id: EffectId) -> NoSuchResult<Effect> {
+    pub fn take_rub_effect(&mut self, effect_id: RubEffectId) -> NoSuchResult<RubEffect> {
         let &mut Self {
             owner_id,
             tile_id,
-            ref mut effects,
+            ref mut rub_effects,
             ..
         } = self;
-        Ok(effects
+        Ok(rub_effects
             .iter()
             .position(|e| e.effect_id == effect_id)
-            .map(|i| self.effects.swap_remove(i))
-            .ok_or_else(|| NoSuchEffectOnPlant(owner_id, tile_id, effect_id))?)
+            .map(|i| rub_effects.swap_remove(i))
+            .ok_or_else(|| NoSuchRubEffectOnPlant(owner_id, tile_id, effect_id))?)
     }
 }
 
@@ -317,7 +361,7 @@ mod client {
             .map_err(|e| ClientError::bad_ask(a, "PlantSlaughter", e))
         }
 
-        pub async fn rub_with(&self, rub: impl IdentifiesItem) -> ClientResult<Vec<Effect>> {
+        pub async fn rub_with(&self, rub: impl IdentifiesItem) -> ClientResult<Vec<RubEffect>> {
             let a = Ask::Plant(PlantAsk::Rub {
                 rub_item_id: rub.item_id(),
                 tile_id: self.tile_id,
