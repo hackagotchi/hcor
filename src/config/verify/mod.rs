@@ -9,7 +9,10 @@ pub fn yaml_and_verify() -> Result<Config, String> {
     let plants = parse::read_plants()?;
     let items = parse::read_items()?;
     let hackstead = parse::read::<hackstead::Config>("hackstead")?;
-    info!("I like all {} advancements in hackstead.yml!", hackstead.advancements.len());
+    info!(
+        "I like all {} advancements in hackstead.yml!",
+        hackstead.advancements.len()
+    );
 
     RawConfig {
         plant_name_corpus: ngrammatic::CorpusBuilder::new()
