@@ -95,15 +95,9 @@ impl Config {
     }
 
     pub fn recipes(&self) -> impl Iterator<Item = &plant::Recipe> {
-        self
-            .plants
+        self.plants
             .values()
-            .flat_map(|p| {
-                p
-                  .skills
-                  .values()
-                  .flat_map(|s| s.effects.iter())
-            })
+            .flat_map(|p| p.skills.values().flat_map(|s| s.effects.iter()))
             .filter_map(|e| e.kind.buff())
             .flat_map(|buff| buff.recipes())
     }

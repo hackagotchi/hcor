@@ -28,7 +28,11 @@ impl<I: Clone> Output<I> {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct OneOfRow<I: Clone>(
-    #[cfg_attr(feature = "config_verify", serde(deserialize_with = "one_of_chance_parse"))] OneOfChance,
+    #[cfg_attr(
+        feature = "config_verify",
+        serde(deserialize_with = "one_of_chance_parse")
+    )]
+    OneOfChance,
     Evalput<I>,
 );
 

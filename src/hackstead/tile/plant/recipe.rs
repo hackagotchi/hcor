@@ -1,5 +1,5 @@
 use crate::{config, item};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 
 #[derive(Deserialize, SerdeDiff, Serialize, Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -72,4 +72,3 @@ impl config::Verify for RawRecipe {
         Some(format!("in a recipe named \"{}\"", self.title))
     }
 }
-

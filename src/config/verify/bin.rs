@@ -36,7 +36,7 @@ fn write_config_bincode(config: &hcor::config::Config) -> Result<(), String> {
         bincode::serialize(config)
             .map_err(|e| format!("couldn't transpile bincode: {}", e))?
             .as_slice(),
-        10
+        10,
     )
     .map_err(|e| format!("couldn't compress bincode: {}", e))?;
     println!("compressed len: {}", compressed.len());

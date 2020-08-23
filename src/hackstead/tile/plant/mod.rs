@@ -14,7 +14,7 @@ pub use skill::Skill;
 pub mod recipe;
 #[cfg(feature = "config_verify")]
 pub use recipe::RawRecipe;
-pub use recipe::{Recipe, Craft};
+pub use recipe::{Craft, Recipe};
 
 pub mod buff;
 #[cfg(feature = "config_verify")]

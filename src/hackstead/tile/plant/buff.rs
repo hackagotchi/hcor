@@ -53,7 +53,7 @@ impl Buff {
     pub fn recipes(&self) -> impl ExactSizeIterator<Item = &Recipe> {
         match self {
             Buff::Craft(recipes) => recipes.iter(),
-            _ => [].iter()
+            _ => [].iter(),
         }
     }
 }

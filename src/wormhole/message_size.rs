@@ -24,7 +24,7 @@ fn zstd_bincode_len<S: Serialize>(s: &S, lvl: i32) -> Result<usize, String> {
         bincode::serialize(&s)
             .map_err(|e| format!("couldn't transpile bincode: {}", e))?
             .as_slice(),
-        lvl
+        lvl,
     )
     .map_err(|e| format!("couldn't zstd bincode: {}", e))
     .map(|b| b.len())
@@ -102,9 +102,7 @@ fn time_each_encoding<S: Serialize>(s: &S) -> Vec<Entry> {
     }
 
     for i in 0..10 {
-        results.push(time(Source::CompressedZstd(i), || {
-            zstd_bincode_len(s, i)
-        }));
+        results.push(time(Source::CompressedZstd(i), || zstd_bincode_len(s, i)));
     }
 
     results
