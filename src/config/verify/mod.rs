@@ -9,44 +9,7 @@ pub fn yaml_and_verify() -> Result<Config, String> {
     let plants = parse::read_plants()?;
     let items = parse::read_items()?;
     let hackstead = parse::read::<hackstead::Config>("hackstead")?;
-    info!(
-        "I like all {} advancements in hackstead.yml!",
-        hackstead.advancements.len()
-    );
-
-    {
-        use std::collections::HashMap;
-
-        let plant_rows = parse::read::<HashMap<usize, plant::Conf>>("plant_rows_to_uuids")?;
-        if plant_rows.len() != plants.len() {
-            return Err(format!(
-                "Couldn't verify config: \
-                    need {} plant row -> uuid mappings \
-                    in plant_rows_to_uuids.yml, got {}",
-                plants.len(),
-                plant_rows.len()
-            ));
-        }
-        info!(
-            "I like all {} mappings in plant_rows_to_uuids.yml!",
-            plant_rows.len()
-        );
-
-        let item_rows = parse::read::<HashMap<usize, item::Conf>>("item_rows_to_uuids")?;
-        if item_rows.len() != items.len() {
-            return Err(format!(
-                "Couldn't verify config: \
-                    need {} item row -> uuid mappings \
-                    in item_rows_to_uuids.yml, got {}",
-                items.len(),
-                item_rows.len()
-            ));
-        }
-        info!(
-            "I like all {} mappings in item_rows_to_uuids.yml!",
-            item_rows.len()
-        );
-    }
+    info!("I like all {} advancements in hackstead.yml!", hackstead.advancements.len());
 
     RawConfig {
         plant_name_corpus: ngrammatic::CorpusBuilder::new()
