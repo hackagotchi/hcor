@@ -1,7 +1,7 @@
 use crate::{
     config,
     id::{NoSuchResult, NoSuchRubEffectOnPlant},
-    item, Hackstead, IdentifiesSteader, IdentifiesTile, SteaderId, TileId,
+    Hackstead, IdentifiesSteader, IdentifiesTile, SteaderId, TileId,
 };
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
@@ -10,6 +10,11 @@ pub mod skill;
 #[cfg(feature = "config_verify")]
 pub use skill::RawSkill;
 pub use skill::Skill;
+
+pub mod recipe;
+#[cfg(feature = "config_verify")]
+pub use recipe::RawRecipe;
+pub use recipe::{Recipe, Craft};
 
 pub mod buff;
 #[cfg(feature = "config_verify")]
@@ -40,7 +45,7 @@ impl std::ops::Deref for Conf {
     fn deref(&self) -> &Self::Target {
         config::CONFIG
             .plants
-            .get(self.0)
+            .get(self)
             .as_ref()
             .expect("invalid plant Conf, this is very bad")
     }
@@ -69,9 +74,10 @@ fn default_skills() -> config::FromFile<Vec<RawSkill>> {
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     pub name: String,
+    pub conf: Conf,
     pub base_yield_duration: Option<f32>,
     pub skillpoint_unlock_xps: Vec<usize>,
-    pub skills: Vec<Skill>,
+    pub skills: config::ConfMap<uuid::Uuid, Skill>,
 }
 
 #[cfg(feature = "config_verify")]
@@ -79,15 +85,19 @@ impl config::Verify for RawConfig {
     type Verified = Config;
 
     fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
-        let conf = raw.plant_conf(&self.name)?;
-
+        let plant_conf = self.conf;
         Ok(Config {
             name: self.name,
+            conf: plant_conf,
             base_yield_duration: self.base_yield_duration,
             skillpoint_unlock_xps: self.skillpoint_unlock_xps,
             skills: self
                 .skills
-                .map(|s| s.into_iter().map(|rsk| (conf, rsk)).collect::<Vec<_>>())
+                .map(|s| {
+                    s.into_iter()
+                        .map(|rsk| (rsk.conf, (plant_conf, rsk)))
+                        .collect::<config::ConfMap<uuid::Uuid, _>>()
+                })
                 .verify(raw)?,
         })
     }
@@ -238,12 +248,6 @@ impl Plant {
     }
 }
 
-#[derive(Debug, Clone, Copy, SerdeDiff, Serialize, Deserialize, PartialEq)]
-pub struct Craft {
-    #[serde(alias = "makes")]
-    pub recipe_archetype_handle: usize,
-}
-
 #[cfg(feature = "config_verify")]
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 #[serde(deny_unknown_fields)]
@@ -310,61 +314,6 @@ impl Filter {
             Not(these) => !these.iter().any(|h| *h == c),
             All => true,
         }
-    }
-}
-
-#[cfg(feature = "config_verify")]
-#[derive(Deserialize, Debug, Clone, PartialEq)]
-#[serde(deny_unknown_fields)]
-pub struct RawRecipe {
-    pub title: String,
-    /// This needs to get verified into an item::Conf pointing to an item to use the art of
-    pub art: String,
-    pub explanation: String,
-    #[serde(default)]
-    pub destroys_plant: bool,
-    pub time: f32,
-    /// Those Strings need to be verified into an item::Conf
-    pub needs: Vec<(usize, String)>,
-    /// This RawEvalput needs to be verified into an Evalput<item::Conf>
-    pub makes: config::RawEvalput,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
-pub struct Recipe {
-    pub title: String,
-    pub art: item::Conf,
-    pub explanation: String,
-    pub destroys_plant: bool,
-    pub time: f32,
-    pub needs: Vec<(usize, item::Conf)>,
-    pub makes: config::Evalput<item::Conf>,
-}
-
-#[cfg(feature = "config_verify")]
-impl config::Verify for RawRecipe {
-    type Verified = Recipe;
-    fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
-        use config::VerifNote;
-
-        Ok(Recipe {
-            needs: self
-                .needs
-                .iter()
-                .map(|(n, item_name)| Ok((*n, raw.item_conf(item_name)?)))
-                .collect::<config::VerifResult<_>>()
-                .note("in what the recipe needs")?,
-            title: self.title,
-            art: raw.item_conf(&self.art).note("in the art field")?,
-            explanation: self.explanation,
-            destroys_plant: self.destroys_plant,
-            time: self.time,
-            makes: self.makes.verify(raw).note("in what the recipe makes")?,
-        })
-    }
-
-    fn context(&self) -> Option<String> {
-        Some(format!("in a recipe named \"{}\"", self.title))
     }
 }
 

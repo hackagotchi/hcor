@@ -1,12 +1,10 @@
 #[cfg(feature = "config_verify")]
-use crate::{
-    config::{self, Verify},
-    item,
-};
-use serde::{
-    de::{self, MapAccess, Visitor},
-    Deserialize, Serialize,
-};
+use crate::config::{self, Verify};
+use crate::item;
+#[cfg(feature = "config_verify")]
+use serde::de::{self, MapAccess, Visitor};
+use serde::{Deserialize, Serialize};
+#[cfg(feature = "config_verify")]
 use std::fmt;
 
 #[derive(Deserialize, serde_diff::SerdeDiff, Serialize, Debug, PartialEq, Clone, Copy)]
@@ -27,7 +25,7 @@ impl std::ops::Deref for Conf {
     fn deref(&self) -> &Self::Target {
         self.0
             .skills
-            .get(self.1)
+            .get(&self.1)
             .as_ref()
             .expect("invalid skill Conf, this is very bad")
     }
@@ -43,6 +41,7 @@ pub struct RawCost {
     skills: Vec<String>,
 }
 
+#[cfg(feature = "config_verify")]
 impl Default for RawCost {
     fn default() -> Self {
         RawCost {
@@ -101,6 +100,7 @@ pub struct RawUnlock {
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 #[serde(transparent)]
 pub struct SkillNameOrRawUnlock(#[serde(deserialize_with = "skill_name_or_raw_unlock")] RawUnlock);
+#[cfg(feature = "config_verify")]
 fn skill_name_or_raw_unlock<'de, D>(deserializer: D) -> Result<RawUnlock, D::Error>
 where
     D: serde::de::Deserializer<'de>,
@@ -135,6 +135,7 @@ where
     deserializer.deserialize_any(Deser)
 }
 
+#[cfg(feature = "config_verify")]
 impl std::ops::Deref for SkillNameOrRawUnlock {
     type Target = RawUnlock;
 

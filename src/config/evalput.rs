@@ -1,8 +1,8 @@
 use rand::Rng;
-use serde::{
-    de::{self, MapAccess, SeqAccess, Visitor},
-    Deserialize, Serialize,
-};
+#[cfg(feature = "config_verify")]
+use serde::de::{self, MapAccess, SeqAccess, Visitor};
+use serde::{Deserialize, Serialize};
+#[cfg(feature = "config_verify")]
 use std::fmt;
 
 #[cfg(feature = "config_verify")]
@@ -28,7 +28,7 @@ impl<I: Clone> Output<I> {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct OneOfRow<I: Clone>(
-    #[serde(deserialize_with = "one_of_chance_parse")] OneOfChance,
+    #[cfg_attr(feature = "config_verify", serde(deserialize_with = "one_of_chance_parse"))] OneOfChance,
     Evalput<I>,
 );
 
@@ -38,11 +38,11 @@ pub enum Evalput<I: Clone> {
     All(Vec<Evalput<I>>),
     OneOf(Vec<OneOfRow<I>>),
     Amount(
-        #[serde(deserialize_with = "repeats_parse")] Repeats,
+        #[cfg_attr(feature = "config_verify", serde(deserialize_with = "repeats_parse"))] Repeats,
         Box<Evalput<I>>,
     ),
     Chance(f64, Box<Evalput<I>>),
-    Xp(#[serde(deserialize_with = "repeats_parse")] Repeats),
+    Xp(#[cfg_attr(feature = "config_verify", serde(deserialize_with = "repeats_parse"))] Repeats),
     Item(I),
     Nothing,
 }
@@ -259,6 +259,7 @@ impl Repeats {
         x.floor() as usize + extra as usize
     }
 }
+#[cfg(feature = "config_verify")]
 fn repeats_parse<'de, D>(deserializer: D) -> Result<Repeats, D::Error>
 where
     D: serde::de::Deserializer<'de>,
@@ -326,6 +327,7 @@ impl OneOfChance {
     }
 }
 
+#[cfg(feature = "config_verify")]
 fn one_of_chance_parse<'de, D>(deserializer: D) -> Result<OneOfChance, D::Error>
 where
     D: serde::de::Deserializer<'de>,
@@ -429,6 +431,7 @@ fn test_one_of_verification() {
             item::RawConfig {
                 name: "pig".to_string(),
                 description: "oink".to_string(),
+                conf: item::Conf(uuid::Uuid::new_v4()),
                 gotchi: None,
                 grows_into: None,
                 hatch_table: None,

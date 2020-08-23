@@ -5,7 +5,9 @@ use std::fmt;
 use super::{Buff, Conf, Filter};
 #[cfg(feature = "config_verify")]
 use super::{RawBuff, RawFilter};
-use crate::{config, item};
+#[cfg(feature = "config_verify")]
+use crate::config;
+use crate::item;
 
 #[derive(SerdeDiff, Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash)]
 #[serde(transparent)]

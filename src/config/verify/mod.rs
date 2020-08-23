@@ -71,8 +71,18 @@ impl RawConfig {
             ..
         } = self;
         Ok(Config {
-            plants: plants.clone().verify(self)?,
-            items: items.clone().verify(self)?,
+            plants: plants
+                .clone()
+                .verify(self)?
+                .into_iter()
+                .map(|c| (c.conf, c))
+                .collect(),
+            items: items
+                .clone()
+                .verify(self)?
+                .into_iter()
+                .map(|c| (c.conf, c))
+                .collect(),
             hackstead: hackstead.inner.clone(),
         })
     }
@@ -242,6 +252,20 @@ impl<V: Verify> Verify for Vec<V> {
 
     fn verify_raw(self, raw: &RawConfig) -> VerifResult<Self::Verified> {
         self.into_iter().map(|v| v.verify(raw)).collect()
+    }
+
+    fn context(&self) -> Option<String> {
+        None
+    }
+}
+
+impl<K: std::hash::Hash + Eq, V: Verify> Verify for super::ConfMap<K, V> {
+    type Verified = super::ConfMap<K, V::Verified>;
+
+    fn verify_raw(self, raw: &RawConfig) -> VerifResult<Self::Verified> {
+        self.into_iter()
+            .map(|(k, v)| Ok((k, v.verify(raw)?)))
+            .collect()
     }
 
     fn context(&self) -> Option<String> {

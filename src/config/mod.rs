@@ -8,6 +8,9 @@ pub use verify::{
     yaml_and_verify, FromFile, RawConfig, VerifError, VerifNote, VerifResult, Verify,
 };
 
+/// The kind of map you should look up your Confs in.
+pub type ConfMap<K, V> = std::collections::HashMap<K, V>;
+
 mod evalput;
 pub use evalput::Evalput;
 #[cfg(feature = "config_verify")]
@@ -22,10 +25,15 @@ lazy_static::lazy_static! {
     };
 
     pub static ref CONFIG: Config = {
-        let path = format!("{}/config.json", &*CONFIG_PATH);
-        serde_json::from_str(
-            &std::fs::read_to_string(&path)
-                .unwrap_or_else(|e| panic!("opening {}: {}", path, e))
+        let path = format!("{}/config.bincode", &*CONFIG_PATH);
+        bincode::deserialize(
+            zstd::decode_all(
+                std::fs::read(&path)
+                    .unwrap_or_else(|e| panic!("opening {}: {}", path, e))
+                    .as_slice()
+            )
+            .unwrap_or_else(|e| panic!("couldn't decompress config: {}", e))
+            .as_slice()
         )
         .unwrap_or_else(|e| panic!("parsing {}: {}", path, e))
     };
@@ -73,22 +81,36 @@ pub fn max_level_index(your_xp: usize, level_xps: impl Iterator<Item = usize>) -
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Config {
-    pub(crate) plants: Vec<plant::Config>,
-    pub(crate) items: Vec<item::Config>,
-    pub(crate) hackstead: hackstead::Config,
+    pub plants: ConfMap<plant::Conf, plant::Config>,
+    pub items: ConfMap<item::Conf, item::Config>,
+    pub hackstead: hackstead::Config,
 }
 impl Config {
     pub fn welcome_gifts(&self) -> impl Iterator<Item = &item::Config> {
-        self.items.iter().filter(|a| a.welcome_gift)
+        self.items.values().filter(|a| a.welcome_gift)
     }
 
     pub fn seeds(&self) -> impl Iterator<Item = (plant::Conf, &item::Config)> {
-        self.items.iter().filter_map(|c| Some((c.grows_into?, c)))
+        self.items.values().filter_map(|c| Some((c.grows_into?, c)))
+    }
+
+    pub fn recipes(&self) -> impl Iterator<Item = &plant::Recipe> {
+        self
+            .plants
+            .values()
+            .flat_map(|p| {
+                p
+                  .skills
+                  .values()
+                  .flat_map(|s| s.effects.iter())
+            })
+            .filter_map(|e| e.kind.buff())
+            .flat_map(|buff| buff.recipes())
     }
 
     pub fn land_unlockers(&self) -> impl Iterator<Item = (&item::LandUnlock, &item::Config)> {
         self.items
-            .iter()
+            .values()
             .filter_map(|c| Some((c.unlocks_land.as_ref()?, c)))
     }
 }

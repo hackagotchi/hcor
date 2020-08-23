@@ -1,3 +1,4 @@
+#[cfg(feature = "config_verify")]
 use super::RawRecipe;
 use super::Recipe;
 use crate::{config, item, Hackstead, TileId};
@@ -46,6 +47,15 @@ pub enum Buff {
     CraftSpeedMultiplier(f32),
     CraftInputReturnChance(f32),
     CraftOutputDoubleChance(f32),
+}
+
+impl Buff {
+    pub fn recipes(&self) -> impl ExactSizeIterator<Item = &Recipe> {
+        match self {
+            Buff::Craft(recipes) => recipes.iter(),
+            _ => [].iter()
+        }
+    }
 }
 
 #[cfg(feature = "config_verify")]

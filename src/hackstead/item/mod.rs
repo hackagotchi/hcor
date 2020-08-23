@@ -57,7 +57,7 @@ pub struct Item {
     pub ownership_log: Vec<LoggedOwner>,
 }
 
-#[derive(Deserialize, SerdeDiff, Serialize, Debug, PartialEq, Clone, Copy)]
+#[derive(Deserialize, SerdeDiff, Serialize, Debug, PartialEq, Eq, Hash, Clone, Copy)]
 #[serde(transparent)]
 #[serde_diff(opaque)]
 /// An item::Conf points to an item::Config in the CONFIG lazy_static.
@@ -75,7 +75,7 @@ impl std::ops::Deref for Conf {
     fn deref(&self) -> &Self::Target {
         config::CONFIG
             .items
-            .get(self.0)
+            .get(self)
             .as_ref()
             .expect("invalid item Conf, this is very bad")
     }
@@ -142,7 +142,7 @@ impl config::Verify for RawConfig {
                 .as_ref()
                 .map(|plant_name| raw.plant_conf(plant_name))
                 .transpose()?,
-            conf: raw.item_conf(&self.name)?,
+            conf: self.conf,
             name: self.name,
             description: self.description,
             gotchi: self.gotchi,

@@ -3,10 +3,10 @@
 /// re-export this dependency to make it easier to sync versions
 pub use serde_diff;
 
-// All of the game design switches and levers are handled here, with a focus on how they interact
-// with the rest of the data in the game.
+/// All of the game design switches and levers are handled here, with a focus on how they interact
+/// with the rest of the data in the game.
 pub mod config;
-//pub use config::{ConfigError, ConfigResult, CONFIG};
+pub use config::CONFIG;
 
 #[cfg(feature = "client")]
 mod client;
