@@ -32,8 +32,7 @@ impl std::ops::Deref for RubEffect {
     type Target = Config;
 
     fn deref(&self) -> &Self::Target {
-        self
-            .item_conf
+        self.item_conf
             .plant_rub_effects
             .get(self.effect_conf)
             .as_ref()

@@ -6,7 +6,7 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 
-mod skill;
+pub mod skill;
 #[cfg(feature = "config_verify")]
 pub use skill::RawSkill;
 pub use skill::Skill;
@@ -22,14 +22,21 @@ pub use effect::{RubEffect, RubEffectId};
 pub mod timer;
 pub use timer::{Timer, TimerKind};
 
-#[derive(Deserialize, SerdeDiff, Serialize, Debug, PartialEq, Clone, Copy)]
+#[derive(Deserialize, SerdeDiff, Serialize, Debug, PartialEq, Eq, Hash, Clone, Copy)]
 #[serde(transparent)]
+#[serde_diff(opaque)]
 /// A plant::Conf points to a plant::Config in the CONFIG lazy_static.
-pub struct Conf(pub(crate) usize);
+pub struct Conf(pub(crate) uuid::Uuid);
 
 impl std::ops::Deref for Conf {
     type Target = Config;
 
+    #[cfg(feature = "config_verify")]
+    fn deref(&self) -> &Self::Target {
+        panic!("no looking up confs with config_verify enabled")
+    }
+
+    #[cfg(not(feature = "config_verify"))]
     fn deref(&self) -> &Self::Target {
         config::CONFIG
             .plants
@@ -44,6 +51,7 @@ impl std::ops::Deref for Conf {
 #[serde(deny_unknown_fields)]
 pub struct RawConfig {
     pub name: String,
+    pub conf: Conf,
     pub skillpoint_unlock_xps: Vec<usize>,
     #[serde(default)]
     pub base_yield_duration: Option<f32>,
@@ -71,10 +79,6 @@ impl config::Verify for RawConfig {
     type Verified = Config;
 
     fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
-        let corpus = ngrammatic::CorpusBuilder::new()
-            .fill(self.skills.iter().map(|s| s.title.as_ref()))
-            .finish();
-        let skills_ref = self.skills.inner.clone();
         let conf = raw.plant_conf(&self.name)?;
 
         Ok(Config {
@@ -83,11 +87,7 @@ impl config::Verify for RawConfig {
             skillpoint_unlock_xps: self.skillpoint_unlock_xps,
             skills: self
                 .skills
-                .map(|s| {
-                    s.into_iter()
-                        .map(|rsk| (conf, skills_ref.as_slice(), &corpus, rsk))
-                        .collect::<Vec<_>>()
-                })
+                .map(|s| s.into_iter().map(|rsk| (conf, rsk)).collect::<Vec<_>>())
                 .verify(raw)?,
         })
     }
@@ -101,7 +101,6 @@ impl config::Verify for RawConfig {
 pub struct Plant {
     pub owner_id: SteaderId,
     pub tile_id: TileId,
-    pub xp: usize,
     pub nickname: String,
     pub conf: Conf,
     /// Records how many items have been applied to this plant
@@ -110,21 +109,54 @@ pub struct Plant {
     pub craft: Option<Craft>,
     /// Effects from potions, warp powder, etc. that actively change the behavior of this plant.
     pub rub_effects: Vec<RubEffect>,
-    pub unlocked_skills: Vec<skill::Conf>,
+    pub skills: Skills,
+    pub xp: usize,
 }
+
+#[derive(Clone, Debug, SerdeDiff, Serialize, Deserialize, PartialEq)]
+pub struct Skills {
+    pub unlocked: Vec<skill::Conf>,
+    pub points_awarded: usize,
+    pub points_used: usize,
+}
+impl Skills {
+    pub fn try_unlock(&mut self, skill_cost: usize) -> bool {
+        let available = self.points_awarded - self.points_used;
+
+        if available <= skill_cost {
+            self.points_used += skill_cost;
+            true
+        } else {
+            false
+        }
+    }
+}
+
 impl Plant {
     pub fn from_conf(iu: impl IdentifiesSteader, it: impl IdentifiesTile, conf: Conf) -> Self {
         Self {
             owner_id: iu.steader_id(),
             tile_id: it.tile_id(),
-            xp: 0,
             nickname: conf.name.clone(),
             conf,
             lifetime_rubs: 0,
             craft: None,
             rub_effects: vec![],
-            unlocked_skills: vec![],
+            xp: 0,
+            skills: Skills {
+                unlocked: vec![],
+                points_awarded: 0,
+                points_used: 0,
+            },
         }
+    }
+
+    pub fn points_unlocked(&self) -> usize {
+        config::max_level_index(self.xp, self.conf.skillpoint_unlock_xps.iter().cloned())
+    }
+
+    pub fn next_point_info(&self) -> config::LevelInfo {
+        config::max_level_info(self.xp, self.conf.skillpoint_unlock_xps.iter().cloned())
     }
 
     /// includes:
@@ -156,7 +188,7 @@ impl Plant {
                     .filter_map(|e| Some((e.kind.buff()?.clone(), RubbedItemEffect(e.item_conf)))),
             )
             // buffs from unlocked skills
-            .chain(self.unlocked_skills.iter().flat_map(|sc| {
+            .chain(self.skills.unlocked.iter().flat_map(|sc| {
                 sc.effects
                     .iter()
                     .filter_map(move |e| Some((e.kind.buff()?.clone(), SkillUnlock(*sc))))

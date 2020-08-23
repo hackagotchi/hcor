@@ -1,5 +1,5 @@
 use super::{FromFile, CONFIG_PATH};
-use crate::{hackstead, item, plant};
+use crate::{item, plant};
 use log::*;
 use serde::de::DeserializeOwned;
 use serde_yaml::Value;
@@ -24,23 +24,19 @@ pub(super) fn read_items() -> Result<Vec<FromFile<item::RawConfig>>, String> {
     Ok(items)
 }
 
-pub(super) fn read_hackstead() -> Result<FromFile<hackstead::Config>, String> {
-    let pd = format!("{}/hackstead.yml", &*CONFIG_PATH);
+pub(super) fn read<D: serde::de::DeserializeOwned + fmt::Debug>(
+    file: &str,
+) -> Result<FromFile<D>, String> {
+    let pd = format!("{}/{}.yml", &*CONFIG_PATH, file);
     let path = std::path::Path::new(&pd);
     let file =
         fs::read_to_string(&path).map_err(|e| format!("\nCouldn't read file {}: {}", pd, e))?;
-    let hackfig: FromFile<hackstead::Config> = FromFile::new(
-        parse_and_merge::<hackstead::Config>(&file)
-            .map_err(|e| format!("I don't like your YAML in {}: {}", pd, e))?,
+    let data: FromFile<D> = FromFile::new(
+        parse_and_merge(&file).map_err(|e| format!("I don't like your YAML in {}: {}", pd, e))?,
         pd.to_string(),
     );
-    info!(
-        "I like all {} advancements in {}!",
-        hackfig.advancements.len(),
-        pd
-    );
 
-    Ok(hackfig)
+    Ok(data)
 }
 
 pub(super) fn read_plants() -> Result<Vec<FromFile<plant::RawConfig>>, String> {

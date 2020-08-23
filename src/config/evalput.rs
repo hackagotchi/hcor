@@ -29,7 +29,7 @@ impl<I: Clone> Output<I> {
 #[serde(deny_unknown_fields)]
 pub struct OneOfRow<I: Clone>(
     #[serde(deserialize_with = "one_of_chance_parse")] OneOfChance,
-    Evalput<I>
+    Evalput<I>,
 );
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -173,7 +173,10 @@ impl super::Verify for RawEvalput {
                 .collect::<VerifResult<_>>()?),
             OneOf(these) => {
                 let has_rest = these.iter().any(|OneOfRow(c, _)| c.is_rest());
-                let adds_up_to = these.iter().filter_map(|OneOfRow(c, _)| c.chance()).sum::<f64>();
+                let adds_up_to = these
+                    .iter()
+                    .filter_map(|OneOfRow(c, _)| c.chance())
+                    .sum::<f64>();
 
                 if !(has_rest || adds_up_to == 1.0) {
                     err("OneOf chances must add up to 1.0 or contain Rest")?;
@@ -340,19 +343,30 @@ where
 
         #[inline]
         fn visit_f64<E>(self, value: f64) -> Result<OneOfChance, E>
-        where E: de::Error {
+        where
+            E: de::Error,
+        {
             if 0.0 < value && value < 1.0 {
                 Ok(OneOfChance::Chance(value))
             } else {
-                Err(de::Error::invalid_value(de::Unexpected::Float(value), &"a float between 0.0 and 1.0, exclusive"))
+                Err(de::Error::invalid_value(
+                    de::Unexpected::Float(value),
+                    &"a float between 0.0 and 1.0, exclusive",
+                ))
             }
         }
 
-        fn visit_str<E>(self, s: &str) -> Result<OneOfChance, E> where E: de::Error {
+        fn visit_str<E>(self, s: &str) -> Result<OneOfChance, E>
+        where
+            E: de::Error,
+        {
             if s == "Rest" {
                 Ok(OneOfChance::Rest)
             } else {
-                Err(de::Error::invalid_value(de::Unexpected::Str(s), &"expected Rest"))
+                Err(de::Error::invalid_value(
+                    de::Unexpected::Str(s),
+                    &"expected Rest",
+                ))
             }
         }
     }
@@ -429,10 +443,14 @@ fn test_one_of_verification() {
     };
 
     let parse = |s| serde_yaml::from_str::<Evalput<String>>(s);
-    assert!(parse(r#"OneOf: [ [0.1, Item: pig] ]"#).unwrap().verify(&raw).is_err());
+    assert!(parse(r#"OneOf: [ [0.1, Item: pig] ]"#)
+        .unwrap()
+        .verify(&raw)
+        .is_err());
     assert!(parse(r#"OneOf: [ [0.1, Item: pig], [0.9, Item: pig], [1.1, Item: pig]]"#).is_err());
     assert!(parse(r#"OneOf: [ [1.0, Item: pig] ]"#).is_err());
-    assert!(parse(r#"OneOf: [ [0.5, Item: pig], [0.5, Item: pig]]"#).unwrap()
+    assert!(parse(r#"OneOf: [ [0.5, Item: pig], [0.5, Item: pig]]"#)
+        .unwrap()
         .verify(&raw)
         .is_ok());
 }

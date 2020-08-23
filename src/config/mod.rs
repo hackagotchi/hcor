@@ -31,19 +31,44 @@ lazy_static::lazy_static! {
     };
 }
 
-pub fn max_level_index(
-    mut your_xp: usize,
-    mut level_xps: impl Iterator<Item = usize>,
-) -> usize {
-    level_xps
+pub struct LevelInfo {
+    pub xp_so_far: usize,
+    pub xp_to_go: usize,
+    pub total_level_xp: usize,
+    pub last_unlocked_index: usize,
+}
+
+pub fn max_level_info(mut your_xp: usize, mut level_xps: impl Iterator<Item = usize>) -> LevelInfo {
+    let mut xp_so_far = 0;
+    let mut xp_to_go = 0;
+    let mut total_level_xp = 0;
+
+    let last_unlocked_index = level_xps
         .position(|xp| match your_xp.checked_sub(xp) {
-            None => true,
+            None | Some(0) => {
+                xp_to_go = your_xp;
+                xp_so_far = xp - your_xp;
+                total_level_xp = xp;
+                true
+            }
             Some(subbed_xp) => {
                 your_xp = subbed_xp;
                 false
             }
         })
-        .unwrap_or(0)
+        .and_then(|p| p.checked_sub(0))
+        .unwrap_or(0);
+
+    LevelInfo {
+        xp_so_far,
+        xp_to_go,
+        total_level_xp,
+        last_unlocked_index,
+    }
+}
+
+pub fn max_level_index(your_xp: usize, level_xps: impl Iterator<Item = usize>) -> usize {
+    max_level_info(your_xp, level_xps).last_unlocked_index
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]

@@ -59,12 +59,19 @@ pub struct Item {
 
 #[derive(Deserialize, SerdeDiff, Serialize, Debug, PartialEq, Clone, Copy)]
 #[serde(transparent)]
+#[serde_diff(opaque)]
 /// An item::Conf points to an item::Config in the CONFIG lazy_static.
-pub struct Conf(pub(crate) usize);
+pub struct Conf(pub(crate) uuid::Uuid);
 
 impl std::ops::Deref for Conf {
     type Target = Config;
 
+    #[cfg(feature = "config_verify")]
+    fn deref(&self) -> &Self::Target {
+        panic!("no looking up confs with config_verify enabled")
+    }
+
+    #[cfg(not(feature = "config_verify"))]
     fn deref(&self) -> &Self::Target {
         config::CONFIG
             .items
@@ -81,6 +88,8 @@ pub struct RawConfig {
     pub name: String,
 
     pub description: String,
+
+    pub conf: Conf,
 
     #[serde(default)]
     pub gotchi: Option<gotchi::Config>,
