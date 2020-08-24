@@ -28,7 +28,7 @@ mod client {
     use crate::{
         client::{ClientError, ClientResult},
         wormhole::{ask, until_ask_id_map, AskedNote, ItemAsk},
-        Ask
+        Ask,
     };
 
     impl Gotchi {

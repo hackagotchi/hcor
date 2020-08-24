@@ -1,4 +1,8 @@
-use crate::{config, plant, IdentifiesSteader, ItemId, SteaderId, id::{NoSuch, NoSuchGotchiOnItem, NoSuchResult}};
+use crate::{
+    config,
+    id::{NoSuch, NoSuchGotchiOnItem, NoSuchResult},
+    plant, IdentifiesSteader, ItemId, SteaderId,
+};
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 use std::fmt;
