@@ -1,4 +1,4 @@
-use crate::{item, plant, Item, ItemId, Plant, SteaderId, Tile, TileId};
+use crate::{config, item, plant, Item, ItemId, Plant, SteaderId, Tile, TileId};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
@@ -67,7 +67,7 @@ pub enum AskedNote {
     /// This can fail if the provided item isn't hatchable, among a host of other reasons.
     ///
     /// Returns a list of the new items, if successful.
-    ItemHatchResult(StrResult<Vec<Item>>),
+    ItemHatchResult(StrResult<config::evalput::Output<Item>>),
     /// The result of renaming a gotchi
     ///
     /// Returns the new name
@@ -120,13 +120,11 @@ pub enum RudeNote {
     /// Identifies the giver and contains a list of items, complete with updated ownership logs.
     ItemThrowReceipt { from: SteaderId, items: Vec<Item> },
     YieldFinish {
-        items: Vec<Item>,
-        xp: i32,
+        output: config::evalput::Output<Item>,
         tile_id: TileId,
     },
     CraftFinish {
-        items: Vec<Item>,
-        xp: i32,
+        output: config::evalput::Output<Item>,
         tile_id: TileId,
     },
     RubEffectFinish {

@@ -5,6 +5,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
+use std::fmt;
 
 pub mod skill;
 #[cfg(feature = "config_verify")]
@@ -48,6 +49,12 @@ impl std::ops::Deref for Conf {
             .get(self)
             .as_ref()
             .expect("invalid plant Conf, this is very bad")
+    }
+}
+
+impl fmt::Display for Conf {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
@@ -123,13 +130,31 @@ pub struct Plant {
     pub xp: usize,
 }
 
-#[derive(Clone, Debug, SerdeDiff, Serialize, Deserialize, PartialEq)]
+impl std::ops::Deref for Plant {
+    type Target = Config;
+
+    #[cfg(feature = "config_verify")]
+    fn deref(&self) -> &Self::Target {
+        panic!("no looking up confs with config_verify enabled")
+    }
+
+    #[cfg(not(feature = "config_verify"))]
+    fn deref(&self) -> &Self::Target {
+        &*self.conf
+    }
+}
+
+#[derive(Default, Clone, Debug, SerdeDiff, Serialize, Deserialize, PartialEq)]
 pub struct Skills {
     pub unlocked: Vec<skill::Conf>,
     pub points_awarded: usize,
     pub points_used: usize,
 }
 impl Skills {
+    pub fn empty() -> Self {
+        Self::default()
+    }
+
     pub fn try_unlock(&mut self, skill_cost: usize) -> bool {
         let available = self.points_awarded - self.points_used;
 

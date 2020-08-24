@@ -18,7 +18,9 @@ pub struct LoggedOwner {
     pub owner_index: usize,
 }
 
-#[derive(SerdeDiff, Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(SerdeDiff, Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
+/// You know, my big-eared friend once told me there are actually some pretty
+/// comprehensive rules about these.
 pub enum Acquisition {
     Trade,
     Farmed,
@@ -61,6 +63,20 @@ pub struct Item {
     pub ownership_log: Vec<LoggedOwner>,
 }
 
+impl std::ops::Deref for Item {
+    type Target = Config;
+
+    #[cfg(feature = "config_verify")]
+    fn deref(&self) -> &Self::Target {
+        panic!("no looking up confs with config_verify enabled")
+    }
+
+    #[cfg(not(feature = "config_verify"))]
+    fn deref(&self) -> &Self::Target {
+        &*self.conf
+    }
+}
+
 #[derive(Deserialize, SerdeDiff, Serialize, Debug, PartialEq, Eq, Hash, Clone, Copy)]
 #[serde(transparent)]
 #[serde_diff(opaque)]
@@ -77,11 +93,20 @@ impl std::ops::Deref for Conf {
 
     #[cfg(not(feature = "config_verify"))]
     fn deref(&self) -> &Self::Target {
-        config::CONFIG
-            .items
-            .get(self)
-            .as_ref()
+        self.try_lookup()
             .expect("invalid item Conf, this is very bad")
+    }
+}
+
+impl fmt::Display for Conf {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Conf {
+    pub fn try_lookup(self) -> Option<&'static Config> {
+        config::CONFIG.items.get(&self)
     }
 }
 
@@ -133,6 +158,54 @@ pub struct Config {
     pub passive_plant_effects: Vec<plant::effect::Config>,
     pub plant_rub_effects: Vec<plant::effect::Config>,
     pub hatch_table: Option<config::Evalput<Conf>>,
+}
+
+#[cfg(feature = "client")]
+mod config_client {
+    use super::*;
+    use crate::{
+        client::{ClientError, ClientResult},
+        wormhole::{ask, Ask, until_ask_id_map, AskedNote, ItemAsk},
+    };
+
+    impl Config {
+        pub async fn spawn_some(&self, amount: usize) -> ClientResult<Vec<Item>> {
+            let a = Ask::Item(ItemAsk::Spawn {
+                item_conf: self.conf,
+                amount,
+            });
+
+            let ask_id = ask(a.clone()).await?;
+
+            until_ask_id_map(ask_id, |n| match n {
+                AskedNote::ItemSpawnResult(r) => Some(r),
+                _ => None,
+            })
+            .await?
+            .map_err(|e| ClientError::bad_ask(a, "ItemSpawnResult", e))
+        }
+
+        pub async fn spawn(&self) -> ClientResult<Item> {
+            let a = Ask::Item(ItemAsk::Spawn {
+                item_conf: self.conf,
+                amount: 1,
+            });
+
+            let ask_id = ask(a.clone()).await?;
+
+            until_ask_id_map(ask_id, |n| match n {
+                AskedNote::ItemSpawnResult(r) => Some(r),
+                _ => None,
+            })
+            .await?
+            .and_then(|mut items| {
+                items
+                    .pop()
+                    .ok_or_else(|| "expected one item, got none".to_string())
+            })
+            .map_err(|e| ClientError::bad_ask(a, "ItemSpawnResult", e))
+        }
+    }
 }
 
 #[cfg(feature = "config_verify")]
@@ -194,7 +267,7 @@ mod client {
             .map_err(|e| ClientError::bad_ask(a, "TileSummon", e))
         }
 
-        pub async fn hatch(&self) -> ClientResult<Vec<Item>> {
+        pub async fn hatch(&self) -> ClientResult<config::evalput::Output<Item>> {
             let a = Ask::Item(ItemAsk::Hatch {
                 hatchable_item_id: self.item_id(),
             });

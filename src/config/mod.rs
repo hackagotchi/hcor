@@ -11,7 +11,7 @@ pub use verify::{
 /// The kind of map you should look up your Confs in.
 pub type ConfMap<K, V> = std::collections::HashMap<K, V>;
 
-mod evalput;
+pub mod evalput;
 pub use evalput::Evalput;
 #[cfg(feature = "config_verify")]
 pub use evalput::RawEvalput;
@@ -46,17 +46,19 @@ pub struct LevelInfo {
     pub last_unlocked_index: usize,
 }
 
-pub fn max_level_info(mut your_xp: usize, mut level_xps: impl Iterator<Item = usize>) -> LevelInfo {
+pub fn max_level_info(mut your_xp: usize, mut level_xps: impl ExactSizeIterator<Item = usize>) -> LevelInfo {
     let mut xp_so_far = 0;
     let mut xp_to_go = 0;
     let mut total_level_xp = 0;
 
+    let level_count = level_xps.len();
     let last_unlocked_index = level_xps
         .position(|xp| match your_xp.checked_sub(xp) {
-            None | Some(0) => {
+            None => {
                 xp_to_go = your_xp;
                 xp_so_far = xp - your_xp;
                 total_level_xp = xp;
+                println!("found limit at: {}", xp);
                 true
             }
             Some(subbed_xp) => {
@@ -64,8 +66,7 @@ pub fn max_level_info(mut your_xp: usize, mut level_xps: impl Iterator<Item = us
                 false
             }
         })
-        .and_then(|p| p.checked_sub(0))
-        .unwrap_or(0);
+        .unwrap_or(level_count);
 
     LevelInfo {
         xp_so_far,
@@ -75,7 +76,7 @@ pub fn max_level_info(mut your_xp: usize, mut level_xps: impl Iterator<Item = us
     }
 }
 
-pub fn max_level_index(your_xp: usize, level_xps: impl Iterator<Item = usize>) -> usize {
+pub fn max_level_index(your_xp: usize, level_xps: impl ExactSizeIterator<Item = usize>) -> usize {
     max_level_info(your_xp, level_xps).last_unlocked_index
 }
 
@@ -86,6 +87,10 @@ pub struct Config {
     pub hackstead: hackstead::Config,
 }
 impl Config {
+    pub fn item_named(&self, item_name: &str) -> Option<&item::Config> {
+        self.items.values().find(|i| i.name == item_name)
+    }
+
     pub fn welcome_gifts(&self) -> impl Iterator<Item = &item::Config> {
         self.items.values().filter(|a| a.welcome_gift)
     }

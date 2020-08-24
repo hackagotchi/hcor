@@ -23,7 +23,7 @@ required-features = [ "flate2", "serde_json" ]
 config_verify = [ "serde_yaml", "yaml-merge-keys", "ngrammatic", "pretty_env_logger", "serde_json" ]
 message_derive = [ "actix" ]
 simultaneous_systems = [ "client", "dashmap" ]
-client = [ "awc", "actix", "bytes", "actix-codec", "tokio", "futures" ]
+client = [ "awc", "actix", "bytes", "actix-codec", "tokio", "futures", "serde_json" ]
 
 [dependencies]
 # (de)serialize
