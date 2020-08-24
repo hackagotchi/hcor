@@ -52,13 +52,8 @@ impl fmt::Display for Acquisition {
 pub struct Item {
     pub item_id: ItemId,
     pub owner_id: SteaderId,
-<<<<<<< HEAD
     pub conf: Conf,
-    pub gotchi: Option<Gotchi>,
-=======
-    pub archetype_handle: ArchetypeHandle,
     gotchi: Option<Gotchi>,
->>>>>>> f24160a... feat: Allow renaming gotchi and plants
     pub ownership_log: Vec<LoggedOwner>,
 }
 
@@ -238,12 +233,8 @@ impl Item {
         let item_id = ItemId(uuid::Uuid::new_v4());
         Self {
             item_id,
-            gotchi: Some(Gotchi::new(conf)).filter(|_| conf.gotchi.is_some()),
+            gotchi: Some(Gotchi::new(conf, item_id)).filter(|_| conf.gotchi.is_some()),
             owner_id: logged_owner_id,
-<<<<<<< HEAD
-=======
-            gotchi: Some(Gotchi::new(ah, item_id)).filter(|_| a.gotchi.is_some()),
->>>>>>> f24160a... feat: Allow renaming gotchi and plants
             ownership_log: vec![LoggedOwner {
                 owner_index: 0,
                 logged_owner_id,

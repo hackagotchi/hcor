@@ -1,4 +1,4 @@
-use crate::{config, CONFIG, id::{IdentifiesItem, ItemId}};
+use crate::id::{IdentifiesItem, ItemId};
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 
@@ -28,12 +28,12 @@ mod client {
     use crate::{
         client::{ClientError, ClientResult},
         wormhole::{ask, until_ask_id_map, AskedNote, ItemAsk},
-        Ask, IdentifiesItem,
+        Ask
     };
 
     impl Gotchi {
         pub async fn rename(&self, new_name: String) -> ClientResult<String> {
-            let a = Ask::Item(ItemAsk::GotchiRename {
+            let a = Ask::Item(ItemAsk::GotchiNickname {
                 item_id: self.item_id,
                 new_name,
             });
@@ -41,11 +41,11 @@ mod client {
             let ask_id = ask(a.clone()).await?;
 
             until_ask_id_map(ask_id, |n| match n {
-                AskedNote::GotchiRenameResult(r) => Some(r),
+                AskedNote::GotchiNicknameResult(r) => Some(r),
                 _ => None,
             })
             .await?
-            .map_err(|e| ClientError::bad_ask(a, "GotchiRename", e))
+            .map_err(|e| ClientError::bad_ask(a, "GotchiNickname", e))
         }
     }
 }

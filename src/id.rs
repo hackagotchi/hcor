@@ -9,12 +9,8 @@ pub enum NoSuch {
     Plant(NoSuchPlantOnTile),
     Item(NoSuchItem),
     Tile(NoSuchTile),
-<<<<<<< HEAD
     Effect(NoSuchRubEffectOnPlant),
-=======
-    Effect(NoSuchEffectOnPlant),
     Gotchi(NoSuchGotchiOnItem),
->>>>>>> f24160a... feat: Allow renaming gotchi and plants
 }
 pub type NoSuchResult<T> = Result<T, NoSuch>;
 impl std::error::Error for NoSuch {}
