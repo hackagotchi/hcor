@@ -143,7 +143,6 @@ fn main() {
     };
     let item = || Item::from_conf(i_conf(), s_rnd(), item::Acquisition::spawned());
 
-    /*
     test_each(vec![
         KnowledgeSnort { xp: 100 },
         Plant(Summon {
@@ -173,7 +172,7 @@ fn main() {
         TileSummon {
             tile_redeemable_item_id: i_rnd(),
         },
-    ]); */
+    ]);
     test_each(vec![
         KnowledgeSnortResult(Ok(10)),
         PlantSummonResult(Ok(plant())),
