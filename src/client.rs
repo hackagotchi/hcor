@@ -31,11 +31,11 @@ pub struct ClientError {
     kind: ClientErrorKind,
 }
 impl ClientError {
-    pub fn bad_ask(input: Ask, what: &'static str, err: String) -> Self {
+    pub fn bad_ask(input: Ask, what: &'static str, err: impl AsRef<str>) -> Self {
         ClientError {
             route: "wormhole",
             input: format!("{:#?}", input),
-            kind: ClientErrorKind::BadAsk(what, err),
+            kind: ClientErrorKind::BadAsk(what, err.as_ref().to_string()),
         }
     }
 }

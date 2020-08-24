@@ -7,21 +7,50 @@ use std::fmt;
 
 #[cfg(feature = "config_verify")]
 use super::{VerifError, VerifResult};
-#[cfg(feature = "config_verify")]
-use crate::item;
+use crate::{item, Hackstead, Item, SteaderId};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Output<I: Clone> {
-    xp: usize,
-    items: Vec<I>,
+    pub xp: usize,
+    pub items: Vec<I>,
 }
+
+impl<I: Clone> Default for Output<I> {
+    fn default() -> Self {
+        Self {
+            xp: 0,
+            items: vec![],
+        }
+    }
+}
+
 impl<I: Clone> Output<I> {
     fn new() -> Self {
         Self {
             xp: 0,
             items: vec![],
         }
+    }
+}
+
+impl Output<item::Conf> {
+    pub fn spawned(self, owner: SteaderId, acq: item::Acquisition) -> Output<Item> {
+        Output {
+            xp: self.xp,
+            items: self
+                .items
+                .into_iter()
+                .map(|conf| Item::from_conf(conf, owner, acq))
+                .collect(),
+        }
+    }
+}
+
+impl Output<Item> {
+    pub fn copy_into(&self, hs: &mut Hackstead) {
+        hs.profile.xp += self.xp;
+        hs.inventory.append(&mut self.items.clone());
     }
 }
 
@@ -52,7 +81,7 @@ pub enum Evalput<I: Clone> {
 }
 
 impl<I: Clone> Evalput<I> {
-    pub fn evaluated(self, rng: &mut impl Rng) -> Output<I> {
+    pub fn evaluated(&self, rng: &mut impl Rng) -> Output<I> {
         let mut output = Output::new();
         self.eval(&mut output, rng);
         output

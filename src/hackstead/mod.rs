@@ -53,9 +53,9 @@ impl Hackstead {
     pub fn land_unlock_eligible(&self) -> bool {
         let xp_allows = self.max_land();
         let extra = self.profile.extra_land_plot_count;
-        let eligible = xp_allows + extra;
+        let eligible = dbg!(xp_allows) + dbg!(extra);
 
-        self.land.len() < eligible
+        dbg!(self.land.len()) < eligible
     }
 
     /// The maximum amount of land this Hackstead is currently able to unlock based on the amount of xp it has.

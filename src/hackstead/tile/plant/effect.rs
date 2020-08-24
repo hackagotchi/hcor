@@ -27,7 +27,23 @@ pub struct RubEffect {
     /// The conf of the item that was consumed to apply this effect.
     pub item_conf: item::Conf,
     /// The handle of the effect within this item that describes this effect.
-    pub effect_conf: usize,
+    pub effect_index: usize,
+}
+
+impl RubEffect {
+    pub fn item_on_plant(item_conf: item::Conf, plant_conf: super::Conf) -> Vec<Self> {
+        item_conf
+            .plant_rub_effects
+            .iter()
+            .enumerate()
+            .filter(move |(_, e)| e.for_plants.allows(plant_conf))
+            .map(move |(i, _)| Self {
+                effect_id: RubEffectId(uuid::Uuid::new_v4()),
+                item_conf,
+                effect_index: i,
+            })
+            .collect()
+    }
 }
 
 impl std::ops::Deref for RubEffect {
@@ -36,9 +52,9 @@ impl std::ops::Deref for RubEffect {
     fn deref(&self) -> &Self::Target {
         self.item_conf
             .plant_rub_effects
-            .get(self.effect_conf)
+            .get(self.effect_index)
             .as_ref()
-            .expect("invalid rub effect_conf, this is pretty bad")
+            .expect("invalid rub index, this is pretty bad")
     }
 }
 
