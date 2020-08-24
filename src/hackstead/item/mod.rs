@@ -165,7 +165,7 @@ mod config_client {
     use super::*;
     use crate::{
         client::{ClientError, ClientResult},
-        wormhole::{ask, Ask, until_ask_id_map, AskedNote, ItemAsk},
+        wormhole::{ask, until_ask_id_map, Ask, AskedNote, ItemAsk},
     };
 
     impl Config {

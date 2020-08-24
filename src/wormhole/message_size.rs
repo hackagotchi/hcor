@@ -1,6 +1,6 @@
 use flate2::{write::DeflateEncoder, Compression};
 use hcor::wormhole::{Ask::*, AskedNote::*, ItemAsk::*, PlantAsk::*};
-use hcor::{item, plant, Item, ItemId, Plant, SteaderId, Tile, TileId};
+use hcor::{config, item, plant, Item, ItemId, Plant, SteaderId, Tile, TileId};
 use serde::Serialize;
 use std::{
     fmt,
@@ -139,7 +139,7 @@ fn main() {
     let rub_effect = || plant::RubEffect {
         effect_id: plant::RubEffectId(Uuid::new_v4()),
         item_conf: i_conf(),
-        effect_conf: 0,
+        effect_index: 0,
     };
     let item = || Item::from_conf(i_conf(), s_rnd(), item::Acquisition::spawned());
 
@@ -184,6 +184,9 @@ fn main() {
         TileSummonResult(Ok(Tile::new(s_rnd()))),
         ItemSpawnResult(Ok((0..4).map(|_| item()).collect())),
         ItemThrowResult(Ok((0..100).map(|_| item()).collect())),
-        ItemHatchResult(Ok((0..20).map(|_| item()).collect())),
+        ItemHatchResult(Ok(config::evalput::Output {
+            items: (0..20).map(|_| item()).collect(),
+            xp: 100,
+        })),
     ])
 }

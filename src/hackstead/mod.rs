@@ -53,7 +53,7 @@ impl Hackstead {
     pub fn land_unlock_eligible(&self) -> bool {
         let xp_allows = self.max_land();
         let extra = self.profile.extra_land_plot_count;
-        let eligible = xp_allows + extra)
+        let eligible = xp_allows + extra;
 
         self.land.len() < eligible
     }

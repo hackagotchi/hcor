@@ -46,7 +46,10 @@ pub struct LevelInfo {
     pub last_unlocked_index: usize,
 }
 
-pub fn max_level_info(mut your_xp: usize, mut level_xps: impl ExactSizeIterator<Item = usize>) -> LevelInfo {
+pub fn max_level_info(
+    mut your_xp: usize,
+    mut level_xps: impl ExactSizeIterator<Item = usize>,
+) -> LevelInfo {
     let mut xp_so_far = 0;
     let mut xp_to_go = 0;
     let mut total_level_xp = 0;
