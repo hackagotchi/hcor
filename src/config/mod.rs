@@ -58,7 +58,6 @@ pub fn max_level_info(mut your_xp: usize, mut level_xps: impl ExactSizeIterator<
                 xp_to_go = your_xp;
                 xp_so_far = xp - your_xp;
                 total_level_xp = xp;
-                println!("found limit at: {}", xp);
                 true
             }
             Some(subbed_xp) => {
