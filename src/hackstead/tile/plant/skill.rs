@@ -228,11 +228,11 @@ impl std::ops::Deref for SkillNameOrRawUnlock {
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct Unlock {
-    skill: Conf,
-    hide_until: Cost,
-    costs: Cost,
-    source_skill: Conf,
-    index: usize,
+    pub skill: Conf,
+    pub hide_until: Cost,
+    pub costs: Cost,
+    pub source_skill: Conf,
+    pub index: usize,
 }
 
 #[cfg(feature = "client")]
