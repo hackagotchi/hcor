@@ -67,6 +67,11 @@ pub enum AskedNote {
     /// Returns the number of skill points left, if successful.
     PlantSkillUnlockResult(StrResult<usize>),
 
+    /// Can fail if the plant doesn't exist.
+    ///
+    /// Returns the new xp total for this plant.
+    PlantKnowledgeSnortResult(StrResult<usize>),
+
     /// Summoning a tile can fail if the item used isn't configured to do so.
     ///
     /// Returns the fresh tile, if successful.
@@ -117,6 +122,8 @@ impl AskedNote {
             PlantNicknameResult(Ok(_)) => None,
             PlantSkillUnlockResult(Err(e)) => Some(e),
             PlantSkillUnlockResult(Ok(_)) => None,
+            PlantKnowledgeSnortResult(Err(e)) => Some(e),
+            PlantKnowledgeSnortResult(Ok(_)) => None,
             TileSummonResult(Err(e)) => Some(e),
             TileSummonResult(Ok(_)) => None,
             ItemSpawnResult(Err(e)) => Some(e),
@@ -223,6 +230,10 @@ pub enum PlantAsk {
         source_skill_conf: plant::skill::Conf,
         unlock_index: usize,
     },
+    KnowledgeSnort {
+        tile_id: TileId,
+        xp: usize,
+    }
 }
 
 /// Something the client wants the server to do

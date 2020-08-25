@@ -401,5 +401,21 @@ mod client {
             .await?
             .map_err(|e| ClientError::bad_ask(a, "PlantRub", e))
         }
+
+        pub async fn knowledge_snort(&self, xp: usize) -> ClientResult<usize> {
+            let a = Ask::Plant(PlantAsk::KnowledgeSnort {
+                tile_id: self.tile_id,
+                xp,
+            });
+
+            let ask_id = ask(a.clone()).await?;
+
+            until_ask_id_map(ask_id, |n| match n {
+                AskedNote::PlantKnowledgeSnortResult(r) => Some(r),
+                _ => None,
+            })
+            .await?
+            .map_err(|e| ClientError::bad_ask(a, "KnowledgeSnort", e))
+        }
     }
 }
