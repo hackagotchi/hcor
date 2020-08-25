@@ -99,6 +99,7 @@ impl Cost {
     pub fn points(points: usize) -> Self {
         Cost {
             points,
+            ..Default::default()
         }
     }
 
