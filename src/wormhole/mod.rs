@@ -233,7 +233,7 @@ pub enum PlantAsk {
     KnowledgeSnort {
         tile_id: TileId,
         xp: usize,
-    }
+    },
 }
 
 /// Something the client wants the server to do
