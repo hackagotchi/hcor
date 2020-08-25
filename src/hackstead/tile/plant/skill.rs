@@ -1,6 +1,6 @@
 #[cfg(feature = "config_verify")]
 use crate::config::{self, Verify};
-use crate::item;
+use crate::{item, Hackstead, id::NoSuch, IdentifiesPlant};
 #[cfg(feature = "config_verify")]
 use serde::de::{self, MapAccess, Visitor};
 use serde::{Deserialize, Serialize};
@@ -57,13 +57,6 @@ impl RawCost {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
-pub struct Cost {
-    points: usize,
-    items: Vec<(usize, item::Conf)>,
-    skills: Vec<Conf>,
-}
-
 #[cfg(feature = "config_verify")]
 impl Verify for (super::Conf, RawCost) {
     type Verified = Cost;
@@ -87,6 +80,46 @@ impl Verify for (super::Conf, RawCost) {
 
     fn context(&self) -> Option<String> {
         Some(format!("in one of an unlock's costs"))
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
+pub struct Cost {
+    points: usize,
+    items: Vec<(usize, item::Conf)>,
+    skills: Vec<Conf>,
+}
+
+impl Cost {
+    pub fn can_afford(
+        &self,
+        hs: &Hackstead,
+        p: impl IdentifiesPlant
+    ) -> Result<Result<(), usize>, NoSuch> {
+        let has_items = hs.has_items(&self.items);
+
+        let plant = hs.plant(p.tile_id())?;
+        let has_points = plant.skills.afford(self.points);
+        let has_skills = self.skills.iter().all(|s| plant.skills.unlocked.contains(s));
+        Ok(if has_items && has_points.is_ok() && has_skills {
+            Ok(())
+        } else {
+            Err(has_points.err().unwrap_or(0))
+        })
+    }
+
+    pub fn charge(
+        &self,
+        hs: &mut Hackstead,
+        plant: impl IdentifiesPlant + Copy
+    ) -> Result<Result<(), usize>, NoSuch> {
+        match self.can_afford(&hs, plant) {
+            Ok(Ok(())) => {
+                hs.take_items(&self.items);
+                Ok(hs.plant_mut(plant)?.skills.charge(self.points))
+            }
+            other => other,
+        }
     }
 }
 
@@ -202,7 +235,7 @@ mod client {
     use crate::{
         client::{ClientError, ClientResult},
         wormhole::{ask, until_ask_id_map, AskedNote, PlantAsk},
-        Ask, IdentifiesPlant,
+        Ask
     };
 
     impl Unlock {

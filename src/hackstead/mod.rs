@@ -49,6 +49,29 @@ impl Hackstead {
         hs
     }
 
+    /// Returns true if the hackstead's inventory has all of the items in at least the specified amounts.
+    pub fn has_items(&self, item_confs: &[(usize, item::Conf)]) -> bool {
+        item_confs.iter().copied().all(|(count, conf)| {
+            let has = self.inventory.iter().filter(|x| x.conf == conf).take(count).count();
+            count <= has
+        })
+    }
+
+    /// Returns true if the hackstead's inventory has all of the items in at least the specified amounts.
+
+    /// Do not use with a list of needs where the same item::Conf is repeated across rows,
+    /// i.e. [ (3, conf1), (1, conf2), (1, conf2) ] instead of [ (3, conf1), (2, conf2) ]
+    pub fn take_items(&mut self, take: &[(usize, item::Conf)]) {
+        let items: Vec<_> = self.inventory.iter().map(|i| (i.conf, i.item_id)).collect();
+        for (count, conf) in take.iter().copied() {
+            for (_, i) in items.iter().filter(|(c, _)| *c == conf).take(count) {
+                if let Err(e) = self.take_item(i) {
+                    log::error!("error taking item: {}", e);
+                }
+            }
+        }
+    }
+
     /// Returns true if this hackstead has enough xp to redeem another tile of land.
     pub fn land_unlock_eligible(&self) -> bool {
         let xp_allows = self.max_land();

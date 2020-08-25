@@ -130,7 +130,6 @@ pub struct Plant {
     /// Effects from potions, warp powder, etc. that actively change the behavior of this plant.
     pub rub_effects: Vec<RubEffect>,
     pub skills: Skills,
-    pub xp: usize,
 }
 
 impl std::ops::Deref for Plant {
@@ -147,26 +146,51 @@ impl std::ops::Deref for Plant {
     }
 }
 
-#[derive(Default, Clone, Debug, SerdeDiff, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, SerdeDiff, Serialize, Deserialize, PartialEq)]
 pub struct Skills {
-    pub unlocked: Vec<skill::Conf>,
-    pub points_awarded: usize,
-    pub points_used: usize,
+    points_redeemed: usize,
+    conf: Conf,
+    level: usize,
+    xp: usize,
+    unlocked: Vec<skill::Conf>,
 }
+
 impl Skills {
-    pub fn empty() -> Self {
-        Self::default()
+    pub fn empty(conf: Conf) -> Self {
+        Self {
+            points_redeemed: 0,
+            conf,
+            level: 0,
+            xp: 0,
+            unlocked: vec![],
+        }
     }
 
-    pub fn try_unlock(&mut self, skill_cost: usize) -> bool {
-        let available = self.points_awarded - self.points_used;
+    fn point_xps(&self) -> impl ExactSizeIterator<Item = usize> + '_ {
+        self.conf.skillpoint_unlock_xps.iter().copied()
+    }
 
-        if available <= skill_cost {
-            self.points_used += skill_cost;
-            true
+    pub fn next_point_info(&self) -> config::LevelInfo {
+        config::max_level_info(self.xp, self.point_xps())
+    }
+
+    pub fn available_points(&self) -> usize {
+        let awarded = config::max_level_index(self.xp, self.point_xps());
+        awarded - self.points_redeemed
+    }
+
+    /// If can't afford this amount of skill points, returns the amount that would be needed.
+    pub fn afford(&self, amount: usize) -> Result<(), usize> {
+        if self.available_points() >= amount {
+            Ok(())
         } else {
-            false
+            Err(amount - self.available_points())
         }
+    }
+
+    /// If can't afford this amount of skill points, returns the amount that would be needed.
+    pub fn charge(&mut self, amount: usize) -> Result<(), usize> {
+        self.afford(amount).map(|_| self.points_redeemed += amount)
     }
 }
 
@@ -180,21 +204,8 @@ impl Plant {
             lifetime_rubs: 0,
             craft: None,
             rub_effects: vec![],
-            xp: 0,
-            skills: Skills {
-                unlocked: vec![],
-                points_awarded: 0,
-                points_used: 0,
-            },
+            skills: Skills::empty(conf),
         }
-    }
-
-    pub fn points_unlocked(&self) -> usize {
-        config::max_level_index(self.xp, self.conf.skillpoint_unlock_xps.iter().cloned())
-    }
-
-    pub fn next_point_info(&self) -> config::LevelInfo {
-        config::max_level_info(self.xp, self.conf.skillpoint_unlock_xps.iter().cloned())
     }
 
     /// includes:
