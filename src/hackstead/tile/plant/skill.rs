@@ -13,6 +13,12 @@ use std::fmt;
 /// also contains the Conf of the plant.
 pub struct Conf(pub(crate) super::Conf, pub(crate) uuid::Uuid);
 
+impl Conf {
+    pub fn try_lookup(self) -> Option<&'static Skill> {
+        self.0.try_lookup()?.skills.get(&self.1)
+    }
+}
+
 impl std::ops::Deref for Conf {
     type Target = Skill;
 
@@ -23,11 +29,7 @@ impl std::ops::Deref for Conf {
 
     #[cfg(not(feature = "config_verify"))]
     fn deref(&self) -> &Self::Target {
-        self.0
-            .skills
-            .get(&self.1)
-            .as_ref()
-            .expect("invalid skill Conf, this is very bad")
+        self.try_lookup().expect("invalid skill Conf, this is very bad")
     }
 }
 

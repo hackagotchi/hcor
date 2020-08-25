@@ -34,6 +34,14 @@ pub use timer::{Timer, TimerKind};
 /// A plant::Conf points to a plant::Config in the CONFIG lazy_static.
 pub struct Conf(pub(crate) uuid::Uuid);
 
+impl Conf {
+    pub fn try_lookup(self) -> Option<&'static Config> {
+        config::CONFIG
+            .plants
+            .get(&self)
+    }
+}
+
 impl std::ops::Deref for Conf {
     type Target = Config;
 
@@ -44,10 +52,7 @@ impl std::ops::Deref for Conf {
 
     #[cfg(not(feature = "config_verify"))]
     fn deref(&self) -> &Self::Target {
-        config::CONFIG
-            .plants
-            .get(self)
-            .as_ref()
+        self.try_lookup()
             .expect("invalid plant Conf, this is very bad")
     }
 }
