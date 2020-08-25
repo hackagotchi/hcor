@@ -148,11 +148,11 @@ impl std::ops::Deref for Plant {
 
 #[derive(Clone, Debug, SerdeDiff, Serialize, Deserialize, PartialEq)]
 pub struct Skills {
-    points_redeemed: usize,
+    pub points_redeemed: usize,
     conf: Conf,
-    level: usize,
-    xp: usize,
-    unlocked: Vec<skill::Conf>,
+    pub level: usize,
+    pub xp: usize,
+    pub unlocked: Vec<skill::Conf>,
 }
 
 impl Skills {
