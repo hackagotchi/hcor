@@ -4,9 +4,9 @@ use crate::{
     IdentifiesItem, IdentifiesPlant, IdentifiesSteader, IdentifiesTile, SteaderId,
 };
 use chrono::{DateTime, Utc};
+use log::*;
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
-use log::*;
 
 pub mod tile;
 pub use tile::{
@@ -227,7 +227,7 @@ mod client {
     use super::*;
     use crate::{
         client::{request, ClientError, ClientResult},
-        wormhole::{self, ask, until_ask_id_map, AskedNote, Note, EditNote, ItemAsk},
+        wormhole::{self, ask, until_ask_id_map, AskedNote, EditNote, ItemAsk, Note},
         Ask, IdentifiesSteader, IdentifiesUser, Item, Tile,
     };
 
@@ -243,8 +243,9 @@ mod client {
                     Note::Edit(EditNote::Json(json_data)) => {
                         serde_diff::Apply::apply(
                             &mut serde_json::Deserializer::from_str(&json_data),
-                            self
-                        ).map_err(|e| wormhole::WormholeError::Serde(e))?;
+                            self,
+                        )
+                        .map_err(|e| wormhole::WormholeError::Serde(e))?;
                     }
                     other => warn!("unexpected unhandled note: {:#?}", other),
                 }
