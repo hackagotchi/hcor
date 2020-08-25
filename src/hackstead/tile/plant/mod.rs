@@ -34,6 +34,12 @@ pub use timer::{Timer, TimerKind};
 /// A plant::Conf points to a plant::Config in the CONFIG lazy_static.
 pub struct Conf(pub(crate) uuid::Uuid);
 
+impl Conf {
+    pub fn try_lookup(self) -> Option<&'static Config> {
+        config::CONFIG.plants.get(&self)
+    }
+}
+
 impl std::ops::Deref for Conf {
     type Target = Config;
 
@@ -44,10 +50,7 @@ impl std::ops::Deref for Conf {
 
     #[cfg(not(feature = "config_verify"))]
     fn deref(&self) -> &Self::Target {
-        config::CONFIG
-            .plants
-            .get(self)
-            .as_ref()
+        self.try_lookup()
             .expect("invalid plant Conf, this is very bad")
     }
 }
@@ -127,7 +130,6 @@ pub struct Plant {
     /// Effects from potions, warp powder, etc. that actively change the behavior of this plant.
     pub rub_effects: Vec<RubEffect>,
     pub skills: Skills,
-    pub xp: usize,
 }
 
 impl std::ops::Deref for Plant {
@@ -144,26 +146,56 @@ impl std::ops::Deref for Plant {
     }
 }
 
-#[derive(Default, Clone, Debug, SerdeDiff, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, SerdeDiff, Serialize, Deserialize, PartialEq)]
 pub struct Skills {
+    pub points_redeemed: usize,
+    conf: Conf,
+    pub level: usize,
+    pub xp: usize,
     pub unlocked: Vec<skill::Conf>,
-    pub points_awarded: usize,
-    pub points_used: usize,
 }
+
 impl Skills {
-    pub fn empty() -> Self {
-        Self::default()
+    pub fn new(conf: Conf) -> Self {
+        Self {
+            points_redeemed: 0,
+            conf,
+            level: 0,
+            xp: 0,
+            unlocked: conf
+                .skills
+                .values()
+                .filter(|s| s.start_unlocked)
+                .map(|s| s.conf)
+                .collect(),
+        }
     }
 
-    pub fn try_unlock(&mut self, skill_cost: usize) -> bool {
-        let available = self.points_awarded - self.points_used;
+    fn point_xps(&self) -> impl ExactSizeIterator<Item = usize> + '_ {
+        self.conf.skillpoint_unlock_xps.iter().copied()
+    }
 
-        if available <= skill_cost {
-            self.points_used += skill_cost;
-            true
+    pub fn next_point_info(&self) -> config::LevelInfo {
+        config::max_level_info(self.xp, self.point_xps())
+    }
+
+    pub fn available_points(&self) -> usize {
+        let awarded = config::max_level_index(self.xp, self.point_xps());
+        awarded - self.points_redeemed
+    }
+
+    /// If can't afford this amount of skill points, returns the amount that would be needed.
+    pub fn afford(&self, amount: usize) -> Result<(), usize> {
+        if self.available_points() >= amount {
+            Ok(())
         } else {
-            false
+            Err(amount - self.available_points())
         }
+    }
+
+    /// If can't afford this amount of skill points, returns the amount that would be needed.
+    pub fn charge(&mut self, amount: usize) -> Result<(), usize> {
+        self.afford(amount).map(|_| self.points_redeemed += amount)
     }
 }
 
@@ -177,21 +209,8 @@ impl Plant {
             lifetime_rubs: 0,
             craft: None,
             rub_effects: vec![],
-            xp: 0,
-            skills: Skills {
-                unlocked: vec![],
-                points_awarded: 0,
-                points_used: 0,
-            },
+            skills: Skills::new(conf),
         }
-    }
-
-    pub fn points_unlocked(&self) -> usize {
-        config::max_level_index(self.xp, self.conf.skillpoint_unlock_xps.iter().cloned())
-    }
-
-    pub fn next_point_info(&self) -> config::LevelInfo {
-        config::max_level_info(self.xp, self.conf.skillpoint_unlock_xps.iter().cloned())
     }
 
     /// includes:
@@ -381,6 +400,22 @@ mod client {
             })
             .await?
             .map_err(|e| ClientError::bad_ask(a, "PlantRub", e))
+        }
+
+        pub async fn knowledge_snort(&self, xp: usize) -> ClientResult<usize> {
+            let a = Ask::Plant(PlantAsk::KnowledgeSnort {
+                tile_id: self.tile_id,
+                xp,
+            });
+
+            let ask_id = ask(a.clone()).await?;
+
+            until_ask_id_map(ask_id, |n| match n {
+                AskedNote::PlantKnowledgeSnortResult(r) => Some(r),
+                _ => None,
+            })
+            .await?
+            .map_err(|e| ClientError::bad_ask(a, "KnowledgeSnort", e))
         }
     }
 }

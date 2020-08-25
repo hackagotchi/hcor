@@ -144,7 +144,7 @@ fn main() {
     let item = || Item::from_conf(i_conf(), s_rnd(), item::Acquisition::spawned());
 
     test_each(vec![
-        KnowledgeSnort { xp: 100 },
+        hcor::Ask::KnowledgeSnort { xp: 100 },
         Plant(Summon {
             tile_id: t_rnd(),
             seed_item_id: i_rnd(),
