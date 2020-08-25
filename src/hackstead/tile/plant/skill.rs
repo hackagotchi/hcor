@@ -96,6 +96,13 @@ pub struct Cost {
 }
 
 impl Cost {
+    pub fn points(points: usize) -> Self {
+        RawCost {
+            points,
+            ..Default::default()
+        }
+    }
+
     pub fn can_afford(
         &self,
         hs: &Hackstead,
