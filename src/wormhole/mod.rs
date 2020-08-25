@@ -77,7 +77,7 @@ pub enum AskedNote {
     ///
     /// Returns the list of new items, if successful.
     ItemSpawnResult(StrResult<Vec<Item>>),
-    
+
     /// This can fail if the items don't belong to the giver.
     ///
     /// Returns the list of new items, complete with updated owner logs.
@@ -220,7 +220,8 @@ pub enum PlantAsk {
     },
     SkillUnlock {
         tile_id: TileId,
-        skill_conf: plant::skill::Conf,
+        source_skill_conf: plant::skill::Conf,
+        unlock_index: usize,
     },
 }
 

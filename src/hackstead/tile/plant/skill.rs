@@ -29,35 +29,36 @@ impl std::ops::Deref for Conf {
 
     #[cfg(not(feature = "config_verify"))]
     fn deref(&self) -> &Self::Target {
-        self.try_lookup().expect("invalid skill Conf, this is very bad")
+        self.try_lookup()
+            .expect("invalid skill Conf, this is very bad")
     }
 }
 
 #[cfg(feature = "config_verify")]
-#[derive(Deserialize, Debug, Clone, PartialEq)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Default)]
 #[serde(deny_unknown_fields, default)]
 pub struct RawCost {
-    hide_until_met: bool,
     points: usize,
     items: Vec<(usize, String)>,
     skills: Vec<String>,
 }
 
 #[cfg(feature = "config_verify")]
-impl Default for RawCost {
-    fn default() -> Self {
+impl RawCost {
+    pub fn empty() -> Self {
+        Default::default()
+    }
+
+    pub fn points(points: usize) -> Self {
         RawCost {
-            hide_until_met: false,
-            points: 1,
-            items: vec![],
-            skills: vec![],
+            points,
+            ..Default::default()
         }
     }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct Cost {
-    hide_until_met: bool,
     points: usize,
     items: Vec<(usize, item::Conf)>,
     skills: Vec<Conf>,
@@ -70,7 +71,6 @@ impl Verify for (super::Conf, RawCost) {
     fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
         let (plant_conf, cost) = self;
         Ok(Cost {
-            hide_until_met: cost.hide_until_met,
             points: cost.points,
             skills: cost
                 .skills
@@ -95,7 +95,47 @@ impl Verify for (super::Conf, RawCost) {
 #[serde(deny_unknown_fields)]
 pub struct RawUnlock {
     skill: String,
-    costs: Vec<RawCost>,
+    costs: RawCost,
+    #[serde(default)]
+    hide_until: RawCost,
+}
+
+#[cfg(feature = "config_verify")]
+struct RawUnlockVerifyWrapper {
+    inner: RawUnlock,
+    source_skill: Conf,
+    plant_conf: super::Conf,
+    index: usize,
+}
+
+#[cfg(feature = "config_verify")]
+impl Verify for RawUnlockVerifyWrapper {
+    type Verified = Unlock;
+
+    fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
+        let RawUnlockVerifyWrapper {
+            inner:
+                RawUnlock {
+                    skill,
+                    hide_until,
+                    costs,
+                },
+            source_skill,
+            plant_conf,
+            index,
+        } = self;
+        Ok(Unlock {
+            skill: raw.plant_skill_conf(plant_conf, &skill)?,
+            hide_until: (plant_conf, hide_until).verify(raw)?,
+            costs: (plant_conf, costs).verify(raw)?,
+            source_skill,
+            index,
+        })
+    }
+
+    fn context(&self) -> Option<String> {
+        Some(format!("in an unlock for {}", self.inner.skill))
+    }
 }
 
 #[cfg(feature = "config_verify")]
@@ -123,7 +163,8 @@ where
         {
             Ok(RawUnlock {
                 skill: s.to_string(),
-                costs: vec![Default::default()],
+                costs: RawCost::points(1),
+                hide_until: RawCost::empty(),
             })
         }
 
@@ -149,27 +190,39 @@ impl std::ops::Deref for SkillNameOrRawUnlock {
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct Unlock {
     skill: Conf,
-    costs: Vec<Cost>,
+    hide_until: Cost,
+    costs: Cost,
+    source_skill: Conf,
+    index: usize,
 }
 
-#[cfg(feature = "config_verify")]
-impl Verify for (super::Conf, SkillNameOrRawUnlock) {
-    type Verified = Unlock;
+#[cfg(feature = "client")]
+mod client {
+    use super::*;
+    use crate::{
+        client::{ClientError, ClientResult},
+        wormhole::{ask, until_ask_id_map, AskedNote, PlantAsk},
+        Ask, IdentifiesPlant,
+    };
 
-    fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
-        let (plant_conf, SkillNameOrRawUnlock(RawUnlock { skill, costs })) = self;
-        Ok(Unlock {
-            skill: raw.plant_skill_conf(plant_conf, &skill)?,
-            costs: costs
-                .into_iter()
-                .map(|c| (plant_conf, c))
-                .collect::<Vec<_>>()
-                .verify(raw)?,
-        })
-    }
+    impl Unlock {
+        pub async fn unlock_for(&self, p: impl IdentifiesPlant) -> ClientResult<usize> {
+            let tile_id = p.tile_id();
+            let a = Ask::Plant(PlantAsk::SkillUnlock {
+                tile_id,
+                source_skill_conf: self.source_skill,
+                unlock_index: self.index,
+            });
 
-    fn context(&self) -> Option<String> {
-        Some(format!("in an unlock for {}", self.1.skill))
+            let ask_id = ask(a.clone()).await?;
+
+            until_ask_id_map(ask_id, |n| match n {
+                AskedNote::PlantSkillUnlockResult(r) => Some(r),
+                _ => None,
+            })
+            .await?
+            .map_err(|e| ClientError::bad_ask(a, "PlantSkillUnlock", e))
+        }
     }
 }
 
@@ -195,16 +248,25 @@ impl Verify for (super::Conf, RawSkill) {
 
     fn verify_raw(self, raw: &config::RawConfig) -> config::VerifResult<Self::Verified> {
         let (plant_conf, rsk) = self;
-        let unlocks = rsk
-            .unlocks
-            .into_iter()
-            .map(|unlock| (plant_conf, unlock).verify(raw))
-            .collect::<Result<_, _>>()?;
+        let uuid = rsk.conf;
 
         Ok(Skill {
-            unlocks,
             title: rsk.title,
             effects: rsk.effects.verify(raw)?,
+            unlocks: rsk
+                .unlocks
+                .into_iter()
+                .enumerate()
+                .map(|(index, SkillNameOrRawUnlock(unlock))| {
+                    RawUnlockVerifyWrapper {
+                        plant_conf,
+                        index,
+                        source_skill: Conf(plant_conf, uuid),
+                        inner: unlock,
+                    }
+                    .verify(raw)
+                })
+                .collect::<Result<_, _>>()?,
         })
     }
 
