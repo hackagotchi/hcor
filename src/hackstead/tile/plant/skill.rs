@@ -13,6 +13,12 @@ use std::fmt;
 /// also contains the Conf of the plant.
 pub struct Conf(pub(crate) super::Conf, pub(crate) uuid::Uuid);
 
+impl fmt::Display for Conf {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.1)
+    }
+}
+
 impl Conf {
     pub fn try_lookup(self) -> Option<&'static Skill> {
         self.0.try_lookup()?.skills.get(&self.1)
