@@ -4,7 +4,6 @@ use crate::{item, Hackstead, id::NoSuch, IdentifiesPlant};
 #[cfg(feature = "config_verify")]
 use serde::de::{self, MapAccess, Visitor};
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "config_verify")]
 use std::fmt;
 
 #[derive(Deserialize, serde_diff::SerdeDiff, Serialize, Debug, PartialEq, Clone, Copy)]
