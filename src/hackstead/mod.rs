@@ -240,13 +240,11 @@ mod client {
         pub async fn server_sync(&mut self) -> ClientResult<()> {
             while let Some(n) = wormhole::try_note().await? {
                 match n {
-                    Note::Edit(EditNote::Bincode(bincode_bytes)) => {
-                        use bincode::Options;
-
-                        bincode::options().deserialize_seed(
-                            serde_diff::Apply::deserializable(self),
-                            &bincode_bytes
-                        ).map_err(|e| wormhole::WormholeError::Bincode(e))?
+                    Note::Edit(EditNote::Json(json_data)) => {
+                        serde_diff::Apply::apply(
+                            &mut serde_json::Deserializer::from_str(&json_data),
+                            self
+                        ).map_err(|e| wormhole::WormholeError::Serde(e))?;
                     }
                     other => warn!("unexpected unhandled note: {:#?}", other),
                 }
