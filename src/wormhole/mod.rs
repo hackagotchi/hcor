@@ -30,20 +30,24 @@ pub enum AskedNote {
     ///
     /// Returns the new total xp of the user's stead.
     KnowledgeSnortResult(StrResult<usize>),
+
     /// Can fail if this tile is already occupied, among a host of other reasons
     ///
     /// Returns the fresh new plant, if successful.
     PlantSummonResult(StrResult<Plant>),
+
     /// Can fail if the plant doesn't exist, among a host of other reasons.
     ///
-    /// Returns the now-deceased planti, if successful.
+    /// Returns the now-deceased plant, if successful.
     PlantSlaughterResult(StrResult<Plant>),
+
     /// Expect a RudeNote::CraftFinish later.
     ///
     /// Can fail if the plant is already crafting something, among a host of other reasons.
     ///
     /// Returns the Craft struct added to the plant, if successful.
     PlantCraftStartResult(StrResult<plant::Craft>),
+
     /// Expect a RudeNote::RubEffectFinish later, if the item you applied can wear off.
     ///
     /// Can fail if the provided item has no rub effects or has no rub effects when applied to this
@@ -51,31 +55,43 @@ pub enum AskedNote {
     ///
     /// Returns the effect struct, complete with ID and ticks until finish.
     PlantRubStartResult(StrResult<Vec<plant::RubEffect>>),
+
+    /// Result of renaming a plant
+    ///
+    /// Returns the new name
+    PlantNicknameResult(StrResult<String>),
+
+    /// Can fail if you don't have any skill points to spare,
+    /// or if there is no skill with the id you asked for.
+    ///
+    /// Returns the number of skill points left, if successful.
+    PlantSkillUnlockResult(StrResult<usize>),
+
     /// Summoning a tile can fail if the item used isn't configured to do so.
     ///
     /// Returns the fresh tile, if successful.
     TileSummonResult(StrResult<Tile>),
+
     /// This can fail if an invalid item_conf is provided, or if the user is not authorized to
     /// spawn items.
     ///
     /// Returns the list of new items, if successful.
     ItemSpawnResult(StrResult<Vec<Item>>),
+    
     /// This can fail if the items don't belong to the giver.
     ///
     /// Returns the list of new items, complete with updated owner logs.
     ItemThrowResult(StrResult<Vec<Item>>),
+
     /// This can fail if the provided item isn't hatchable, among a host of other reasons.
     ///
     /// Returns a list of the new items, if successful.
     ItemHatchResult(StrResult<config::evalput::Output<Item>>),
+
     /// The result of renaming a gotchi
     ///
     /// Returns the new name
     GotchiNicknameResult(StrResult<String>),
-    /// Result of renaming a plant
-    ///
-    /// Returns the new name
-    PlantNicknameResult(StrResult<String>),
 }
 
 impl AskedNote {
@@ -97,6 +113,10 @@ impl AskedNote {
             PlantCraftStartResult(Ok(_)) => None,
             PlantRubStartResult(Err(e)) => Some(e),
             PlantRubStartResult(Ok(_)) => None,
+            PlantNicknameResult(Err(e)) => Some(e),
+            PlantNicknameResult(Ok(_)) => None,
+            PlantSkillUnlockResult(Err(e)) => Some(e),
+            PlantSkillUnlockResult(Ok(_)) => None,
             TileSummonResult(Err(e)) => Some(e),
             TileSummonResult(Ok(_)) => None,
             ItemSpawnResult(Err(e)) => Some(e),
@@ -107,8 +127,6 @@ impl AskedNote {
             ItemHatchResult(Ok(_)) => None,
             GotchiNicknameResult(Err(e)) => Some(e),
             GotchiNicknameResult(Ok(_)) => None,
-            PlantNicknameResult(Err(e)) => Some(e),
-            PlantNicknameResult(Ok(_)) => None,
         }
     }
 }
@@ -199,6 +217,10 @@ pub enum PlantAsk {
     Nickname {
         tile_id: TileId,
         new_name: String,
+    },
+    SkillUnlock {
+        tile_id: TileId,
+        skill_conf: plant::skill::Conf,
     },
 }
 

@@ -382,5 +382,21 @@ mod client {
             .await?
             .map_err(|e| ClientError::bad_ask(a, "PlantRub", e))
         }
+
+        pub async fn unlock_skill(&self, skill_conf: skill::Conf) -> ClientResult<usize> {
+            let a = Ask::Plant(PlantAsk::SkillUnlock {
+                tile_id: self.tile_id,
+                skill_conf,
+            });
+
+            let ask_id = ask(a.clone()).await?;
+
+            until_ask_id_map(ask_id, |n| match n {
+                AskedNote::PlantSkillUnlockResult(r) => Some(r),
+                _ => None,
+            })
+            .await?
+            .map_err(|e| ClientError::bad_ask(a, "PlantSkillUnlock", e))
+        }
     }
 }
