@@ -88,7 +88,7 @@ impl Verify for (super::Conf, RawCost) {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Default)]
 pub struct Cost {
     points: usize,
     items: Vec<(usize, item::Conf)>,
@@ -99,7 +99,6 @@ impl Cost {
     pub fn points(points: usize) -> Self {
         Cost {
             points,
-            ..Default::default()
         }
     }
 
