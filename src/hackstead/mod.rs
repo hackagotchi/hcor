@@ -26,8 +26,6 @@ pub struct Hackstead {
     pub land: Vec<Tile>,
     pub inventory: Vec<Item>,
     pub timers: Vec<plant::Timer>,
-    #[serde(skip)]
-    pub local_version: usize,
 }
 impl Hackstead {
     pub fn empty(slack_id: Option<impl ToString>) -> Self {
@@ -36,7 +34,6 @@ impl Hackstead {
             land: vec![],
             inventory: vec![],
             timers: vec![],
-            local_version: 0,
         }
     }
 
