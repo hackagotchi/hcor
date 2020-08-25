@@ -4,6 +4,7 @@ use crate::{
     IdentifiesItem, IdentifiesPlant, IdentifiesSteader, IdentifiesTile, SteaderId,
 };
 use chrono::{DateTime, Utc};
+use log::*;
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 
@@ -25,8 +26,6 @@ pub struct Hackstead {
     pub land: Vec<Tile>,
     pub inventory: Vec<Item>,
     pub timers: Vec<plant::Timer>,
-    #[serde(skip)]
-    pub local_version: usize,
 }
 impl Hackstead {
     pub fn empty(slack_id: Option<impl ToString>) -> Self {
@@ -35,7 +34,6 @@ impl Hackstead {
             land: vec![],
             inventory: vec![],
             timers: vec![],
-            local_version: 0,
         }
     }
 
@@ -71,7 +69,7 @@ impl Hackstead {
         for (count, conf) in take.iter().copied() {
             for (_, i) in items.iter().filter(|(c, _)| *c == conf).take(count) {
                 if let Err(e) = self.take_item(i) {
-                    log::error!("error taking item: {}", e);
+                    error!("error taking item: {}", e);
                 }
             }
         }
@@ -229,13 +227,31 @@ mod client {
     use super::*;
     use crate::{
         client::{request, ClientError, ClientResult},
-        wormhole::{self, ask, until_ask_id_map, AskedNote, ItemAsk},
+        wormhole::{self, ask, until_ask_id_map, AskedNote, EditNote, ItemAsk, Note},
         Ask, IdentifiesSteader, IdentifiesUser, Item, Tile,
     };
 
     impl Hackstead {
         pub async fn fetch(iu: impl IdentifiesUser) -> ClientResult<Self> {
             request("hackstead/spy", &iu.user_id()).await
+        }
+
+        /// Goes through all pending EditNotes from the server, applying each to our hackstead.
+        pub async fn server_sync(&mut self) -> ClientResult<()> {
+            while let Some(n) = wormhole::try_note().await? {
+                match n {
+                    Note::Edit(EditNote::Json(json_data)) => {
+                        serde_diff::Apply::apply(
+                            &mut serde_json::Deserializer::from_str(&json_data),
+                            self,
+                        )
+                        .map_err(|e| wormhole::WormholeError::Serde(e))?;
+                    }
+                    other => warn!("unexpected unhandled note: {:#?}", other),
+                }
+            }
+
+            Ok(())
         }
 
         pub async fn register() -> ClientResult<Self> {
