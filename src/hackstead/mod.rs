@@ -6,6 +6,7 @@ use crate::{
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
+use log::*;
 
 pub mod tile;
 pub use tile::{
@@ -71,7 +72,7 @@ impl Hackstead {
         for (count, conf) in take.iter().copied() {
             for (_, i) in items.iter().filter(|(c, _)| *c == conf).take(count) {
                 if let Err(e) = self.take_item(i) {
-                    log::error!("error taking item: {}", e);
+                    error!("error taking item: {}", e);
                 }
             }
         }
@@ -229,13 +230,32 @@ mod client {
     use super::*;
     use crate::{
         client::{request, ClientError, ClientResult},
-        wormhole::{self, ask, until_ask_id_map, AskedNote, ItemAsk},
+        wormhole::{self, ask, until_ask_id_map, AskedNote, Note, EditNote, ItemAsk},
         Ask, IdentifiesSteader, IdentifiesUser, Item, Tile,
     };
 
     impl Hackstead {
         pub async fn fetch(iu: impl IdentifiesUser) -> ClientResult<Self> {
             request("hackstead/spy", &iu.user_id()).await
+        }
+
+        /// Goes through all pending EditNotes from the server, applying each to our hackstead.
+        pub async fn server_sync(&mut self) -> ClientResult<()> {
+            while let Some(n) = wormhole::try_note().await? {
+                match n {
+                    Note::Edit(EditNote::Bincode(bincode_bytes)) => {
+                        use bincode::Options;
+
+                        bincode::options().deserialize_seed(
+                            serde_diff::Apply::deserializable(self),
+                            &bincode_bytes
+                        ).map_err(|e| wormhole::WormholeError::Bincode(e))?
+                    }
+                    other => warn!("unexpected unhandled note: {:#?}", other),
+                }
+            }
+
+            Ok(())
         }
 
         pub async fn register() -> ClientResult<Self> {
