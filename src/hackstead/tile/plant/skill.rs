@@ -1,6 +1,6 @@
 #[cfg(feature = "config_verify")]
 use crate::config::{self, Verify};
-use crate::{item, Hackstead, id::NoSuch, IdentifiesPlant};
+use crate::{item, Hackstead, id::NoSuch, IdentifiesTile};
 #[cfg(feature = "config_verify")]
 use serde::de::{self, MapAccess, Visitor};
 use serde::{Deserialize, Serialize};
@@ -99,11 +99,11 @@ impl Cost {
     pub fn can_afford(
         &self,
         hs: &Hackstead,
-        p: impl IdentifiesPlant
+        t: impl IdentifiesTile
     ) -> Result<Result<(), usize>, NoSuch> {
         let has_items = hs.has_items(&self.items);
 
-        let plant = hs.plant(p.tile_id())?;
+        let plant = hs.plant(t.tile_id())?;
         let has_points = plant.skills.afford(self.points);
         let has_skills = self.skills.iter().all(|s| plant.skills.unlocked.contains(s));
         Ok(if has_items && has_points.is_ok() && has_skills {
@@ -116,12 +116,13 @@ impl Cost {
     pub fn charge(
         &self,
         hs: &mut Hackstead,
-        plant: impl IdentifiesPlant + Copy
+        t: impl IdentifiesTile
     ) -> Result<Result<(), usize>, NoSuch> {
-        match self.can_afford(&hs, plant) {
+        let tile_id = t.tile_id();
+        match self.can_afford(&hs, tile_id) {
             Ok(Ok(())) => {
                 hs.take_items(&self.items);
-                Ok(hs.plant_mut(plant)?.skills.charge(self.points))
+                Ok(hs.plant_mut(tile_id)?.skills.charge(self.points))
             }
             other => other,
         }
@@ -240,7 +241,7 @@ mod client {
     use crate::{
         client::{ClientError, ClientResult},
         wormhole::{ask, until_ask_id_map, AskedNote, PlantAsk},
-        Ask
+        Ask, IdentifiesPlant
     };
 
     impl Unlock {
