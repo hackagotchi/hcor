@@ -52,7 +52,12 @@ impl Hackstead {
     /// Returns true if the hackstead's inventory has all of the items in at least the specified amounts.
     pub fn has_items(&self, item_confs: &[(usize, item::Conf)]) -> bool {
         item_confs.iter().copied().all(|(count, conf)| {
-            let has = self.inventory.iter().filter(|x| x.conf == conf).take(count).count();
+            let has = self
+                .inventory
+                .iter()
+                .filter(|x| x.conf == conf)
+                .take(count)
+                .count();
             count <= has
         })
     }

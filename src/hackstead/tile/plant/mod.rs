@@ -156,13 +156,18 @@ pub struct Skills {
 }
 
 impl Skills {
-    pub fn empty(conf: Conf) -> Self {
+    pub fn new(conf: Conf) -> Self {
         Self {
             points_redeemed: 0,
             conf,
             level: 0,
             xp: 0,
-            unlocked: vec![],
+            unlocked: conf
+                .skills
+                .values()
+                .filter(|s| s.start_unlocked)
+                .map(|s| s.conf)
+                .collect(),
         }
     }
 
@@ -204,7 +209,7 @@ impl Plant {
             lifetime_rubs: 0,
             craft: None,
             rub_effects: vec![],
-            skills: Skills::empty(conf),
+            skills: Skills::new(conf),
         }
     }
 

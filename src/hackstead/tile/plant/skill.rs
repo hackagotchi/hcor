@@ -1,6 +1,6 @@
 #[cfg(feature = "config_verify")]
 use crate::config::{self, Verify};
-use crate::{item, Hackstead, id::NoSuch, IdentifiesTile};
+use crate::{id::NoSuch, item, Hackstead, IdentifiesTile};
 #[cfg(feature = "config_verify")]
 use serde::de::{self, MapAccess, Visitor};
 use serde::{Deserialize, Serialize};
@@ -99,13 +99,16 @@ impl Cost {
     pub fn can_afford(
         &self,
         hs: &Hackstead,
-        t: impl IdentifiesTile
+        t: impl IdentifiesTile,
     ) -> Result<Result<(), usize>, NoSuch> {
         let has_items = hs.has_items(&self.items);
 
         let plant = hs.plant(t.tile_id())?;
         let has_points = plant.skills.afford(self.points);
-        let has_skills = self.skills.iter().all(|s| plant.skills.unlocked.contains(s));
+        let has_skills = self
+            .skills
+            .iter()
+            .all(|s| plant.skills.unlocked.contains(s));
         Ok(if has_items && has_points.is_ok() && has_skills {
             Ok(())
         } else {
@@ -116,7 +119,7 @@ impl Cost {
     pub fn charge(
         &self,
         hs: &mut Hackstead,
-        t: impl IdentifiesTile
+        t: impl IdentifiesTile,
     ) -> Result<Result<(), usize>, NoSuch> {
         let tile_id = t.tile_id();
         match self.can_afford(&hs, tile_id) {
@@ -241,7 +244,7 @@ mod client {
     use crate::{
         client::{ClientError, ClientResult},
         wormhole::{ask, until_ask_id_map, AskedNote, PlantAsk},
-        Ask, IdentifiesPlant
+        Ask, IdentifiesPlant,
     };
 
     impl Unlock {
@@ -273,12 +276,16 @@ pub struct RawSkill {
     pub unlocks: Vec<SkillNameOrRawUnlock>,
     pub effects: Vec<super::effect::RawConfig>,
     pub conf: uuid::Uuid,
+    #[serde(default)]
+    pub start_unlocked: bool,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct Skill {
     pub title: String,
+    pub conf: Conf,
     pub unlocks: Vec<Unlock>,
+    pub start_unlocked: bool,
     pub effects: Vec<super::effect::Config>,
 }
 #[cfg(feature = "config_verify")]
@@ -291,6 +298,8 @@ impl Verify for (super::Conf, RawSkill) {
 
         Ok(Skill {
             title: rsk.title,
+            conf: Conf(plant_conf, uuid),
+            start_unlocked: rsk.start_unlocked,
             effects: rsk.effects.verify(raw)?,
             unlocks: rsk
                 .unlocks
