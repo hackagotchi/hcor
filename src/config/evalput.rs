@@ -80,6 +80,23 @@ pub enum Evalput<I: Clone> {
     Nothing,
 }
 
+#[test]
+#[cfg(not(feature="config_verify"))]
+fn all_hatch_evalputs_in_config() {
+    drop(pretty_env_logger::try_init());
+    log::info!("testing all hatch evalputs in config ... ");
+    for (name, hatch) in crate::CONFIG.items.values().filter_map(|i| Some((&i.name, i.hatch_table.as_ref()?))) {
+        for i in 0..1000 {
+            log::info!(
+                "hatching {} for the {}th time\ngot {} items",
+                name,
+                i,
+                hatch.evaluated(&mut rand::thread_rng()).items.len()
+            );
+        }
+    }
+}
+
 impl<I: Clone> Evalput<I> {
     pub fn evaluated(&self, rng: &mut impl Rng) -> Output<I> {
         let mut output = Output::new();

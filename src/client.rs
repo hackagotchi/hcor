@@ -22,6 +22,7 @@ pub enum ClientErrorKind {
     ReturnedError(awc::http::StatusCode, String),
     BadAsk(&'static str, String),
     Wormhole(crate::wormhole::WormholeError),
+    Timeout,
     UnknownServerResponse,
 }
 #[derive(Debug)]
@@ -53,6 +54,7 @@ impl fmt::Display for ClientError {
             SendRequest(e) => write!(f, "couldn't send a request to the server: {}", e),
             Wormhole(e) => write!(f, "error communicating with server through wormhole: {}", e),
             BadAsk(w, e) => write!(f, "request {} sent to wormhole returned: {}", w, e),
+            Timeout => write!(f, "timeout waiting for response from server"),
             ReturnedError(status, e) => {
                 write!(f, "server returned Status {}, error body: {}", status, e)
             }
@@ -81,6 +83,15 @@ impl From<crate::wormhole::WormholeError> for ClientError {
             route: "/wormhole",
             input: "unknown".to_string(),
             kind: ClientErrorKind::Wormhole(e),
+        }
+    }
+}
+impl From<tokio::time::Elapsed> for ClientError {
+    fn from(_: tokio::time::Elapsed) -> ClientError {
+        ClientError {
+            route: "/wormhole",
+            input: "unknown".to_string(),
+            kind: ClientErrorKind::Timeout,
         }
     }
 }
