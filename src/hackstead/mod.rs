@@ -25,7 +25,6 @@ pub struct Hackstead {
     pub profile: Profile,
     pub land: Vec<Tile>,
     pub inventory: Vec<Item>,
-    pub timers: Vec<plant::Timer>,
 }
 impl Hackstead {
     pub fn empty(slack_id: Option<impl ToString>) -> Self {
@@ -33,7 +32,6 @@ impl Hackstead {
             profile: Profile::new(slack_id.map(|s| s.to_string())),
             land: vec![],
             inventory: vec![],
-            timers: vec![],
         }
     }
 
@@ -73,6 +71,23 @@ impl Hackstead {
                 }
             }
         }
+    }
+
+    pub fn timers(&self) -> impl Iterator<Item = &plant::SharedTimer> {
+        self.plants().flat_map(|p| p.timers.iter())
+    }
+
+    pub fn timer(&self, id: plant::TimerId) -> Option<&plant::SharedTimer> {
+        self.timers().find(|t| t.timer_id == id)
+    }
+
+    pub fn take_timer(&mut self, id: plant::TimerId) -> Option<plant::SharedTimer> {
+        self.plants_mut().find_map(|p| {
+            p.timers
+                .iter()
+                .position(|t| t.timer_id == id)
+                .map(|i| p.timers.swap_remove(i))
+        })
     }
 
     /// Returns true if this hackstead has enough xp to redeem another tile of land.

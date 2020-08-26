@@ -106,12 +106,13 @@ impl Cost {
     pub fn can_afford(
         &self,
         hs: &Hackstead,
+        xp: usize,
         t: impl IdentifiesTile,
     ) -> Result<Result<(), usize>, NoSuch> {
         let has_items = hs.has_items(&self.items);
 
         let plant = hs.plant(t.tile_id())?;
-        let has_points = plant.skills.afford(self.points);
+        let has_points = plant.skills.afford(xp, self.points);
         let has_skills = self
             .skills
             .iter()
@@ -126,13 +127,14 @@ impl Cost {
     pub fn charge(
         &self,
         hs: &mut Hackstead,
+        xp: usize,
         t: impl IdentifiesTile,
     ) -> Result<Result<(), usize>, NoSuch> {
         let tile_id = t.tile_id();
-        match self.can_afford(&hs, tile_id) {
+        match self.can_afford(&hs, xp, tile_id) {
             Ok(Ok(())) => {
                 hs.take_items(&self.items);
-                Ok(hs.plant_mut(tile_id)?.skills.charge(self.points))
+                Ok(hs.plant_mut(tile_id)?.skills.charge(xp, self.points))
             }
             other => other,
         }

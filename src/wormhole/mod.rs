@@ -156,6 +156,11 @@ pub enum RudeNote {
         effect: plant::RubEffect,
         tile_id: TileId,
     },
+    TimerUpdate {
+        timer_id: plant::TimerId,
+        value: f32,
+        rate: f32,
+    },
 }
 
 /// Like a notification, but cuter; a tidbit of information that the server

@@ -119,21 +119,22 @@ pub struct BuffSum {
     pub craft_output_double_chance: f32,
     pub craft_input_return_chance: f32,
 }
+const DEFAULT_BUFF_SUM: &BuffSum = &BuffSum {
+    art: String::new(),
+    total_extra_time_ticks: 0,
+    xp_per_tick: 0.0,
+    yield_speed_multiplier: 1.0,
+    yield_size_multiplier: 1.0,
+    yields: config::Evalput::Nothing,
+    recipes: vec![],
+    craft_speed_multiplier: 1.0,
+    craft_output_double_chance: 0.0,
+    craft_input_return_chance: 0.0,
+};
 
 impl Default for BuffSum {
     fn default() -> Self {
-        BuffSum {
-            art: Default::default(),
-            total_extra_time_ticks: 0,
-            xp_per_tick: 0.0,
-            yield_speed_multiplier: 1.0,
-            yield_size_multiplier: 1.0,
-            yields: config::Evalput::Nothing,
-            recipes: vec![],
-            craft_speed_multiplier: 1.0,
-            craft_output_double_chance: 0.0,
-            craft_input_return_chance: 0.0,
-        }
+        DEFAULT_BUFF_SUM.clone()
     }
 }
 
@@ -251,6 +252,10 @@ impl BuffBook {
             .collect();
 
         s
+    }
+
+    pub fn page(&self, t: impl crate::IdentifiesTile) -> &BuffSum {
+        self.sums.get(&t.tile_id()).unwrap_or(DEFAULT_BUFF_SUM)
     }
 
     fn spread_neighbors(&mut self) {
