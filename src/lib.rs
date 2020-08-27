@@ -1,6 +1,8 @@
 //#![warn(missing_docs)]
 
-/// re-export this dependency to make it easier to sync versions
+pub use bidiff;
+pub use bipatch;
+/// re-export these deps to make it easier to sync versions
 pub use serde_diff;
 
 /// All of the game design switches and levers are handled here, with a focus on how they interact

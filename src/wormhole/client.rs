@@ -268,6 +268,7 @@ pub enum WormholeError {
     Connection(String),
     Serde(serde_json::Error),
     Bincode(bincode::Error),
+    ApplyingEditNote(bipatch::DecodeError),
     Utf8(std::str::Utf8Error),
     ConnectionLost,
     NeverConnected,
@@ -293,6 +294,7 @@ impl fmt::Display for WormholeError {
                 "error parsing or formatting binary data from or for wormhole: {}",
                 e
             ),
+            ApplyingEditNote(e) => write!(f, "error applying edit note patch from server: {}", e),
             Utf8(e) => write!(f, "error parsing utf8 bytes from wormhole: {}", e),
             AlreadyDisconnected => write!(
                 f,
@@ -304,6 +306,12 @@ impl fmt::Display for WormholeError {
                 write!(f, "receiver for response from note handler was canceled")
             }
         }
+    }
+}
+
+impl From<bipatch::DecodeError> for WormholeError {
+    fn from(e: bipatch::DecodeError) -> WormholeError {
+        WormholeError::ApplyingEditNote(e)
     }
 }
 

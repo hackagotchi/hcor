@@ -227,7 +227,9 @@ mod client {
     use super::*;
     use crate::{
         client::{request, ClientError, ClientResult},
-        wormhole::{self, ask, until_ask_id_map, AskedNote, EditNote, ItemAsk, Note},
+        wormhole::{
+            self, ask, until_ask_id_map, AskedNote, EditNote, ItemAsk, Note, WormholeError,
+        },
         Ask, IdentifiesSteader, IdentifiesUser, Item, Tile,
     };
 
@@ -240,12 +242,16 @@ mod client {
         pub async fn server_sync(&mut self) -> ClientResult<()> {
             while let Some(n) = wormhole::try_note().await? {
                 match n {
-                    Note::Edit(EditNote::Json(json_data)) => {
-                        serde_diff::Apply::apply(
-                            &mut serde_json::Deserializer::from_str(&json_data),
-                            self,
-                        )
-                        .map_err(|e| wormhole::WormholeError::Serde(e))?;
+                    Note::Edit(EditNote::Bincode(patch)) => {
+                        bincode::serialize(self)
+                            .map_err(|e| WormholeError::Bincode(e))
+                            .and_then(|old| {
+                                *self = bincode::deserialize_from(bipatch::Reader::new(
+                                    patch.as_slice(),
+                                    std::io::Cursor::new(old.as_slice()),
+                                )?)?;
+                                Ok(())
+                            })?;
                     }
                     other => warn!("unexpected unhandled note: {:#?}", other),
                 }
