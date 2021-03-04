@@ -2,6 +2,9 @@ use crate::config::{ArchetypeHandle, PlantArchetype};
 use crate::*;
 use serde::Serialize;
 use std::time::SystemTime;
+use tokio_postgres::Client as PgClient;
+use tokio_postgres::error::Error as SqlError;
+
 
 #[derive(Clone, Debug, Serialize)]
 pub struct Hacksteader {
@@ -46,6 +49,17 @@ pub struct Craft {
     pub total_cycles: f32,
     pub destroys_plant: bool,
     pub makes: ArchetypeHandle,
+}
+
+impl Hacksteader {
+    pub async fn insert_to_sql(&self, client: &PgClient) -> Result<(), SqlError> {
+
+        Ok(())
+    }
+
+    pub async fn update_in_sql(&self, client: &PgClient) -> Result<(), SqlError> {
+        Ok(())
+    }
 }
 
 impl std::ops::Deref for Plant {

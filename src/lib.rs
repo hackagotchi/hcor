@@ -3,7 +3,6 @@
 #![warn(missing_docs)]
 
 use humantime::{format_rfc3339, parse_rfc3339};
-use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient};
 use std::collections::HashMap;
 use std::fmt;
 use std::time::SystemTime;
