@@ -21,8 +21,9 @@ derive_more = "0.99"
 dotenv = "0.15"
 reqwest = { version = "0.11.1", features = ["json"] }
 tokio = "1.0"
+time = {version="0.2", features=["serde", "std"]}
 
-tokio-postgres = {version = "0.7", features = ["with-uuid-0_8"]}
+sqlx = {version = "0.5.1", features=["postgres", "macros", "uuid", "time", "runtime-tokio-rustls"]}
 
 [[bin]]
 name = "yank_config"

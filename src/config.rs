@@ -164,7 +164,7 @@ impl Config {
 }
 
 // I should _really_ use a different version of this for PlantArchetypes and PossessionArchetypes ...
-pub type ArchetypeHandle = usize;
+pub type ArchetypeHandle = u32;
 
 lazy_static::lazy_static! {
     pub static ref CONFIG: Config = {

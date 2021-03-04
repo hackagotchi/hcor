@@ -1,5 +1,6 @@
 #![recursion_limit = "256"]
 #![feature(try_trait)]
+#![feature(trivial_bounds)]
 #![warn(missing_docs)]
 
 use humantime::{format_rfc3339, parse_rfc3339};
