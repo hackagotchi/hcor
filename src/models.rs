@@ -15,7 +15,7 @@ pub struct Hacksteader {
     pub gotchis: Vec<Possessed<possess::Gotchi>>,
 }
 
-#[derive(Debug, Clone, Serialize, Type)]
+#[derive(Debug, Clone, Serialize, FromRow)]
 pub struct Tile {
     pub acquired: PrimitiveDateTime,
     pub plant: Option<Plant>,
@@ -23,7 +23,7 @@ pub struct Tile {
     pub steader: String,
 }
 
-#[derive(Clone, Debug, Serialize, Type)]
+#[derive(Clone, Debug, Serialize, FromRow)]
 pub struct Profile {
     /// Indicates when this Hacksteader first joined the elite community.
     pub joined: PrimitiveDateTime,
@@ -34,7 +34,7 @@ pub struct Profile {
     pub xp: u32,
 }
 
-#[derive(Debug, Clone, Serialize, Type)]
+#[derive(Debug, Clone, Serialize, FromRow)]
 pub struct Plant {
     pub xp: u32,
     pub until_yield: f32,
@@ -43,7 +43,7 @@ pub struct Plant {
     pub archetype_handle: ArchetypeHandle,
 }
 
-#[derive(Debug, Clone, Serialize, Type)]
+#[derive(Debug, Clone, Serialize, FromRow)]
 pub struct Craft {
     pub until_finish: f32,
     pub total_cycles: f32,

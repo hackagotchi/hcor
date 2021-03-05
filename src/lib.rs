@@ -28,6 +28,8 @@ pub use category::{Category, CategoryError};
 pub use config::CONFIG;
 pub use possess::{Possessed, Possession};
 
+use sqlx::postgres::PgConnection;
+
 pub const TABLE_NAME: &'static str = "hackagotchi";
 pub type Item = HashMap<String, AttributeValue>;
 
@@ -130,7 +132,8 @@ impl Profile {
             .increase_xp(&mut self.xp, amt)
     }
 
-    pub async fn fetch_all(db: &DynamoDbClient) -> Result<Vec<Profile>, String> {
+    pub async fn fetch_all(conn: &PgConnection) -> Result<Vec<Profile>, String> {
+        let result = sqlx::query!("SELECT * FROM hacksteaders").fetch_all(&mut conn).await?;
         let query = db
             .query(rusoto_dynamodb::QueryInput {
                 table_name: TABLE_NAME.to_string(),

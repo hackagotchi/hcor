@@ -24,7 +24,7 @@ pub struct SeedGrower {
     pub generations: u32,
 }
 impl SeedGrower {
-    pub fn new(id: String, generations: u64) -> Self {
+    pub fn new(id: String, generations: u32) -> Self {
         SeedGrower { id, generations }
     }
 
@@ -48,34 +48,6 @@ impl SeedGrower {
                 .parse()
                 .map_err(|e| IntFieldParse("generations", e))?,
         })
-    }
-}
-impl Into<AttributeValue> for SeedGrower {
-    fn into(self) -> AttributeValue {
-        AttributeValue {
-            m: Some(
-                [
-                    (
-                        "id".to_string(),
-                        AttributeValue {
-                            s: Some(self.id.clone()),
-                            ..Default::default()
-                        },
-                    ),
-                    (
-                        "generations".to_string(),
-                        AttributeValue {
-                            n: Some(self.generations.to_string()),
-                            ..Default::default()
-                        },
-                    ),
-                ]
-                .iter()
-                .cloned()
-                .collect(),
-            ),
-            ..Default::default()
-        }
     }
 }
 

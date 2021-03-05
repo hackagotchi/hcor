@@ -23,7 +23,8 @@ reqwest = { version = "0.11.1", features = ["json"] }
 tokio = "1.0"
 time = {version="0.2", features=["serde", "std"]}
 
-sqlx = {version = "0.5.1", features=["postgres", "macros", "uuid", "time", "runtime-tokio-rustls"]}
+sqlx = {version = "0.5", features=["postgres", "macros", "uuid", "time", "runtime-tokio-rustls", "migrate"]}
+barrel = "0.6"
 
 [[bin]]
 name = "yank_config"
