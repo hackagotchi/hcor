@@ -3,6 +3,7 @@ use crate::{config, AttributeParseError, Item, CONFIG};
 use config::{ArchetypeHandle, ArchetypeKind};
 use rusoto_dynamodb::AttributeValue;
 use serde::{Deserialize, Serialize};
+use sqlx::types::Type as PgType;
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone, PartialEq)]
 pub struct Seed {
@@ -17,13 +18,13 @@ impl Possessable for Seed {
         PossessionKind::Seed(self)
     }
 }
-#[derive(Serialize, Deserialize, Default, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Default, Debug, Clone, PartialEq, PgType)]
 pub struct SeedGrower {
     pub id: String,
-    pub generations: u64,
+    pub generations: u32,
 }
 impl SeedGrower {
-    pub fn new(id: String, generations: u64) -> Self {
+    pub fn new(id: String, generations: u32) -> Self {
         SeedGrower { id, generations }
     }
 
@@ -47,34 +48,6 @@ impl SeedGrower {
                 .parse()
                 .map_err(|e| IntFieldParse("generations", e))?,
         })
-    }
-}
-impl Into<AttributeValue> for SeedGrower {
-    fn into(self) -> AttributeValue {
-        AttributeValue {
-            m: Some(
-                [
-                    (
-                        "id".to_string(),
-                        AttributeValue {
-                            s: Some(self.id.clone()),
-                            ..Default::default()
-                        },
-                    ),
-                    (
-                        "generations".to_string(),
-                        AttributeValue {
-                            n: Some(self.generations.to_string()),
-                            ..Default::default()
-                        },
-                    ),
-                ]
-                .iter()
-                .cloned()
-                .collect(),
-            ),
-            ..Default::default()
-        }
     }
 }
 
